@@ -1,4 +1,5 @@
 canvas {
+  /* if set 'this.scale.pageAlignHorizontally = true;' you can comment out margin */
   margin: auto;
 }
 
