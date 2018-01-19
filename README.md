@@ -2,7 +2,7 @@
 @email niconoster@t-online.de
 
 Your not allowed to use my Code!
-Your welcome contact me!
+Your welcome to contact me!
 
 Projektwiederherstellung:
 >git fsck --lost-found

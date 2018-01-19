@@ -16,11 +16,7 @@ SpaceHipster.Preload.prototype = {
     this.load.tilemap('map_01', 'assets/content/map/map_01.json', null, Phaser.Tilemap.TILED_JSON);
     this.load.image('set_01', 'assets/content/map/set_01.png');
     // LOAD PLAYER //
-    this.load.spritesheet('player', 'assets/content/player/playerset.png', 20, 20, 1, 30); // sprite of player
-
-
-    // LOADING TEST-SPRITES //
-    this.load.spritesheet('test_1', 'assets/content/images_old/player.png', 12, 12);
+    this.load.spritesheet('player', 'assets/content/player/playerset.png', 64, 64, 30, 30); // sprite of player
 
     this.load.setPreloadSprite(this.preloadBar);
   },
