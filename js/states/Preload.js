@@ -1,9 +1,5 @@
-var SpaceHipster = SpaceHipster || {};
-
 //loading the game assets
-SpaceHipster.Preload = function(){};
-
-SpaceHipster.Preload.prototype = {
+var preloadState = {
   preload: function() {
   	//show logo in loading screen
   	this.splash = this.add.sprite(this.game.world.centerX, this.game.world.centerY, 'logo');
@@ -21,6 +17,6 @@ SpaceHipster.Preload.prototype = {
     this.load.setPreloadSprite(this.preloadBar);
   },
   create: function() {
-  	this.state.start('MainMenu');
+  	this.state.start('Menu');
   }
 };

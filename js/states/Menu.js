@@ -1,6 +1,4 @@
-SpaceHipster.MainMenu = function(){};
-
-SpaceHipster.MainMenu.prototype = {
+var menuState = {
   create: function() {
     this.stage.backgroundColor = 'black';
 
