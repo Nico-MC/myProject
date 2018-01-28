@@ -5,15 +5,17 @@ var player, playerStart, playerTransfer; // Create
 var cursor, player_velocity = 80, facing = 'down'; // Move
 // COLLISION OBJECTS //
 var objectLayer; // Collide
+// SCREENS AND OPTIONS //
+var mainScreenJSON;
+var mainScreen, mainScreen_opened = false;
 
 // --- CREATE THE GAME --- //
-var gameState = {
+GAME = {
   preload: function() {
     this.time.advancedTiming = true;
   },
 
   create: function() {
-    GAME = this; // Allocate gameState to game.
 
     // CREATE MAP //
     map = this.add.tilemap('map_01');
@@ -38,6 +40,7 @@ var gameState = {
     this.physics.enable(this.player, Phaser.Physics.ARCADE);
     this.player.body.collideWorldBounds = true; // world borders
     this.player.body.setSize(20, 20, 0, 0);
+    this.player.scale.setTo(1.3);
 
     this.camera.follow(this.player); // camera
 
@@ -64,7 +67,14 @@ var gameState = {
       this.timing = this.add.plugin(Phaser.Plugin.AdvancedTiming);
     }
 
-    createMovementAnimations(this);
+    createMovementAnimations();
+
+    this.player.inputEnabled = true;
+    this.player.events.onInputDown.add(listener_onPlayer, this);
+
+
+    // AT LAST BUT NOT LEAST ... THE UI
+    loadUI();
   },
 
   update: function() {
@@ -81,3 +91,25 @@ var gameState = {
   }
 
 };
+
+function listener_onPlayer() {
+  var mouseX = game.input.mousePointer.x;
+  var mouseY = game.input.mousePointer.y;
+
+  if(mainScreen != null) {
+    if(!mainScreen_opened) {
+      mainScreen.visible = true;
+      mainScreen.position.x = mouseX;
+      mainScreen.position.y = mouseY;
+      mainScreen_opened = true;
+    } else {
+      mainScreen.visible = false;
+      mainScreen_opened = false;
+    }
+  } else {
+    mainScreen = EZGUI.create(mainScreenJSON, 'metalworks');
+    mainScreen.position.x = mouseX;
+    mainScreen.position.y = mouseY;
+    mainScreen_opened = true;
+  }
+}

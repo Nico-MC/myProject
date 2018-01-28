@@ -3,19 +3,25 @@
   <head>
     <meta charset="utf-8">
     <title>myproject</title>
+    <!-- MODULES -->
+    <script type="text/javascript" src="modules/ezgui/js/phaser.js"></script>
+    <script type="text/javascript" src="modules/ezgui/js/EZGUI.js"></script>
     <!-- PHASER -->
-    <script type="text/javascript" src="js/phaser.min.js"></script>
+    <!-- <script type="text/javascript" src="js/phaser.min.js"></script> -->
     <script type="text/javascript" src="js/debug.js"></script>
-    <!-- STATES -->
+    <!-- JS -->
+    <!-- JS - STATES -->
     <script type="text/javascript" src="js/states/Boot.js"></script>
     <script type="text/javascript" src="js/states/Preload.js"></script>
     <!-- <script type="text/javascript" src="js/states/MainMenu.js"></script> -->
     <script type="text/javascript" src="js/states/Menu.js"></script>
     <script type="text/javascript" src="js/states/game/Game.js"></script>
+        <script src="js/main.js"></script>
+    <!-- GAME STATE -->
     <script type="text/javascript" src="js/states/game/Movement.js"></script>
+    <script type="text/javascript" src="js/states/game/Ui.js"></script>
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="assets/css/styles.css">
-
     <!-- BOOTSTRAP AND OTHERS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -25,9 +31,5 @@
   <body>
     <!-- game named 'my-game' -->
     <div class="container canvas_container" id="my-game"></div>
-
-
-    <!-- JS -->
-    <script src="js/main.js"></script>
   </body>
 </html>
