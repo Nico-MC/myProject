@@ -1,23 +1,18 @@
 // SCREENS AND OPTIONS //
-var mainScreenJSON;
-var mainScreen, mainScreen_opened = false, tab;
+var mainScreen, mainScreen_opened = false, mainScreenJSON;
 
-function loadUI() {
-  var width = 200;
-  var height = 150;
+function setupGUI() {
+  var clickObject_1 = EZGUI.components.second_tab;
+  console.log(clickObject_1);
 
-  mainScreenJSON = {
-  	id: 'myWindow',
-  	component: 'Window',
-  	header: { position: { x: 0, y: 0 }, height: 40, text: '' },
-  	draggable: true,
-  	// position: { x: mouseX, y: mouseY },
-  	width: width,
-  	height: height,
+  // clickObject_1.on('click', function() {
+  //   if(EZGUI.components.first_tab.text == 'Koordinaten: ') EZGUI.components.first_tab.text += '53/17';
+  //   else EZGUI.components.first_tab.text = 'Koordinaten: ' + '53/18';
+  // });
+}
 
-  	layout: [1, 3],
-  	children: []
-  }
+function loadGUI() {
+  mainScreenJSON = loadJSON();
 
   EZGUI.Theme.load(['modules/ezgui/assets/metalworks-theme/metalworks-theme.json'], function() {
     mainScreen = EZGUI.create(mainScreenJSON, 'metalworks');
@@ -25,6 +20,8 @@ function loadUI() {
     mainScreen.position.y = HEIGHT/2-mainScreen.settings.height/2;
     mainScreen.visible = false;
     mainScreen_opened = false;
+
+    setupGUI();
   });
 }
 
@@ -38,4 +35,8 @@ function checkUi() {
     // game.paused = false;
     mainScreen_opened = false;
   }
+}
+
+function updateUi() {
+  // GAME.player.position.x;
 }

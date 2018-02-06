@@ -1,4 +1,4 @@
-var cursor, player_velocity = 80, facing = 'down'; // Move
+var player_velocity = 80, facing = 'down'; // Move
 var direction, newDirection, firstTab // temp for better movement
 
 function createMovementAnimations() {
@@ -45,7 +45,6 @@ function createMovementAnimations() {
 function playMovementAnimations() {
   //  Reset the players velocity (movement)
   GAME.player.body.velocity.set(0);
-console.log(direction);
   // --- FINAL MOVEMENT --- //
   if(upKey.isDown || downKey.isDown  || leftKey.isDown  || rightKey.isDown) {
     if(direction == "ArrowUp") {

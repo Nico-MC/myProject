@@ -72,13 +72,20 @@ GAME = {
 
     createMovementAnimations();
 
-    // AT LAST BUT NOT LEAST ... THE UI
-    mainScreen = loadUI();
+    // If user press 'TAB' for opening Ui
+    loadGUI();
     tab = game.input.keyboard.addKey(Phaser.Keyboard.TAB);
     tab.onDown.add(checkUi, this);
   },
 
   update: function() {
+    playMovementAnimations();
+    updateUi();
+
+
+
+
+
 
     // Render collision layers
     GAME.physics.arcade.collide(GAME.player, objectLayer.children[0]);
@@ -92,7 +99,5 @@ GAME = {
     GAME.physics.arcade.collide(GAME.player, objectLayer.children[8]);
     GAME.physics.arcade.collide(GAME.player, objectLayer.children[9]);
     GAME.physics.arcade.collide(GAME.player, objectLayer.children[10]);
-
-    playMovementAnimations();
   }
 };
