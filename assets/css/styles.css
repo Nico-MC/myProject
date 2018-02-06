@@ -1,15 +1,8 @@
 canvas {
   /* if set 'this.scale.pageAlignHorizontally = true;' you can comment out margin */
-  margin: 0 auto !important;
+  /* margin: 0 auto !important; */
 }
 
 .canvas_container {
   margin-top: 25px;
 }
-
-/* SCALING OF GAME WINDOW */
-/* @media (min-width: 1920px) {
-  canvas {
-    width: 100px !important;
-  }
-} */

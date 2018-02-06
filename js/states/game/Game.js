@@ -2,17 +2,14 @@
 var GAME;
 // PLAYER-OPTIONS //
 var player, playerStart, playerTransfer; // Create
-var cursor, player_velocity = 80, facing = 'down'; // Move
 // COLLISION OBJECTS //
 var objectLayer; // Collide
-// SCREENS AND OPTIONS //
-var mainScreenJSON;
-var mainScreen, mainScreen_opened = false;
 
 // --- CREATE THE GAME --- //
 GAME = {
   preload: function() {
-    this.time.advancedTiming = true;
+    // affects the performance heavily!
+    this.time.advancedTiming = false;
   },
 
   create: function() {
@@ -33,6 +30,10 @@ GAME = {
     this.player = this.add.sprite(playerStart.x+playerStart.width/2+7, playerStart.y+playerStart.height/2-10, 'player'); // sprite
     var frontground = map.createLayer('Frontground');
     var overlays = map.createLayer('Overlays');
+    background.renderSettings.enableScrollDelta = false;
+    middleground.renderSettings.enableScrollDelta = false;
+    frontground.renderSettings.enableScrollDelta = false;
+    overlays.renderSettings.enableScrollDelta = false;
 
 
     // CONFIGURE PLAYER //
@@ -48,6 +49,7 @@ GAME = {
     downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
     leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+    tab = game.input.keyboard.addKey(Phaser.Keyboard.TAB);
 
     /*
       GET OBJECTS OUT OF map_01.json
@@ -65,51 +67,32 @@ GAME = {
     if (this.time.advancedTiming) {
       // this.plugins.add(Phaser.Plugin.AdvancedTiming); funktioniert hier nicht mehr (veraltet).
       this.timing = this.add.plugin(Phaser.Plugin.AdvancedTiming);
+      console.log("timing is on!");
     }
 
     createMovementAnimations();
 
-    this.player.inputEnabled = true;
-    this.player.events.onInputDown.add(listener_onPlayer, this);
-
-
     // AT LAST BUT NOT LEAST ... THE UI
-    loadUI();
+    mainScreen = loadUI();
+    tab = game.input.keyboard.addKey(Phaser.Keyboard.TAB);
+    tab.onDown.add(checkUi, this);
   },
 
   update: function() {
-    for(var i=0; i<objectLayer.length; i++) {
-      this.physics.arcade.collide(this.player, objectLayer.children[i]);
-    }
 
-    playMovementAnimations(this);
-  },
+    // Render collision layers
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[0]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[1]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[2]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[3]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[4]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[5]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[6]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[7]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[8]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[9]);
+    GAME.physics.arcade.collide(GAME.player, objectLayer.children[10]);
 
-  render: function() {
-    // this.game.debug.body(objectLayer.children[0]);
-    // this.game.debug.body(this.player);
+    playMovementAnimations();
   }
-
 };
-
-function listener_onPlayer() {
-  var mouseX = game.input.mousePointer.x;
-  var mouseY = game.input.mousePointer.y;
-
-  if(mainScreen != null) {
-    if(!mainScreen_opened) {
-      mainScreen.visible = true;
-      mainScreen.position.x = mouseX;
-      mainScreen.position.y = mouseY;
-      mainScreen_opened = true;
-    } else {
-      mainScreen.visible = false;
-      mainScreen_opened = false;
-    }
-  } else {
-    mainScreen = EZGUI.create(mainScreenJSON, 'metalworks');
-    mainScreen.position.x = mouseX;
-    mainScreen.position.y = mouseY;
-    mainScreen_opened = true;
-  }
-}
