@@ -13,7 +13,6 @@ GAME = {
   },
 
   create: function() {
-
     // CREATE MAP //
     map = this.add.tilemap('map_01');
     this.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -73,14 +72,14 @@ GAME = {
     createMovementAnimations();
 
     // If user press 'TAB' for opening Ui
-    loadGUI();
+    gui_load();
     tab = game.input.keyboard.addKey(Phaser.Keyboard.TAB);
-    tab.onDown.add(checkUi, this);
+    tab.onDown.add(gui_check, this);
   },
 
   update: function() {
     playMovementAnimations();
-    updateUi();
+    gui_update();
 
 
 

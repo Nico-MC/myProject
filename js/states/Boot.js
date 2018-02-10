@@ -8,14 +8,25 @@ var bootState = {
   create: function() {
 
     // scaling options
+    this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
   	this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-  	this.scale.minWidth = 240;
-  	this.scale.minHeight = 170;
+  	this.scale.minWidth = 400;
+  	this.scale.minHeight = 400;
   	this.scale.maxWidth = 800;
   	this.scale.maxHeight = 800;
 
   	// have the game centered horizontally
   	this.scale.pageAlignHorizontally = true;
+    this.game.scale.refresh();
+
+    $(window).on('resize', function(e) {
+      setTimeout(function() {
+        canvas_left = $('canvas').offset().left;
+        $('.shop').css("left", canvas_left);
+        this.game.scale.refresh();
+        console.log(canvas_left);
+      }, 250);
+    });
 
     this.state.start('Preload');
   }

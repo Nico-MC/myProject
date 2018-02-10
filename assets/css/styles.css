@@ -1,8 +1,17 @@
 canvas {
   /* if set 'this.scale.pageAlignHorizontally = true;' you can comment out margin */
   /* margin: 0 auto !important; */
+  display: block !important;
+}
+
+.full_container {
+
 }
 
 .canvas_container {
-  margin-top: 25px;
+
+}
+
+.ui {
+
 }

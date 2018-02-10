@@ -1,6 +1,4 @@
-function loadJSON() {
-  var width = 200;
-  var height = 150;
+function loadJSON(width, height) {
   var width_clickableButton = "50%";
   var height_clickableButton = 40;
 
