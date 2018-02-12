@@ -4,14 +4,6 @@ canvas {
   display: block !important;
 }
 
-.full_container {
-
-}
-
-.canvas_container {
-
-}
-
-.ui {
-
+.shop_container {
+  position: relative;
 }
