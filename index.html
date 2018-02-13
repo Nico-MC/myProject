@@ -19,18 +19,30 @@
     <!-- <script type="text/javascript" src="js/debug.js"></script> -->
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="assets/css/styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Skranji" rel="stylesheet">
     <!-- BOOTSTRAP AND OTHERS -->
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
   </head>
   <body>
     <!-- game named 'my-game' -->
-    <div class="canvas_container" id="my-game"></div>
-    <div class="gui_container">
-      <div class="gui_1"></div>
-      <div class="shop"></div>
+    <div class="game_container">
+      <div class="canvas_container" id="my-game"></div>
+      <div class="gui_container">
+        <div class="window_1 bg-dark shadow_out">
+          <div class="header flex">
+            <button type="button" class="btn btn-primary btn-lg flex-child">Stats</button>
+            <button id="shop_button" type="button" class="btn btn-primary btn-lg flex-child">Shop</button>
+          </div>
+        </div>
+
+        <div class="shop bg-dark">
+
+        </div>
+      </div>
     </div>
   </body>
 </html>

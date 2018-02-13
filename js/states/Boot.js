@@ -18,14 +18,13 @@ var bootState = {
   	// have the game centered horizontally
   	this.scale.pageAlignHorizontally = true;
     this.game.scale.refresh();
-
-    $(window).on('resize', function(e) {
+    $(window).on('resize', function() {
       setTimeout(function() {
-        canvas_left = $('canvas').offset().left;
-        $('.shop').css("left", canvas_left);
-        this.game.scale.refresh();
-        console.log(canvas_left);
-      }, 250);
+        if(typeof GAME.scale !== 'undefined') {
+          GAME.resize();
+          gui_resize();
+        }
+      }, 150);
     });
 
     this.state.start('Preload');

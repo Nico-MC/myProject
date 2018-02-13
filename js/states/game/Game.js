@@ -8,6 +8,7 @@ var objectLayer; // Collide
 // --- CREATE THE GAME --- //
 GAME = {
   preload: function() {
+    game.load.bitmapFont('myFont','modules/ezgui/assets/fonts/Skranji-Bold-40.png', 'modules/ezgui/assets/fonts/Skranji-Bold-40.fnt');
     // affects the performance heavily!
     this.time.advancedTiming = false;
   },
@@ -74,7 +75,16 @@ GAME = {
     // If user press 'TAB' for opening Ui
     gui_load();
     tab = game.input.keyboard.addKey(Phaser.Keyboard.TAB);
-    tab.onDown.add(gui_check, this);
+    tab.onDown.add(gui_check_Window1, this);
+
+    $(window).on('resize', function(e) {
+      setTimeout(function() {
+        if(typeof GAME.scale !== 'undefined') {
+          GAME.resize();
+          gui_resize();
+        }
+      }, 150);
+    });
   },
 
   update: function() {
@@ -98,5 +108,7 @@ GAME = {
     GAME.physics.arcade.collide(GAME.player, objectLayer.children[8]);
     GAME.physics.arcade.collide(GAME.player, objectLayer.children[9]);
     GAME.physics.arcade.collide(GAME.player, objectLayer.children[10]);
-  }
+  },
+
+  resize: function() {}
 };

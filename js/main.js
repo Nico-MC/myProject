@@ -1,7 +1,7 @@
 var WIDTH = 400;
 var HEIGHT = 400;
 
-game = new Phaser.Game(WIDTH, HEIGHT, Phaser.CANVAS, 'my-game');
+game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'my-game');
 
 game.state.add('Boot', bootState);
 game.state.add('Preload', preloadState);
