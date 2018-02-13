@@ -4,6 +4,20 @@ canvas {
   display: block !important;
 }
 
-.shop_container {
+/* Width, height and position of GUI items will be computed by Jquery based on canvas (see UI.js) */
+
+.gui_1 {
+  position: absolute;
+  background-color: red;
+  display: none;
+}
+
+.gui_container {
   position: relative;
+}
+
+.shop {
+  background-color: red;
+  position: absolute;
+  display: none;
 }
