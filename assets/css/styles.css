@@ -44,6 +44,13 @@ canvas {
   display: none;
   border-top: 1px solid #e9ecef !important;
 }
+.shop .shop_content,
+.shop .stats_content {
+  display: none;
+  color: white;
+  font-size: 18px;
+  padding: 15px;
+}
 
 .flex {
     display: -webkit-box;

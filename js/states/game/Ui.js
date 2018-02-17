@@ -5,9 +5,16 @@ var shop, shop_opened = false;
 // --- GUI DEFAULT-FUNCTIONS --- //
 function gui_setup() {
   var shop_button = $('#shop_button');
+  var stats_button = $('#stats_button');
+
+  stats_button.on('click', function() {
+    if($('.shop_content').css('display') == 'inline-block') gui_check_Shop('statsContent', true);
+    else gui_check_Shop('statsContent');
+  });
 
   shop_button.on('click', function() {
-    gui_check_Shop();
+    if($('.stats_content').css('display') == 'inline-block') gui_check_Shop('shopContent', true);
+    else gui_check_Shop('shopContent');
   });
 
   window.onclick = function(e) {
@@ -15,8 +22,8 @@ function gui_setup() {
     var target_window_1 = $(e.target).closest(window_1).length;
 
     if(!(target_shop || target_window_1)) {
-      gui_close_Window1();
-      gui_close_Shop();
+      // gui_close_Window1();
+      // gui_close_Shop();
     }
   }
 }
@@ -38,17 +45,18 @@ function gui_resize() {
   $(shop).css('left', canvas_left);
 }
 
-function gui_update() {}
+function gui_update() {
+  // console.log("ShopContent: " + show_shopContent);
+  // console.log("StatsContent: " + show_statsContent);
+}
 
 // --- GUI BUILD-FUNCTIONS --- //
 function gui_build_Window1() {
   var window_1_width = GAME.scale.width/2;
-  // var window_1_height = GAME.scale.height/4;
   var window_1_height = $(window_1).height();
   var window_1_left = GAME.scale.offset.x + GAME.scale.width/2 - window_1_width/2;
   var window_1_bottom = 0 + $(shop).height() + 20;
   $(window_1).css('width', window_1_width);
-  // $(window_1).css('height', window_1_height);
   $(window_1).css('left', window_1_left);
   $(window_1).css('bottom', window_1_bottom);
 }
@@ -81,18 +89,41 @@ function gui_close_Window1() {
   window_1_opened = false;
 }
 
-// --- CHECK GUI-FUNCTIONS --- //
-function gui_check_Shop() {
-  if(shop_opened) gui_close_Shop();
-  else gui_open_Shop();
+// --- CHECK SHOP-FUNCTIONS --- //
+function gui_check_Shop(content, toggle) {
+  if(toggle) {
+    gui_close_Shop(function() {
+      gui_open_Shop(content);
+    });
+  }
+  else {
+    if(shop_opened) gui_close_Shop();
+    else gui_open_Shop(content);
+  }
 }
 
-function gui_open_Shop() {
-  $(shop).slideDown();
-  shop_opened = true;
+function gui_open_Shop(content) {
+  gui_check_content(content);
+  $(shop).slideDown("slow", function() {
+    shop_opened = true;
+  });
 }
 
-function gui_close_Shop() {
-  $(shop).slideUp();
-  shop_opened = false;
+function gui_close_Shop(callback) {
+  $(shop).slideUp("slow", function() {
+    shop_opened = false;
+    $('.shop_content').css('display', 'none');
+    $('.stats_content').css('display', 'none');
+    if(callback) callback();
+  });
+}
+
+function gui_check_content(content) {
+  if(content == "shopContent") {
+    $('.shop_content').css('display', 'inline-block');
+    $('.stats_content').css('display', 'none');
+  } else if(content == "statsContent") {
+    $('.shop_content').css('display', 'none');
+    $('.stats_content').css('display', 'inline-block');
+  }
 }
