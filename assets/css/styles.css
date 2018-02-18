@@ -67,3 +67,19 @@ canvas {
     -ms-flex:  1 1 auto;
     flex:  1 1 auto;
 }
+
+
+
+
+
+.auctionhouse_container {
+  margin-top: 30px;
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+.auctionhouse {
+  width: 100%;
+  height: 100%;
+}
