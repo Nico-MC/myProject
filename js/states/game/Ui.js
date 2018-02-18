@@ -1,6 +1,7 @@
 // SCREENS AND OPTIONS - VARIABLES //
 var window_1, window_1_opened = false;
 var shop, shop_opened = false;
+var auctionHouse_opened = false, i = 0;
 
 // --- GUI DEFAULT-FUNCTIONS --- //
 function gui_setup() {
@@ -46,8 +47,7 @@ function gui_resize() {
 }
 
 function gui_update() {
-  // console.log("ShopContent: " + show_shopContent);
-  // console.log("StatsContent: " + show_statsContent);
+
 }
 
 // --- GUI BUILD-FUNCTIONS --- //
@@ -93,6 +93,7 @@ function gui_close_Window1() {
 function gui_check_Shop(content, toggle) {
   if(toggle) {
     gui_close_Shop(function() {
+      console.log("asdsd");
       gui_open_Shop(content);
     });
   }
@@ -125,5 +126,26 @@ function gui_check_content(content) {
   } else if(content == "statsContent") {
     $('.shop_content').css('display', 'none');
     $('.stats_content').css('display', 'inline-block');
+  }
+}
+
+// --- AUCTIONHOUSE-FUNCTIONS --- //
+function gui_open_auctionhouse() {
+  console.log("Auktionshaus offen!");
+}
+
+function gui_close_auctionhouse() {
+  console.log("Auktionshaus geschlossen!");
+}
+
+function gui_check_auctionhouse(overlap) {
+  if(overlap && !auctionHouse_opened) {
+    if(i == 0) {
+      gui_open_auctionhouse();
+      i++;
+    }
+  } else if(auctionHouseOpen && i != 0) {
+    gui_close_auctionhouse();
+    i = 0;
   }
 }

@@ -1,14 +1,12 @@
 // --- GLOBAL VARIABLES --- //
-var GAME;
-// PLAYER-OPTIONS //
-var player, playerStart, playerTransfer; // Create
+var GAME, map;
+// LAYER-OBJECTS //
+var player, playerStart, playerTransfer, auctionHouseOpen; // Create
 // COLLISION OBJECTS //
 var objectLayer; // Collide
-
 // --- CREATE THE GAME --- //
 GAME = {
   preload: function() {
-    game.load.bitmapFont('myFont','modules/ezgui/assets/fonts/Skranji-Bold-40.png', 'modules/ezgui/assets/fonts/Skranji-Bold-40.fnt');
     // affects the performance heavily!
     this.time.advancedTiming = false;
   },
@@ -22,7 +20,12 @@ GAME = {
     // OBJECTS //
     playerStart = map.objects.PlayerStart[0];
     playerTransfer = map.objects.PlayerTransfer[0];
-    var collisionObjects = map.objects.CollisionObjects;
+    collisionObjects = map.objects.CollisionObjects;
+
+    var obj = map.objects.AuctionHouseOpen[0];
+    auctionHouseOpen = game.add.sprite(obj.x, obj.y, null);
+    this.physics.enable(auctionHouseOpen, Phaser.Physics.ARCADE);
+    auctionHouseOpen.body.setSize(obj.width, obj.height);
 
     // LAYERS //
     var background = map.createLayer('Background');
@@ -34,7 +37,6 @@ GAME = {
     middleground.renderSettings.enableScrollDelta = false;
     frontground.renderSettings.enableScrollDelta = false;
     overlays.renderSettings.enableScrollDelta = false;
-
 
     // CONFIGURE PLAYER //
     this.physics.startSystem(Phaser.Physics.ARCADE);
@@ -89,26 +91,23 @@ GAME = {
 
   update: function() {
     playMovementAnimations();
-    gui_update();
-
-
-
-
-
+    gui_check_auctionhouse(this.physics.arcade.overlap(this.player, auctionHouseOpen));
 
     // Render collision layers
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[0]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[1]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[2]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[3]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[4]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[5]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[6]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[7]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[8]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[9]);
-    GAME.physics.arcade.collide(GAME.player, objectLayer.children[10]);
+    this.physics.arcade.collide(this.player, objectLayer.children[0]);
+    this.physics.arcade.collide(this.player, objectLayer.children[1]);
+    this.physics.arcade.collide(this.player, objectLayer.children[2]);
+    this.physics.arcade.collide(this.player, objectLayer.children[3]);
+    this.physics.arcade.collide(this.player, objectLayer.children[4]);
+    this.physics.arcade.collide(this.player, objectLayer.children[5]);
+    this.physics.arcade.collide(this.player, objectLayer.children[6]);
+    this.physics.arcade.collide(this.player, objectLayer.children[7]);
+    this.physics.arcade.collide(this.player, objectLayer.children[8]);
+    this.physics.arcade.collide(this.player, objectLayer.children[9]);
+    this.physics.arcade.collide(this.player, objectLayer.children[10]);
   },
+
+  render: function() {},
 
   resize: function() {}
 };
