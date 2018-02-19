@@ -13,6 +13,7 @@ var preloadState = {
     this.load.image('set_01', 'assets/content/map/set_01.png');
     // LOAD PLAYER //
     this.load.spritesheet('player', 'assets/content/player/playerset.png', 64, 64, 30, 30); // sprite of player
+    this.load.image('arrow', 'assets/content/images/arrow.png');
 
     this.load.setPreloadSprite(this.preloadBar);
   },

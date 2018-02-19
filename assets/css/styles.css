@@ -14,6 +14,7 @@ canvas {
   position: relative;
 }
 
+.window_2,
 .window_1 {
   position: absolute;
   display: none;
@@ -37,6 +38,17 @@ canvas {
 
 .window_1 .header button:first-child {
   margin-right: 7px;
+}
+
+.window_2 {
+
+}
+
+.window_2 button {
+  font-weight: 100;
+  -moz-box-shadow: inset 0 0 10px #000000;
+  -webkit-box-shadow: inset 0 0 10px #000000;
+  box-shadow: inset 0 0 10px #000000;
 }
 
 .shop {
@@ -70,16 +82,13 @@ canvas {
 
 
 
-
-
 .auctionhouse_container {
-  margin-top: 30px;
+  display: none;
   position: relative;
-  width: 100%;
-  height: auto;
+  background-color: #343a40;
 }
 
 .auctionhouse {
   width: 100%;
-  height: 100%;
+  height: 400px;
 }

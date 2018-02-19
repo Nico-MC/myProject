@@ -4,6 +4,7 @@ var GAME, map;
 var player, playerStart, playerTransfer, auctionHouseOpen; // Create
 // COLLISION OBJECTS //
 var objectLayer; // Collide
+
 // --- CREATE THE GAME --- //
 GAME = {
   preload: function() {
@@ -30,7 +31,7 @@ GAME = {
     // LAYERS //
     var background = map.createLayer('Background');
     var middleground = map.createLayer('Middleground');
-    this.player = this.add.sprite(playerStart.x+playerStart.width/2+7, playerStart.y+playerStart.height/2-10, 'player'); // sprite
+    this.player = this.add.sprite(0, 0, 'player'); // sprite
     var frontground = map.createLayer('Frontground');
     var overlays = map.createLayer('Overlays');
     background.renderSettings.enableScrollDelta = false;
@@ -44,6 +45,8 @@ GAME = {
     this.player.body.collideWorldBounds = true; // world borders
     this.player.body.setSize(20, 20, 0, 0);
     this.player.scale.setTo(1.3);
+    this.player.x = playerStart.x+playerStart.width/2-this.player.body.width/2;
+    this.player.y = playerStart.y+playerStart.height/2-this.player.body.height/2;
 
     this.camera.follow(this.player); // camera
 
@@ -66,6 +69,13 @@ GAME = {
       objectLayer.children[i].body.immovable = true;
     }
 
+    arrow = GAME.add.sprite(0, 0, 'arrow');
+    arrow.scale.setTo(0.5);
+    arrow.position.x = auctionHouseOpen.x+auctionHouseOpen.body.width/2-arrow.width/2+2.5;
+    arrow.y = auctionHouseOpen.y+20;
+    arrow.visible = true;
+    arrow_position_default_y = arrow.position.y;
+
     if (this.time.advancedTiming) {
       // this.plugins.add(Phaser.Plugin.AdvancedTiming); funktioniert hier nicht mehr (veraltet).
       this.timing = this.add.plugin(Phaser.Plugin.AdvancedTiming);
@@ -77,7 +87,7 @@ GAME = {
     // If user press 'TAB' for opening Ui
     gui_load();
     tab = game.input.keyboard.addKey(Phaser.Keyboard.TAB);
-    tab.onDown.add(gui_check_Window1, this);
+    tab.onDown.add(gui_check_window1, this);
 
     $(window).on('resize', function(e) {
       setTimeout(function() {
@@ -107,7 +117,10 @@ GAME = {
     this.physics.arcade.collide(this.player, objectLayer.children[10]);
   },
 
-  render: function() {},
+  render: function() {
+    // game.debug.body(this.player);
+    // game.debug.body(auctionHouseOpen);
+  },
 
   resize: function() {}
 };
