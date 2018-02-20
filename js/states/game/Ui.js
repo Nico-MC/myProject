@@ -20,10 +20,6 @@ function gui_setup() {
     else gui_check_shop('shopContent');
   });
 
-  auctionhouse_button.on('click', function() {
-    gui_open_auctionhouse();
-  });
-
   /*window.onclick = function(e) {
     var target_shop = $(e.target).closest(shop).length;
     var target_window_1 = $(e.target).closest(window_1).length;
@@ -37,11 +33,15 @@ function gui_setup() {
   }*/
 
   $(window).keyup(function(e) {
-    if (e.keyCode === 13)
-      if(arrow.visible == true) {
-        // $("#auctionhouse_button").click();
-        console.log("Enter!");
+    if (e.keyCode === 13) {
+      if(arrow.visible == true && !auctionHouse_opened) {
+        gui_open_auctionhouse();
       }
+    } else if(e.keyCode === 27) {
+      if(auctionHouse_opened == true) {
+        gui_close_auctionhouse();
+      }
+    }
   });
 }
 
@@ -171,11 +171,21 @@ function gui_check_content(content) {
 
 // --- AUCTIONHOUSE-FUNCTIONS --- //
 function gui_open_auctionhouse() {
-  console.log("Auktionshaus offen!");
+  auctionHouse_opened = true;
+  $(".game_container").slideUp("slow", function(e) {
+    $(".auctionhouse_container").slideDown();
+    game.paused = true;
+  });
+  game.scale.refresh();
 }
 
 function gui_close_auctionhouse() {
-  console.log("Auktionshaus geschlossen!");
+  auctionHouse_opened = false;
+  $(".game_container").slideDown("slow", function(e) {
+    game.paused = false;
+  });
+  game.scale.refresh();
+  $(".auctionhouse_container").slideUp();
 }
 
 function gui_check_auctionhouse(overlap) {
@@ -192,7 +202,7 @@ function gui_check_auctionhouse(overlap) {
     if(arrow_tween1 != null && arrow_tween2 != null) {
       GAME.tweens.remove(arrow_tween1);
       GAME.tweens.remove(arrow_tween2);
-      console.log(GAME.tweens);
+      if(auctionHouse_opened) gui_close_auctionhouse();
     }
   }
 }

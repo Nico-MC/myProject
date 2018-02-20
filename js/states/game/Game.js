@@ -73,7 +73,7 @@ GAME = {
     arrow.scale.setTo(0.5);
     arrow.position.x = auctionHouseOpen.x+auctionHouseOpen.body.width/2-arrow.width/2+2.5;
     arrow.y = auctionHouseOpen.y+20;
-    arrow.visible = true;
+    arrow.visible = false;
     arrow_position_default_y = arrow.position.y;
 
     if (this.time.advancedTiming) {

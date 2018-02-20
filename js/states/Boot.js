@@ -16,7 +16,7 @@ var bootState = {
   	this.scale.maxHeight = 800;
 
   	// have the game centered horizontally
-  	this.scale.pageAlignHorizontally = true;
+  	this.scale.pageAlignHorizontally = false;
     this.game.scale.refresh();
     $(window).on('resize', function() {
       setTimeout(function() {

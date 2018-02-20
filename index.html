@@ -5,7 +5,9 @@
     <title>myproject</title>
     <!-- CSS -->
     <link href="https://fonts.googleapis.com/css?family=Skranji:700" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="assets/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/page.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/game.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/auctionhouse.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!-- DATABASE -->
     <script src="https://www.baqend.com/js-sdk/latest/baqend.min.js"></script>
@@ -14,6 +16,24 @@
 
   </head>
   <body>
+    <div class="header">
+      <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+        <button class="my_navbar-toggler navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="my_collapse collapse navbar-collapse" id="navbarText">
+          <a class="navbar-brand" href="#">Datenbank</a>
+          <a class="navbar-brand" href="#">Dokumentation</a>
+
+          <!-- <span class="my_navbar-text navbar-text">
+
+          </span> -->
+        </div>
+      </nav>
+    </div>
+
+
+
     <section id="part_1">
       <div class="game_container">
         <div class="canvas_container" id="my-game"></div>
@@ -38,13 +58,11 @@
       </div>
     </section>
 
-    <section id="part_2">
       <div class="auctionhouse_container">
         <div class="auctionhouse flex">
 
         </div>
       </div>
-    </section>
 
 
 
