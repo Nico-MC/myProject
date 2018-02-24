@@ -9,6 +9,7 @@ function gui_setup() {
   var shop_button = $('#shop_button');
   var stats_button = $('#stats_button');
   var auctionhouse_button = $('#auctionhouse_button');
+  var myGame = $('#my-game');
 
   stats_button.on('click', function() {
     if($('.shop_content').css('display') == 'inline-block') gui_check_shop('statsContent', true);
@@ -19,6 +20,10 @@ function gui_setup() {
     if($('.stats_content').css('display') == 'inline-block') gui_check_shop('shopContent', true);
     else gui_check_shop('shopContent');
   });
+
+  window.onclick = function() {
+    $('#navbar_toggler').blur();
+  };
 
   /*window.onclick = function(e) {
     var target_shop = $(e.target).closest(shop).length;

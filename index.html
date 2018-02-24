@@ -18,7 +18,7 @@
   <body>
     <div class="header">
       <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
-        <button class="my_navbar-toggler navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <button id="navbar_toggler" class="my_navbar-toggler navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="my_collapse collapse navbar-collapse" id="navbarText">
@@ -36,7 +36,7 @@
 
     <section id="part_1">
       <div class="game_container">
-        <div class="canvas_container" id="my-game"></div>
+        <div id="my-game" class="canvas_container"></div>
         <div class="gui_container">
 
           <div class="window_1 bg-dark shadow_out">
@@ -58,12 +58,43 @@
       </div>
     </section>
 
+
+
+    <section>
       <div class="auctionhouse_container">
-        <div class="auctionhouse flex">
+        <div class="auctionhouse">
+          <div class="auctionhouse_content ">
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+              <!-- container-Klasse entfernt -->
+              <div class="tab-pane active" id="tab1">Durchsuchen</div>
+              <div class="tab-pane fade" id="tab2">Gebote</div>
+              <div class="tab-pane fade" id="tab3">Auktionen</div>
+            </div>
+
+
+          </div>
+          <div class="auctionhouse_nav">
+
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#tab1">Durchsuchen</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tab2">Gebote</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tab3">Auktionen</a>
+              </li>
+            </ul>
+
+          </div>
 
         </div>
       </div>
-
+    </section>
 
 
 
