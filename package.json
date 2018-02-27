@@ -19,7 +19,14 @@
   "homepage": "https://github.com/Nico-MC/myproject#readme",
   "dependencies": {
     "require": "*",
+    "baqend": "*",
+    "jquery": "*",
+    "tether": "*",
+    "websocket": "*",
+    "popper.js": "*",
+    "bootstrap": "*",
     "npm-sass": "*",
-    "nodemon": "*"
+    "nodemon": "*",
+    "phaser": "*"
   }
 }

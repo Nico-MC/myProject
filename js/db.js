@@ -1,3 +1,6 @@
+var DB = require('baqend');
+// realtime
+
 DB.connect("toodle", true);
 //Wait for connection
 DB.ready().then(function() {

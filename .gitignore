@@ -37,5 +37,5 @@ ehthumbs.db
 Thumbs.db
 
 # My Files #
-assets
-modules
+node_modules
+assets/content/images_old
