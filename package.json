@@ -1,0 +1,25 @@
+{
+  "name": "myproject",
+  "version": "1.0.0",
+  "description": "@author Nico Noster\r @email niconoster@t-online.de",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-css": "node-sass assets/scss/ -o assets/build/css/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nico-MC/myproject.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nico-MC/myproject/issues"
+  },
+  "homepage": "https://github.com/Nico-MC/myproject#readme",
+  "dependencies": {
+    "require": "*",
+    "npm-sass": "*",
+    "nodemon": "*"
+  }
+}
