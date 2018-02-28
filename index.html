@@ -4,7 +4,7 @@
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <title>myproject</title>
     <!-- CSS -->
-    <link href="https://fonts.googleapis.com/css?family=Skranji:700" rel="stylesheet">
+    <!-- <link href="https://fonts.googleapis.com/css?family=Skranji:700" rel="stylesheet"-->
     <link rel="stylesheet" type="text/css" href="assets/css/page.css">
     <link rel="stylesheet" type="text/css" href="assets/css/game.css">
     <link rel="stylesheet" type="text/css" href="assets/css/auctionhouse.css">
@@ -13,7 +13,7 @@
     <!-- <script src="https://www.baqend.com/js-sdk/latest/baqend.min.js"></script> -->
     <script type="text/javascript" src="//www.baqend.com/js-sdk/latest/baqend-realtime.js"></script>
     <!-- MODULES -->
-    <script type="text/javascript" src="modules/PHASER/phaser.js"></script>
+    <script type="text/javascript" src="modules/phaser.min.js"></script>
 
   </head>
   <body>
@@ -25,10 +25,6 @@
         <div class="my_collapse collapse navbar-collapse" id="navbarText">
           <a class="navbar-brand" href="#">Datenbank</a>
           <a class="navbar-brand" href="#">Dokumentation</a>
-
-          <!-- <span class="my_navbar-text navbar-text">
-
-          </span> -->
         </div>
       </nav>
     </div>
@@ -127,25 +123,5 @@
     <script type="text/javascript" src="js/states/game/Movement.js"></script>
     <script type="text/javascript" src="js/states/game/Ui.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
-
-    <!-- Funktioniert nicht korrekt, das asynchron -->
-    <!-- <script type="text/javascript">
-
-      // load game content after page is loaded
-      $(document).ready(function() {
-        /* STATES */
-        $.getScript( "js/states/Boot.js");
-        $.getScript( "js/states/Preload.js");
-        $.getScript( "js/states/Menu.js");
-        /* GAME STATE */
-        $.getScript( "js/states/game/Game.js");
-        $.getScript( "js/states/game/Movement.js");
-        $.getScript( "js/states/game/Ui.js");
-        /* MAIN */
-        $.getScript( "js/main.js", function(a,b,c) {
-          if(b === "success") startGame();
-        });
-      });
-    </script> -->
   </body>
 </html>
