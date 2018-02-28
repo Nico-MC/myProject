@@ -25,6 +25,9 @@ function gui_setup() {
     $('#navbar_toggler').blur();
   };
 
+  // Clear text search_field
+  document.getElementById("search").value = "";
+
   /*window.onclick = function(e) {
     var target_shop = $(e.target).closest(shop).length;
     var target_window_1 = $(e.target).closest(window_1).length;
@@ -73,9 +76,7 @@ function gui_resize() {
   $(shop).css('left', canvas_left);
 }
 
-function gui_update() {
-
-}
+function gui_update() {}
 
 // --- GUI BUILD-FUNCTIONS --- //
 function gui_build_window1() {
@@ -209,5 +210,8 @@ function gui_check_auctionhouse(overlap) {
       GAME.tweens.remove(arrow_tween2);
       if(auctionHouse_opened) gui_close_auctionhouse();
     }
+  } else {
+    // want to open it through console? You sneaky rascal you!
+    if($('.auctionhouse_container').css('display') != 'none') gui_close_auctionhouse();
   }
 }

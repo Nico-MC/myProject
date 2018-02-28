@@ -10,7 +10,8 @@
     <link rel="stylesheet" type="text/css" href="assets/css/auctionhouse.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!-- DATABASE -->
-    <script src="https://www.baqend.com/js-sdk/latest/baqend.min.js"></script>
+    <!-- <script src="https://www.baqend.com/js-sdk/latest/baqend.min.js"></script> -->
+    <script type="text/javascript" src="//www.baqend.com/js-sdk/latest/baqend-realtime.js"></script>
     <!-- MODULES -->
     <script type="text/javascript" src="modules/PHASER/phaser.js"></script>
 
@@ -42,7 +43,7 @@
           <div class="window_1 bg-dark shadow_out">
             <div class="window_1_header flex">
               <button id="stats_button" type="button" class="btn btn-primary btn-lg flex-child">Stats</button>
-              <button id="shop_button" type="button" class="btn btn-primary btn-lg flex-child">Shop</button>
+              <button id="shop_button" type="button" class="btn btn-primary btn-lg flex-child">Inventar</button>
             </div>
           </div>
 
@@ -68,7 +69,21 @@
             <!-- Tab panes -->
             <div class="tab-content">
               <!-- container-Klasse entfernt -->
-              <div class="tab-pane active" id="tab1">Durchsuchen</div>
+              <div class="tab-pane fade show active" id="tab1">
+                <div class="search_bar col-lg-6">
+                  <input id="search" class="form-control" name="search" placeholder="Search.." type="text">
+                </div>
+
+                <!-- Vorher ... -->
+                <!-- <div class="search_field col-lg-6">
+                  <div class="input-group">
+                    <input id="search_field_input" type="text" class="form-control" placeholder="Search for...">
+                    <span class="input-group-btn">
+                      <button class="btn btn-secondary" type="button">Go!</button>
+                    </span>
+                  </div>
+                </div> -->
+              </div>
               <div class="tab-pane fade" id="tab2">Gebote</div>
               <div class="tab-pane fade" id="tab3">Auktionen</div>
             </div>
@@ -102,6 +117,7 @@
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
     <!-- LOADING GAME -->
     <script type="text/javascript" src="js/db.js"></script>
     <script type="text/javascript" src="js/states/Boot.js"></script>
