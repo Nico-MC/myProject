@@ -66,24 +66,26 @@
             <div class="tab-content">
               <!-- container-Klasse entfernt -->
               <div class="tab-pane fade show active" id="tab1">
-                <div class="search_bar col-lg-6">
-                  <input id="search" class="form-control" name="search" placeholder="Search.." type="text">
-                </div>
-
-                <!-- Vorher ... -->
-                <!-- <div class="search_field col-lg-6">
-                  <div class="input-group">
-                    <input id="search_field_input" type="text" class="form-control" placeholder="Search for...">
-                    <span class="input-group-btn">
-                      <button class="btn btn-secondary" type="button">Go!</button>
-                    </span>
+                <div class="overflow_div">
+                  <div class="search_bar">
+                    <input id="search" class="form-control" name="search" placeholder="Search.." type="text">
                   </div>
-                </div> -->
+                </div>
               </div>
-              <div class="tab-pane fade" id="tab2">Gebote</div>
+              <div class="tab-pane fade" id="tab2">
+                <div class="overflow_div">
+                  Gebote
+                </div>
+              </div>
               <div class="tab-pane fade" id="tab3">
-                <div class="create_auction_div bg-secondary">
-                  <div class="auction_item">
+                <div class="overflow_div">
+                  <div class="create_auction_div bg-secondary flex-child">
+                    <span>Auktionsgegenstand</span>
+                    <div class="auction_item">
+
+                    </div>
+                  </div>
+                  <div class="show_auction_div bg-secondary flex-child">
 
                   </div>
                 </div>
@@ -125,15 +127,13 @@
         var oldHeight = $('.tab-pane.active').height();
         var newHeight = $(target).height();
         $(target).height(oldHeight);
-        console.log(oldHeight);
 
         setTimeout(function() {
-          $(".tab-pane.active").height(oldHeight).animate({ height: newHeight }, 1000);
+          $(".tab-pane.active").height(newHeight);
         }, 300);
 
     }
     </script>
-
 
     <!-- LOADING GAME -->
     <script type="text/javascript" src="js/db.js"></script>
