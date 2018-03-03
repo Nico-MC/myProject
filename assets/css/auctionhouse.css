@@ -27,15 +27,6 @@ section#part_2 {
         -webkit-transition: 1s;
           transition: 1s;
 }
-#tab1.active, #tab2.active, #tab.active {
-
-}
-#tab2 {
-
-}
-#tab3 {
-
-}
 
 .overflow_div {
   padding: 15px;
@@ -86,6 +77,10 @@ input[type=text]#search:focus {
 }
 
 /* --- TAB 3 --- */
+.create_auction_div {
+  margin-right: 1px;
+}
+
 .create_auction_div,
 .show_auction_div {
   -moz-box-shadow:    inset 0 0 10px #000000;
