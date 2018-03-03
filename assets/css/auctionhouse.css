@@ -86,11 +86,12 @@ input[type=text]#search:focus {
   -moz-box-shadow:    inset 0 0 10px #000000;
   -webkit-box-shadow: inset 0 0 10px #000000;
   box-shadow:         inset 0 0 10px #000000;
-  border-radius: 5%;
+  border-radius: 5px;
   padding: 15px;
 }
 
-.create_auction_div span {
+.create_auction_div span,
+.show_auction_div span {
   /* color: #343a40; */
   color: white;
   font-weight: 600;
