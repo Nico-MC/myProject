@@ -123,13 +123,13 @@
 
     <div id="register_div" class="register col-md-6 mx-auto">
       <div class="card card-body">
-          <!-- <h3 class="text-center mb-4">Sign-up</h3> -->
+          <h3 style="font-weight: 100" class="text-center mb-4">Zugang zu Auktionen</h3>
           <div style="display: none" class="alert alert-danger">
               <a class="close font-weight-light" data-dismiss="alert" href="#">×</a>Password is too short.
           </div>
           <form id="register">
               <div class="form-group has-error">
-                  <input class="form-control input-lg" placeholder="E-Mail" name="email" type="text">
+                  <input class="form-control input-lg" placeholder="E-Mail" name="username" type="text">
               </div>
               <div class="form-group has-success">
                   <input class="form-control input-lg" placeholder="Passwort" name="password" value="" type="password">
@@ -156,8 +156,8 @@
       }
 
       $("#register").submit(function(event) {
-        console.log($(this).serializeArray());
         event.preventDefault();
+        register($(this).serializeArray());
       });
 
 
@@ -176,6 +176,29 @@
           $(".tab-pane.active").height(newHeight);
         }, 300);
     }
+    </script>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+        DB.User.login('root', 'admin');
+        if(typeof DB.User !== 'undefined') {
+          console.log("logged in");
+        } else {
+          console.log("is not logged in");
+        }
+      });
+      $.when(
+        // $.getScript( "/mypath/myscript1.js" ),
+        // $.getScript( "/mypath/myscript2.js" ),
+        // $.getScript( "/mypath/myscript3.js" ),
+        $.Deferred(function( deferred ){
+            $( deferred.resolve );
+        })
+      ).done(function(){
+
+        //place your code here, the scripts are all loaded
+
+      });
     </script>
 
     <!-- LOADING GAME -->

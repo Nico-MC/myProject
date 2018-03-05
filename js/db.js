@@ -11,11 +11,28 @@ DB.ready().then(function() {
 
 
 
-function register() {
-  DB.User.register(username, password).then(function() {
-    //Hey we are logged in
-    console.log(DB.User.me.username); //'john.doe@example.com'
-  });
+function register(data) {
+  var username = data[0].value;
+  var password = data[1].value;
+  var password_2 = data[2].value;
+
+  if(username.length > 4) {
+    if(password.length != 0) {
+      if(password.length > 5) {
+        if(password === password_2) {
+          DB.User.register(username, password).then(function() {
+          });
+        } else errormessage("Passwörter stimmen nicht überein.");
+      } else errormessage("Passwort ist zu kurz.");
+    } else errormessage("Bitte gebe ein Passwort ein.");
+  } else errormessage("Benutzername ist zu kurz.");
+
+  console.log(password.length);
+}
+
+function errormessage(message) {
+  $('.alert').html(message);
+  $('.alert').toggle("slow").delay(2000).toggle("slow");
 }
 
 function login(username, password) {
