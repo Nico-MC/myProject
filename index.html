@@ -14,6 +14,9 @@
     <script type="text/javascript" src="//www.baqend.com/js-sdk/latest/baqend-realtime.js"></script>
     <!-- MODULES -->
     <script type="text/javascript" src="modules/phaser.min.js"></script>
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 
   </head>
   <body>
@@ -25,6 +28,7 @@
         <div class="my_collapse collapse navbar-collapse" id="navbarText">
           <a class="navbar-brand" href="#">Datenbank</a>
           <a class="navbar-brand" href="#">Dokumentation</a>
+          <a class="navbar-brand" href="javascript:openRegister()">Registrieren</a>
         </div>
       </nav>
     </div>
@@ -67,9 +71,11 @@
               <!-- container-Klasse entfernt -->
               <div class="tab-pane fade show active" id="tab1">
                 <div class="overflow_div">
-                  <div class="search_bar">
-                    <input id="search" class="form-control" name="search" placeholder="Search.." type="text">
-                  </div>
+                  <form id="search" class="" action="" method="post">
+                    <div class="search_bar">
+                      <input id="search_field" class="form-control" name="search" placeholder="Search.." type="text">
+                    </div>
+                  </form>
                 </div>
               </div>
               <div class="tab-pane fade" id="tab2">
@@ -115,13 +121,51 @@
       </div>
     </section>
 
+    <div id="register_div" class="register col-md-6 mx-auto">
+      <div class="card card-body">
+          <!-- <h3 class="text-center mb-4">Sign-up</h3> -->
+          <div style="display: none" class="alert alert-danger">
+              <a class="close font-weight-light" data-dismiss="alert" href="#">×</a>Password is too short.
+          </div>
+          <form id="register">
+              <div class="form-group has-error">
+                  <input class="form-control input-lg" placeholder="E-Mail" name="email" type="text">
+              </div>
+              <div class="form-group has-success">
+                  <input class="form-control input-lg" placeholder="Passwort" name="password" value="" type="password">
+              </div>
+              <div class="form-group has-success">
+                  <input class="form-control input-lg" placeholder="Passwort bestätigen" name="password" value="" type="password">
+              </div>
+              <input class="btn btn-lg btn-primary btn-block" value="Registrieren" type="submit">
+          </form>
+      </div>
+    </div>
 
-
-    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-
+    <script type="text/javascript" src="js/db.js"></script>
     <script type="text/javascript">
+      var show_register = false;
+      function openRegister() {
+        if(show_register) {
+          show_register = false;
+          $('#register_div').slideUp("slow");
+        } else {
+          show_register = true;
+          $('#register_div').slideDown("slow");
+        }
+      }
+
+      $("#register").submit(function(event) {
+        console.log($(this).serializeArray());
+        event.preventDefault();
+      });
+
+
+
+
+      // Clear text search_field
+      $("#search_field").val("");
+
       function resize(obj) {
         var target = $(obj).attr("href");
         var oldHeight = $('.tab-pane.active').height();
@@ -131,12 +175,10 @@
         setTimeout(function() {
           $(".tab-pane.active").height(newHeight);
         }, 300);
-
     }
     </script>
 
     <!-- LOADING GAME -->
-    <script type="text/javascript" src="js/db.js"></script>
     <script type="text/javascript" src="js/states/Boot.js"></script>
     <script type="text/javascript" src="js/states/Preload.js"></script>
     <script type="text/javascript" src="js/states/Menu.js"></script>

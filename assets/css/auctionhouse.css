@@ -43,7 +43,7 @@ section#part_2 {
   flex: 1;
 }
 
-input[type="text"]#search {
+input[type="text"]#search_field {
   width: 130px;
   box-sizing: border-box;
   border: 1px solid #5cb3fd;
@@ -63,7 +63,7 @@ input[type="text"]#search {
 }
 
 /* When the input field gets focus, change its width to 100% */
-input[type=text]#search:focus {
+input[type=text]#search_field:focus {
   width: 300px;
   border-color: #80bdff;
   outline: none !important;

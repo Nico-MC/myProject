@@ -21,4 +21,25 @@
   margin-left: 25px !important; }
 
 .my_navbar-text {
-  float: right !important; }
+  float: right !important;
+}
+
+.register {
+  position: absolute !important;
+  top: 0;
+  top: 50px;
+  left: 25%;
+  display: none;
+}
+
+.register input {
+  -webkit-transition: all .4s ease-in-out;
+  transition: all .4s ease-in-out;
+}
+
+.register input:focus {
+  border-color: #80bdff;
+  outline: none !important;
+  border-color: #9ecaed;
+  box-shadow: 0 0 10px #9ecaed;
+}
