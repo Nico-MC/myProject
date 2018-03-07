@@ -1,0 +1,147 @@
+<section id="part_1">
+  <!-- ##### HEADER ##### -->
+  <div class="header">
+    <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+      <button id="navbar_toggler" class="my_navbar-toggler navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="my_collapse collapse navbar-collapse" id="navbarText">
+        <a class="navbar-brand" href="#">Datenbank</a>
+        <a class="navbar-brand" href="#">Dokumentation</a>
+        <a class="navbar-brand" href="javascript:logout()">Logout</a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ##### GAME ##### -->
+  <div class="game_container">
+    <div id="my-game" class="canvas_container"></div>
+    <div class="gui_container">
+
+      <div class="window_1 bg-dark shadow_out">
+        <div class="window_1_header flex">
+          <button id="stats_button" type="button" class="btn btn-primary btn-lg flex-child">Stats</button>
+          <button id="shop_button" type="button" class="btn btn-primary btn-lg flex-child">Inventar</button>
+        </div>
+      </div>
+
+      <div class="shop bg-dark">
+        <div class="stats_content">
+          <p>Spieler Position:</p>
+        </div>
+        <div class="shop_content">
+          asd
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+<!-- ##### AUCTIONHOUSE ##### -->
+<div class="auctionhouse_container">
+  <div class="auctionhouse">
+    <div class="auctionhouse_content">
+
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <!-- container-Klasse entfernt -->
+        <div class="tab-pane fade show active" id="tab1">
+          <div class="overflow_div">
+            <form id="search" class="" action="" method="post">
+              <div class="search_bar">
+                <input id="search_field" class="form-control" name="search" placeholder="Search.." type="text">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="tab2">
+          <div class="overflow_div">
+            Gebote
+          </div>
+        </div>
+        <div class="tab-pane fade" id="tab3">
+          <div class="overflow_div">
+            <div class="create_auction_div bg-secondary flex-child">
+              <span>Auktionsgegenstand</span>
+              <div class="auction_item">
+
+              </div>
+            </div>
+            <div class="show_auction_div bg-secondary flex-child">
+              <span>Inventar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+    <div class="auctionhouse_nav">
+
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#tab1" onclick="resize(this)">Durchsuchen</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab2" onclick="resize(this)">Gebote</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#tab3" onclick="resize(this)">Auktionen</a>
+        </li>
+      </ul>
+
+    </div>
+
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ##### REGISTER ##### -->
+<div class="register_container container">
+  <div id="register_div" class="register_div col-md-6 mx-auto">
+    <div class="card card-body">
+        <h3 style="font-weight: 100" class="text-center mb-4">Zugang zu Auktionen</h3>
+        <div style="display: none" class="alert alert-danger">
+            <a class="close font-weight-light" data-dismiss="alert" href="#">×</a>Password is too short.
+        </div>
+        <div class="switch">
+        <form id="register">
+            <div class="form-group has-error">
+                <input class="form-control input-lg" placeholder="Benutzername" name="username" type="text">
+            </div>
+            <div class="form-group has-success">
+                <input class="form-control input-lg" placeholder="Passwort" name="password" value="" type="password">
+            </div>
+            <div class="form-group has-success">
+                <input class="form-control input-lg" placeholder="Passwort bestätigen" name="password" value="" type="password">
+            </div>
+            <input class="btn btn-lg btn-primary btn-block" value="Registrieren" type="submit">
+        </form>
+        <!-- ##### LOGIN ##### -->
+        <form id="login">
+          <div class="form-group has-error">
+              <input class="form-control input-lg" placeholder="Benutzername" name="username" type="text">
+          </div>
+          <div class="form-group has-success">
+              <input class="form-control input-lg" placeholder="Passwort" name="password" value="" type="password">
+          </div>
+          <input class="btn btn-lg btn-primary btn-block" value="Login" type="submit">
+        </form>
+        </div>
+        <a href="javascript:switchRegister()"><i class="material-icons" style="font-size:36px">expand_more</i></a>
+    </div>
+  </div>
+</div>

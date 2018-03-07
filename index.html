@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-    <title>myproject</title>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>    <title>myproject</title>
     <!-- CSS -->
     <!-- <link href="https://fonts.googleapis.com/css?family=Skranji:700" rel="stylesheet"-->
     <link rel="stylesheet" type="text/css" href="assets/css/page.css">
     <link rel="stylesheet" type="text/css" href="assets/css/game.css">
     <link rel="stylesheet" type="text/css" href="assets/css/auctionhouse.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- DATABASE -->
     <!-- <script src="https://www.baqend.com/js-sdk/latest/baqend.min.js"></script> -->
     <script type="text/javascript" src="//www.baqend.com/js-sdk/latest/baqend-realtime.js"></script>
@@ -17,151 +17,86 @@
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-
   </head>
   <body>
-    <div class="header">
-      <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
-        <button id="navbar_toggler" class="my_navbar-toggler navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="my_collapse collapse navbar-collapse" id="navbarText">
-          <a class="navbar-brand" href="#">Datenbank</a>
-          <a class="navbar-brand" href="#">Dokumentation</a>
-          <a class="navbar-brand" href="javascript:openRegister()">Registrieren</a>
-        </div>
-      </nav>
-    </div>
 
-
-
-    <section id="part_1">
-      <div class="game_container">
-        <div id="my-game" class="canvas_container"></div>
-        <div class="gui_container">
-
-          <div class="window_1 bg-dark shadow_out">
-            <div class="window_1_header flex">
-              <button id="stats_button" type="button" class="btn btn-primary btn-lg flex-child">Stats</button>
-              <button id="shop_button" type="button" class="btn btn-primary btn-lg flex-child">Inventar</button>
-            </div>
-          </div>
-
-          <div class="shop bg-dark">
-            <div class="stats_content">
-              <p>Spieler Position:</p>
-            </div>
-            <div class="shop_content">
-              asd
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-
-    <section id="part_2">
-      <div class="auctionhouse_container">
-        <div class="auctionhouse">
-          <div class="auctionhouse_content">
-
-            <!-- Tab panes -->
-            <div class="tab-content">
-              <!-- container-Klasse entfernt -->
-              <div class="tab-pane fade show active" id="tab1">
-                <div class="overflow_div">
-                  <form id="search" class="" action="" method="post">
-                    <div class="search_bar">
-                      <input id="search_field" class="form-control" name="search" placeholder="Search.." type="text">
-                    </div>
-                  </form>
-                </div>
-              </div>
-              <div class="tab-pane fade" id="tab2">
-                <div class="overflow_div">
-                  Gebote
-                </div>
-              </div>
-              <div class="tab-pane fade" id="tab3">
-                <div class="overflow_div">
-                  <div class="create_auction_div bg-secondary flex-child">
-                    <span>Auktionsgegenstand</span>
-                    <div class="auction_item">
-
-                    </div>
-                  </div>
-                  <div class="show_auction_div bg-secondary flex-child">
-                    <span>Inventar</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-          </div>
-          <div class="auctionhouse_nav">
-
-            <!-- Nav tabs -->
-            <ul class="nav nav-tabs">
-              <li class="nav-item">
-                <a class="nav-link active" data-toggle="tab" href="#tab1" onclick="resize(this)">Durchsuchen</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#tab2" onclick="resize(this)">Gebote</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#tab3" onclick="resize(this)">Auktionen</a>
-              </li>
-            </ul>
-
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <div id="register_div" class="register col-md-6 mx-auto">
-      <div class="card card-body">
-          <h3 style="font-weight: 100" class="text-center mb-4">Zugang zu Auktionen</h3>
-          <div style="display: none" class="alert alert-danger">
-              <a class="close font-weight-light" data-dismiss="alert" href="#">×</a>Password is too short.
-          </div>
-          <form id="register">
-              <div class="form-group has-error">
-                  <input class="form-control input-lg" placeholder="E-Mail" name="username" type="text">
-              </div>
-              <div class="form-group has-success">
-                  <input class="form-control input-lg" placeholder="Passwort" name="password" value="" type="password">
-              </div>
-              <div class="form-group has-success">
-                  <input class="form-control input-lg" placeholder="Passwort bestätigen" name="password" value="" type="password">
-              </div>
-              <input class="btn btn-lg btn-primary btn-block" value="Registrieren" type="submit">
-          </form>
-      </div>
-    </div>
 
     <script type="text/javascript" src="js/db.js"></script>
     <script type="text/javascript">
-      var show_register = false;
-      function openRegister() {
-        if(show_register) {
-          show_register = false;
-          $('#register_div').slideUp("slow");
-        } else {
-          show_register = true;
-          $('#register_div').slideDown("slow");
+
+      function transferToLogin(fade, sk) {
+        // Hier noch secutrity key
+        if(DB.User.me.securitykey === sk) {
+          sk = null;
+          console.log("Schlüssel ist korrekt.");
+          if(fade) {
+            $('body').fadeOut("slow", function() {
+              $('body').load('assets/content/content.html #part_1', function() {
+                startGame();
+              });
+            });
+          } else {
+            $('body').load('assets/content/content.html #part_1', function() {
+              startGame();
+            });
+          }
         }
       }
 
-      $("#register").submit(function(event) {
-        event.preventDefault();
-        register($(this).serializeArray());
+      function transferToRegister() {
+        $('body').load('assets/content/content.html .register_container', function() {
+          $('.register_div').fadeIn(2000);
+          // Click on register-button
+          $("#register").submit(function(event) {
+            event.preventDefault();
+            register($(this).serializeArray(), function() {
+              transferToLogin(true, DB.User.me.securitykey);
+            });
+          });
+          // Click on login-button
+          $("#login").submit(function(event) {
+            event.preventDefault();
+            login($(this).serializeArray(), function(sk) {
+              transferToLogin(true, sk);
+            });
+          });
+        });
+      }
+
+      function errormessage(message) {
+        $('.alert').css('color', '#721c24');
+        $('.alert').css('background-color', '#f8d7da');
+        $('.alert').css('border-color', '#f5c6cb');
+        $('.alert').html(message);
+        $('.alert').toggle("slow").delay(2000).toggle("slow");
+      }
+
+      function registermessage(callback) {
+        $('.alert').css('color', '#21721c');
+        $('.alert').css('background-color', '#d8f8d7');
+        $('.alert').css('border-color', '#c6f5c6');
+        $('.alert').html("Registrierung erfolgreich!");
+        $('.alert').toggle("slow").delay(5000).toggle("slow");
+        return callback();
+      }
+
+      function switchRegister() {
+        if($('.register_div #register').css('display') != 'none') {
+          $('.register_div #register').slideUp("slow", function() {
+            $('.register_div #login').slideDown("slow");
+          });
+        } else {
+          $('.register_div #login').slideUp("slow", function() {
+            $('.register_div #register').slideDown("slow");
+          });
+        }
+      }
+
+      $('#search').submit(function(e) {
+        e.preventDefault();
+        search_result = $('#search_field').val();
+        search(search_result);
       });
-
-
-
 
       // Clear text search_field
       $("#search_field").val("");
@@ -176,29 +111,6 @@
           $(".tab-pane.active").height(newHeight);
         }, 300);
     }
-    </script>
-
-    <script type="text/javascript">
-      $(document).ready(function() {
-        DB.User.login('root', 'admin');
-        if(typeof DB.User !== 'undefined') {
-          console.log("logged in");
-        } else {
-          console.log("is not logged in");
-        }
-      });
-      $.when(
-        // $.getScript( "/mypath/myscript1.js" ),
-        // $.getScript( "/mypath/myscript2.js" ),
-        // $.getScript( "/mypath/myscript3.js" ),
-        $.Deferred(function( deferred ){
-            $( deferred.resolve );
-        })
-      ).done(function(){
-
-        //place your code here, the scripts are all loaded
-
-      });
     </script>
 
     <!-- LOADING GAME -->

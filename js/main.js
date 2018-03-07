@@ -1,5 +1,6 @@
-var WIDTH = 400;
-var HEIGHT = 400;
+function startGame() {
+  var WIDTH = 400;
+  var HEIGHT = 400;
 
   game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'my-game');
 
@@ -9,3 +10,4 @@ var HEIGHT = 400;
   game.state.add('Game', GAME);
 
   game.state.start('Boot');
+}

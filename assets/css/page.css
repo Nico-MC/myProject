@@ -24,22 +24,50 @@
   float: right !important;
 }
 
-.register {
-  position: absolute !important;
-  top: 0;
-  top: 50px;
-  left: 25%;
-  display: none;
+.register_container {
+  /* Screen center */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -75%);
 }
 
-.register input {
+.register_div {
+  margin: 0 auto;
+  display: none;
+  position: fixed;
+}
+
+.register_div .card-body {
+  background-color: #ced4da !important;
+  border: 1px solid #cecece !important;
+  box-shadow: 0 2px 100px #818181;
+  padding-bottom: 0;
+}
+
+.register_div input {
   -webkit-transition: all .4s ease-in-out;
   transition: all .4s ease-in-out;
 }
 
-.register input:focus {
+.register_div input:focus {
   border-color: #80bdff;
   outline: none !important;
   border-color: #9ecaed;
   box-shadow: 0 0 10px #9ecaed;
+}
+
+.register_div a {
+  margin-top: 5px;
+  text-align: center;
+  outline: 0;
+}
+
+.register_div i {
+  vertical-align: bottom;
+}
+
+.register_div #login {
+  display: none;
 }
