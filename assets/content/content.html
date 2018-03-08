@@ -1,4 +1,4 @@
-<section id="part_1">
+<div class="login_content">
   <!-- ##### HEADER ##### -->
   <div class="header">
     <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
@@ -35,69 +35,64 @@
       </div>
     </div>
   </div>
-</section>
 
+  <!-- ##### AUCTIONHOUSE ##### -->
+  <div class="auctionhouse_container">
+    <div class="auctionhouse">
+      <div class="auctionhouse_content">
 
-
-
-
-
-<!-- ##### AUCTIONHOUSE ##### -->
-<div class="auctionhouse_container">
-  <div class="auctionhouse">
-    <div class="auctionhouse_content">
-
-      <!-- Tab panes -->
-      <div class="tab-content">
-        <!-- container-Klasse entfernt -->
-        <div class="tab-pane fade show active" id="tab1">
-          <div class="overflow_div">
-            <form id="search" class="" action="" method="post">
-              <div class="search_bar">
-                <input id="search_field" class="form-control" name="search" placeholder="Search.." type="text">
-              </div>
-            </form>
-          </div>
-        </div>
-        <div class="tab-pane fade" id="tab2">
-          <div class="overflow_div">
-            Gebote
-          </div>
-        </div>
-        <div class="tab-pane fade" id="tab3">
-          <div class="overflow_div">
-            <div class="create_auction_div bg-secondary flex-child">
-              <span>Auktionsgegenstand</span>
-              <div class="auction_item">
-
-              </div>
-            </div>
-            <div class="show_auction_div bg-secondary flex-child">
-              <span>Inventar</span>
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <!-- container-Klasse entfernt -->
+          <div class="tab-pane fade show active" id="tab1">
+            <div class="overflow_div">
+              <form id="search" class="" action="" method="post">
+                <div class="search_bar">
+                  <input id="search_field" class="form-control" name="search" placeholder="Search.." type="text">
+                </div>
+              </form>
             </div>
           </div>
+          <div class="tab-pane fade" id="tab2">
+            <div class="overflow_div">
+              Gebote
+            </div>
+          </div>
+          <div class="tab-pane fade" id="tab3">
+            <div class="overflow_div">
+              <div class="create_auction_div bg-secondary flex-child">
+                <span>Auktionsgegenstand</span>
+                <div class="auction_item">
+
+                </div>
+              </div>
+              <div class="show_auction_div bg-secondary flex-child">
+                <span>Inventar</span>
+              </div>
+            </div>
+          </div>
         </div>
+
+
+      </div>
+      <div class="auctionhouse_nav">
+
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#tab1" onclick="resize(this)">Durchsuchen</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab2" onclick="resize(this)">Gebote</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tab3" onclick="resize(this)">Auktionen</a>
+          </li>
+        </ul>
+
       </div>
 
-
     </div>
-    <div class="auctionhouse_nav">
-
-      <!-- Nav tabs -->
-      <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a class="nav-link active" data-toggle="tab" href="#tab1" onclick="resize(this)">Durchsuchen</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#tab2" onclick="resize(this)">Gebote</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#tab3" onclick="resize(this)">Auktionen</a>
-        </li>
-      </ul>
-
-    </div>
-
   </div>
 </div>
 

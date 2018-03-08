@@ -19,24 +19,24 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
   </head>
   <body>
-
+    <section></section>
 
     <script type="text/javascript" src="js/db.js"></script>
     <script type="text/javascript">
 
+      // Load mit Vorsicht genießen, da asynchron.
       function transferToLogin(fade, sk) {
         // Hier noch secutrity key
         if(DB.User.me.securitykey === sk) {
           sk = null;
-          console.log("Schlüssel ist korrekt.");
           if(fade) {
-            $('body').fadeOut("slow", function() {
-              $('body').load('assets/content/content.html #part_1', function() {
+            $('section .register_container').fadeOut("slow", function() {
+              $('section').load('assets/content/content.html .login_content', function() {
                 startGame();
               });
             });
           } else {
-            $('body').load('assets/content/content.html #part_1', function() {
+            $('section').load('assets/content/content.html .login_content', function() {
               startGame();
             });
           }
@@ -44,7 +44,7 @@
       }
 
       function transferToRegister() {
-        $('body').load('assets/content/content.html .register_container', function() {
+        $('section').load('assets/content/content.html .register_container', function() {
           $('.register_div').fadeIn(2000);
           // Click on register-button
           $("#register").submit(function(event) {
@@ -76,8 +76,9 @@
         $('.alert').css('background-color', '#d8f8d7');
         $('.alert').css('border-color', '#c6f5c6');
         $('.alert').html("Registrierung erfolgreich!");
-        $('.alert').toggle("slow").delay(5000).toggle("slow");
-        return callback();
+        $('.alert').slideDown("slow").delay(500, function() {
+          return callback();
+        });
       }
 
       function switchRegister() {

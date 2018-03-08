@@ -1,12 +1,11 @@
 /* --- VARIABLES --- */
 var search_result = "";
-var username = "root", password = "admin";
-/* --- VARIABLES --- */
 
-DB.connect("misty-shape-74", true);
+DB.connect("misty-shape-74").then(function() {
+  console.log("Verbunden");
+});
 //Wait for connection
 DB.ready().then(function() {
-  console.log("Verbunden");
   if (DB.User.me) {
     //do additional things if user is logged in
     console.log('Hello ' + DB.User.me.username); //the username of the user
@@ -23,13 +22,17 @@ function register(data, callback) {
   var password = data[1].value;
   var password_2 = data[2].value;
 
-
   if(username.length != 0) {
     if(username.length > 3) {
       if(password.length != 0) {
         if(password.length > 4) {
           if(password === password_2) {
-            DB.User.register(username, password);
+            DB.User.register(username, password).then(function() {
+              registermessage(function() {
+                // TODO Hier fehlt noch securitykey
+                return callback();
+              })
+            });
           } else errormessage("Passwörter stimmen nicht überein.");
         } else errormessage("Passwort ist zu kurz.");
       } else errormessage("Bitte gebe ein Passwort ein.");
@@ -42,8 +45,6 @@ function login(data, callback) {
   var password = data[1].value;
 
   DB.User.login(username, password).then(function() {
-    //Hey we are logged in again
-    console.log('Willkommen ' + DB.User.me.username + "!"); //'john.doe@example.com'
     return callback(DB.User.me.securitykey);
   }, function() {
     errormessage("Name oder Passwort ist nicht korrekt.");
@@ -51,10 +52,7 @@ function login(data, callback) {
 }
 
 function logout() {
-  console.log(DB.User.me);
   DB.User.logout().then(function() {
-    //We are logged out again
-    console.log(DB.User.me); //null
     location.reload();
   });
 }

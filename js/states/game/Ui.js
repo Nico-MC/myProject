@@ -212,6 +212,6 @@ function gui_check_auctionhouse(overlap) {
     }
   } else {
     // want to open it through console? You sneaky rascal you!
-    if($('.auctionhouse_container').css('display') != 'none') {gui_close_auctionhouse(); console.log("asd");}
+    if($('.auctionhouse_container').css('display') != 'none') {gui_close_auctionhouse();}
   }
 }

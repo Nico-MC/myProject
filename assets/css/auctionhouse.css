@@ -1,6 +1,3 @@
-section#part_2 {
-}
-
 .auctionhouse_container {
   width: 100%;
   display: none;
@@ -149,7 +146,9 @@ input[type=text]#search_field:focus {
   border-bottom-right-radius: .25rem;
   -webkit-box-shadow: 0 10px 6px -6px #777;
   -moz-box-shadow: 0 10px 6px -6px #777;
-  box-shadow: 0 10px 6px -6px #777; }
+  box-shadow: 0 10px 6px -6px #777;
+  outline: 0;
+}
 
 .auctionhouse_nav .nav-tabs .nav-item .nav-link {
   border: 0; }

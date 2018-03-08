@@ -1,6 +1,11 @@
 function startGame() {
   var WIDTH = 400;
   var HEIGHT = 400;
+  var showAuctionhouseOnly = true;
+  if(showAuctionhouseOnly) {
+    $('.game_container').css('display', 'none', 'important');
+    $('.auctionhouse_container').css('display', 'block', 'important');
+  }
 
   game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'my-game');
 
