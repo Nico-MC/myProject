@@ -1,5 +1,6 @@
 /* --- VARIABLES --- */
 var search_result = "";
+var query;
 
 DB.connect("misty-shape-74").then(function() {
   console.log("Verbunden");
@@ -10,6 +11,7 @@ DB.ready().then(function() {
     //do additional things if user is logged in
     console.log('Hello ' + DB.User.me.username); //the username of the user
     transferToLogin(false, DB.User.me.securitykey);
+    console.log(DB.User.me.items);
   } else {
     //do additional things if user is not logged in
     transferToRegister();
@@ -27,12 +29,15 @@ function register(data, callback) {
       if(password.length != 0) {
         if(password.length > 4) {
           if(password === password_2) {
-            DB.User.register(username, password).then(function() {
-              registermessage(function() {
-                // TODO Hier fehlt noch securitykey
-                return callback();
-              })
-            });
+            initUser(username, function(user) {
+              console.log(user);
+              DB.User.register(user, password).then(function() {
+                registermessage(function() {
+                  // TODO Hier fehlt noch securitykey
+                  return callback();
+                });
+              });
+            })
           } else errormessage("Passwörter stimmen nicht überein.");
         } else errormessage("Passwort ist zu kurz.");
       } else errormessage("Bitte gebe ein Passwort ein.");
@@ -70,4 +75,32 @@ String.prototype.hashCode = function() {
 
 function search(search_result) {
   console.log(search_result);
+}
+
+function subscribe() {
+  console.log("Subscribe queries ...");
+  console.log("Generate items ...");
+  var items = new DB.Items({user: DB.User.me});
+  console.log("Generated: \n");
+  console.log(items);
+  items.save();
+}
+
+function initUser(username, callback) {
+  console.log("Initialize User ...");
+  var item = new DB.Item({
+    'name': 'gold',
+    'type': 'ore'
+  });
+  var items = new DB.Items({
+    'item': [item]
+  });
+  var user = new DB.User({
+    'username': username,
+    'items': items
+  });
+  item.save();
+  items.save();
+
+  return callback(user);
 }

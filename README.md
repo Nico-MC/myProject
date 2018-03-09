@@ -12,4 +12,7 @@ Projektwiederherstellung:
 >git reflog
 >git checkout <commit>
 
+Upcoming changes:
+- daily lootbox filled with random item
+
 Copyright by © Nico Noster, 2017-2018
