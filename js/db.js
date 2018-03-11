@@ -1,10 +1,12 @@
 /* --- VARIABLES --- */
 var search_result = "";
 var query;
-
-DB.connect("misty-shape-74").then(function() {
-  console.log("Verbunden");
-});
+var auctions, items, item;
+$(document).ready(function() {
+  DB.connect("misty-shape-74").then(function() {
+    console.log("Verbunden");
+  });
+})
 //Wait for connection
 DB.ready().then(function() {
   if (DB.User.me) {
@@ -15,9 +17,6 @@ DB.ready().then(function() {
     //do additional things if user is not logged in
     transferToRegister();
   }
-  DB.User.me.auctions = 2;
-  console.log(DB.User.me);
-  DB.User.me.save();
 });
 
 
@@ -34,16 +33,6 @@ function register(data, callback) {
             initUser(username, function(user, sk) {
               DB.User.register(user, password).then(function() {
                 registermessage(function() {
-                  // items object for each individual user
-                  var items = new DB.Items(
-                    {
-                      'user': DB.User.me,
-                      'item': new DB.List(item)
-                    }
-                  );
-                  item.save();
-                  items.save();
-
                   return callback(sk);
                 });
               });
@@ -96,11 +85,20 @@ function subscribe() {
 }
 
 function initUser(username, callback) {
+  // items object for each individual user
+  var items = new DB.Items(
+    {
+      'item': new DB.List()
+    }
+  );
+  items.save();
+
   console.log("Initialize User ...");
   // user object
   var user = new DB.User({
     'username': username,
-    'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64)
+    'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64),
+    'items': items
   });
 
   return callback(user, user.securitykey);

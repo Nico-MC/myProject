@@ -74,6 +74,7 @@ input[type=text]#search_field:focus {
 }
 
 /* --- TAB 3 --- */
+/* left box */
 .create_auction_div {
   margin-right: 1px;
 }
@@ -124,15 +125,30 @@ input[type=text]#search_field:focus {
       box-shadow: inset 0 0 3px #000000;
 }
 
-.inventar {
-
+/* right box */
+.inventar_div {
+  display: flex;
 }
 
-.inventar_item {
+.inventar_div .no_items {
+  font-weight: 100;
+}
+
+.inventar_div .inventar_item {
   width: 64px;
   height: 32px;
-  border-radius: 10%;
+  margin-right: 10px;
+  background-size: 100%;
 }
+
+.gold {
+  background-image: url('../content/images/gold_bar.png');
+}
+
+.iron {
+  background-image: url('../content/images/iron_bar.png');
+}
+
 
 
 
