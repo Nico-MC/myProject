@@ -103,3 +103,7 @@ function initUser(username, callback) {
 
   return callback(user, user.securitykey);
 }
+
+function simulate() {
+  console.log("Simulate");
+}

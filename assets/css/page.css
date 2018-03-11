@@ -71,3 +71,29 @@
 .register_div #login {
   display: none;
 }
+
+.simulate_button_gradient {
+  margin-right: 15px;
+  outline: 0 !important;
+  cursor: pointer;
+  outline: none;
+  color: #fff;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px #999;
+  width: 110px;
+  height: 30px;
+  margin-bottom: 2px;
+
+  background-image: -moz-linear-gradient(top, #AF4CE8, #611BBD);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#AF4CE8), to(#611BBD));
+  background-image: -webkit-linear-gradient(top, #AF4CE8, #611BBD);
+  background-image: -o-linear-gradient(top, #AF4CE8, #611BBD);
+  background-image: linear-gradient(to bottom, #AF4CE8, #611BBD);
+}
+
+.simulate_button_gradient:active {
+  background-color: #3e8e41;
+  box-shadow: 0 3px #666;
+  transform: translateY(2px);
+}
