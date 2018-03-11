@@ -17,6 +17,7 @@
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
   </head>
   <body>
     <section></section>
@@ -25,21 +26,15 @@
     <script type="text/javascript">
 
       // Load mit Vorsicht genießen, da asynchron.
-      function transferToLogin(fade, sk) {
-        // Hier noch secutrity key
-        if(DB.User.me.securitykey === sk) {
-          sk = null;
-          if(fade) {
-            $('section .register_container').fadeOut("slow", function() {
-              $('section').load('assets/content/content.html .login_content', function() {
-                startGame();
-              });
-            });
-          } else {
+      function transferToLogin(sk) {
+        if(DB.User.me.securitykey == sk) {
+          $.when( $('section .register_container').fadeOut("slow") ).done(function() {
             $('section').load('assets/content/content.html .login_content', function() {
+              for(var i=0; i<DB.Items.length;i++)
+                $('.inventar_div').html('<div class="inventar_item"></div>');
               startGame();
             });
-          }
+          });
         }
       }
 
@@ -49,15 +44,15 @@
           // Click on register-button
           $("#register").submit(function(event) {
             event.preventDefault();
-            register($(this).serializeArray(), function() {
-              transferToLogin(true, DB.User.me.securitykey);
+            register($(this).serializeArray(), function(sk) {
+              transferToLogin(sk);
             });
           });
           // Click on login-button
           $("#login").submit(function(event) {
             event.preventDefault();
             login($(this).serializeArray(), function(sk) {
-              transferToLogin(true, sk);
+              transferToLogin(sk);
             });
           });
         });

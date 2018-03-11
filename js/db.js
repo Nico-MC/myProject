@@ -10,12 +10,14 @@ DB.ready().then(function() {
   if (DB.User.me) {
     //do additional things if user is logged in
     console.log('Hello ' + DB.User.me.username); //the username of the user
-    transferToLogin(false, DB.User.me.securitykey);
-    console.log(DB.User.me.items);
+    transferToLogin(DB.User.me.securitykey);
   } else {
     //do additional things if user is not logged in
     transferToRegister();
   }
+  DB.User.me.auctions = 2;
+  console.log(DB.User.me);
+  DB.User.me.save();
 });
 
 
@@ -29,12 +31,20 @@ function register(data, callback) {
       if(password.length != 0) {
         if(password.length > 4) {
           if(password === password_2) {
-            initUser(username, function(user) {
-              console.log(user);
+            initUser(username, function(user, sk) {
               DB.User.register(user, password).then(function() {
                 registermessage(function() {
-                  // TODO Hier fehlt noch securitykey
-                  return callback();
+                  // items object for each individual user
+                  var items = new DB.Items(
+                    {
+                      'user': DB.User.me,
+                      'item': new DB.List(item)
+                    }
+                  );
+                  item.save();
+                  items.save();
+
+                  return callback(sk);
                 });
               });
             })
@@ -83,24 +93,15 @@ function subscribe() {
   var items = new DB.Items({user: DB.User.me});
   console.log("Generated: \n");
   console.log(items);
-  items.save();
 }
 
 function initUser(username, callback) {
   console.log("Initialize User ...");
-  var item = new DB.Item({
-    'name': 'gold',
-    'type': 'ore'
-  });
-  var items = new DB.Items({
-    'item': [item]
-  });
+  // user object
   var user = new DB.User({
     'username': username,
-    'items': items
+    'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64)
   });
-  item.save();
-  items.save();
 
-  return callback(user);
+  return callback(user, user.securitykey);
 }
