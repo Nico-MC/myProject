@@ -22,7 +22,7 @@
   <body>
     <section></section>
 
-    <script type="text/javascript" src="js/db.js"></script>
+    <script type="text/javascript" src="js/db_baqend.js"></script>
     <script type="text/javascript">
 
       // Load mit Vorsicht genießen, da asynchron.
@@ -32,10 +32,10 @@
           $.when( $('section .register_container').fadeOut("slow") ).done(function() {
             $('section').load('assets/content/content.html .login_content', function() {
               DB.User.find(DB.User.me.id).singleResult({depth: 2}, function(user) {
-                if(user.items.item.length == 0) {
+                if(user.items.itemlist.length == 0) {
                   $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
                 } else {
-                  var items = user.items.item;
+                  var items = user.items.itemlist;
                   items.forEach(function(item) {
                     if(item.name == "gold") {
                       $('.inventar_div').append('<div class="inventar_item gold"></div>');
@@ -105,6 +105,11 @@
         }
       }
 
+      function toggleDatabaseButton() {
+        if($('.simulate_button_gradient').css('display') == 'none') $('.simulate_button_gradient').fadeIn("slow");
+        else $('.simulate_button_gradient').fadeOut("slow");
+      }
+
       $('#search').submit(function(e) {
         e.preventDefault();
         search_result = $('#search_field').val();
@@ -114,16 +119,34 @@
       // Clear text search_field
       $("#search_field").val("");
 
-      function resize(obj) {
-        var target = $(obj).attr("href");
-        var oldHeight = $('.tab-pane.active').height();
-        var newHeight = $(target).height();
-        $(target).height(oldHeight);
+      $(window).resize(function() {
+        resize();
+      });
 
-        setTimeout(function() {
-          $(".tab-pane.active").height(newHeight);
-        }, 300);
-    }
+      function resize(obj) {
+        if(obj != null) {
+          console.log("This");
+          var target = $(obj).attr("href");
+          var oldHeight = $('.tab-pane.active').height();
+          var newHeight = $(target).height();
+          $(target).height(oldHeight);
+
+          setTimeout(function() {
+            $(".tab-pane.active").height(newHeight);
+          }, 300);
+        } else {
+          if($('#tab3.tab-pane.active').length !== 0) {
+            var overflowHeight = $('.tab-pane.active .overflow_div').outerHeight();
+            var tabHeight = $('.tab-pane.active').height();
+            console.log(overflowHeight + " ----- " + tabHeight);
+            if(overflowHeight > tabHeight) {
+              $(".tab-pane.active").height($('.tab-pane.active .overflow_div').outerHeight());
+            } else if(overflowHeight < tabHeight) {
+              $(".tab-pane.active").height($('.tab-pane.active .overflow_div').outerHeight());
+            }
+          }
+        }
+      }
     </script>
 
     <!-- LOADING GAME -->

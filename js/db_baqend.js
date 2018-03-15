@@ -1,7 +1,6 @@
 /* --- VARIABLES --- */
 var search_result = "";
 var query;
-var auctions, items, item;
 $(document).ready(function() {
   DB.connect("misty-shape-74").then(function() {
     console.log("Verbunden");
@@ -11,7 +10,7 @@ $(document).ready(function() {
 DB.ready().then(function() {
   if (DB.User.me) {
     //do additional things if user is logged in
-    console.log('Hello ' + DB.User.me.username); //the username of the user
+    console.log('Willkommen ' + DB.User.me.username); //the username of the user
     transferToLogin(DB.User.me.securitykey);
   } else {
     //do additional things if user is not logged in
@@ -78,17 +77,13 @@ function search(search_result) {
 
 function subscribe() {
   console.log("Subscribe queries ...");
-  console.log("Generate items ...");
-  var items = new DB.Items({user: DB.User.me});
-  console.log("Generated: \n");
-  console.log(items);
 }
 
 function initUser(username, callback) {
   // items object for each individual user
   var items = new DB.Items(
     {
-      'item': new DB.List()
+      'itemlist': new DB.List()
     }
   );
   items.save();
@@ -105,5 +100,37 @@ function initUser(username, callback) {
 }
 
 function simulate() {
-  console.log("Simulate");
+  var timeFirst = 000;
+
+  console.log("Start simulating ...");
+
+  setTimeout(function() {
+    console.log("Init step one ...");
+    stepOneInit(function(item) {
+      console.log("Init step one ...");
+      stepOne(item);
+    });
+  }, timeFirst);
+
+  function stepOneInit(callback) {
+    item = new DB.Item({
+      'name': 'gold',
+      'type': 'ore',
+      'cost': 100,
+      'weight': 10,
+      'isAuction': false
+    });
+    return callback(item);
+  }
+
+  function stepOne(item) {
+    console.log(item);
+    console.log("Item saved.");
+    console.log("Pushing item to itemlist ...");
+    DB.User.find(DB.User.me,{depth:2}).singleResult(function(user) {
+      user.items.itemlist
+        .push(item);
+      DB.User.me.save({depth:2});
+    });
+  }
 }
