@@ -137,21 +137,17 @@
 
       function resize(obj) {
         if(obj != null) {
-          console.log("This");
           var target = $(obj).attr("href");
           var oldHeight = $('.tab-pane.active').height();
-          var newHeight = $(target).height();
           $(target).height(oldHeight);
-          console.log(oldHeight);
-          console.log(newHeight);
           setTimeout(function() {
+            var newHeight = $(target).children('.overflow_div').outerHeight();
             $(".tab-pane.active").height(newHeight);
           }, 300);
         } else {
           if($('#tab3.tab-pane.active').length !== 0) {
             var overflowHeight = $('.tab-pane.active .overflow_div').outerHeight();
             var tabHeight = $('.tab-pane.active').height();
-            console.log(overflowHeight + " ----- " + tabHeight);
             if(overflowHeight > tabHeight) {
               $(".tab-pane.active").height($('.tab-pane.active .overflow_div').outerHeight());
             } else if(overflowHeight < tabHeight) {
