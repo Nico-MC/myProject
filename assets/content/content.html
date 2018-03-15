@@ -1,12 +1,12 @@
 <div class="login_content">
   <!-- ##### HEADER ##### -->
-  <div class="header">
+  <div class="header noselect">
     <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
       <button id="navbar_toggler" class="my_navbar-toggler navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="my_collapse collapse navbar-collapse" id="navbarText">
-        <a class="navbar-brand" href="javascript:toggleDatabaseButton()">Datenbank</a>
+        <a class="navbar-brand" href="javascript:toggleDatabaseOptions()">Datenbank</a>
         <a class="navbar-brand" href="#">Dokumentation</a>
         <a class="navbar-brand" href="javascript:logout()">Logout</a>
       </div>
@@ -62,14 +62,14 @@
             </div>
           </div>
           <div class="tab-pane fade" id="tab3">
-            <div class="overflow_div">
-              <div class="create_auction_div bg-secondary flex-child">
+            <div class="overflow_div flex">
+              <div class="create_auction_div bg-secondary">
                 <div class="headline"><span>Auktionsgegenstand</span></div>
                 <div class="auction_item"></div>
               </div>
-              <div class="show_auction_div bg-secondary flex-child">
+              <div class="show_auction_div bg-secondary">
                 <div class="headline"><span>Inventar</span></div>
-                <div class="inventar_div">
+                <div class="inventar_div flex_box">
 
                 </div>
               </div>
@@ -96,6 +96,13 @@
 
       </div>
 
+    </div>
+  </div>
+
+  <div class="database_option_div bg-secondary">
+    <div class="checkbox">
+      <input id="check1" type="checkbox" name="realtime" checked>
+      <span>Enable Realtime</span>
     </div>
   </div>
 </div>

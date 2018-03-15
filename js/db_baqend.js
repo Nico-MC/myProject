@@ -11,7 +11,9 @@ DB.ready().then(function() {
   if (DB.User.me) {
     //do additional things if user is logged in
     console.log('Willkommen ' + DB.User.me.username); //the username of the user
-    transferToLogin(DB.User.me.securitykey);
+    transferToLogin(DB.User.me.securitykey, false, function() {
+      // subscribeRealtime(DB.User.me.securitykey);
+    });
   } else {
     //do additional things if user is not logged in
     transferToRegister();
@@ -75,8 +77,29 @@ function search(search_result) {
   console.log(search_result);
 }
 
-function subscribe() {
-  console.log("Subscribe queries ...");
+function subscribeRealtime(sk) {
+  var query;
+  if(DB.User.me.securitykey == sk) {
+    DB.User.find(DB.User.me.id).singleResult(function(user) {
+      var itemlist_ID = user.items.id;
+      query = DB.Items.find(itemlist_ID);
+    });
+    setTimeout(function() {
+      testWebsocketConnection();
+      console.log("Subscribe Realtime queries ...");
+      console.log(query);
+      query.resultStream(function(result) {
+        console.log(result)
+      });
+    }, 3000);
+  }
+}
+
+function testWebsocketConnection() {
+  var ws = new WebSocket('wss://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
+  ws.onopen = function() { console.log('opened') };
+  ws.onclose = function() { console.log('closed') };
+  //expect opened to be logged but closed is called immediately
 }
 
 function initUser(username, callback) {
@@ -133,4 +156,6 @@ function simulate() {
       DB.User.me.save({depth:2});
     });
   }
+
+  resize();
 }

@@ -26,32 +26,38 @@
     <script type="text/javascript">
 
       // Load mit Vorsicht genießen, da asynchron.
-      function transferToLogin(sk) {
+      function transferToLogin(sk, update, callback) {
         console.log(DB.User.me.securitykey == sk);
         if(DB.User.me.securitykey == sk) {
-          $.when( $('section .register_container').fadeOut("slow") ).done(function() {
-            $('section').load('assets/content/content.html .login_content', function() {
-              DB.User.find(DB.User.me.id).singleResult({depth: 2}, function(user) {
-                if(user.items.itemlist.length == 0) {
-                  $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
-                } else {
-                  var items = user.items.itemlist;
-                  items.forEach(function(item) {
-                    if(item.name == "gold") {
-                      $('.inventar_div').append('<div class="inventar_item gold"></div>');
-                    } else if(item.name == "iron") {
-                      $('.inventar_div').append('<div class="inventar_item iron"></div>');
-                    }
-                  });
-                  $('.inventar_item').click(function(e) {
-                    var target = e.target;
-                    console.log(target);
-                  });
-                }
+          if(!update) {
+            $.when( $('section .register_container').fadeOut("slow") ).done(function() {
+              $('section').load('assets/content/content.html .login_content', function() {
+                DB.User.find(DB.User.me.id).singleResult({depth: 2}, function(user) {
+                  if(user.items.itemlist.length == 0) {
+                    $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
+                  } else {
+                    var items = user.items.itemlist;
+                    items.forEach(function(item) {
+                      if(item.name == "gold") {
+                        $('.inventar_div').append('<div class="inventar_item gold"></div>');
+                      } else if(item.name == "iron") {
+                        $('.inventar_div').append('<div class="inventar_item iron"></div>');
+                      }
+                    });
+                    $('.inventar_item').click(function(e) {
+                      var target = e.target;
+                      console.log(target);
+                    });
+                  }
+                });
+                startGame();
               });
-              startGame();
             });
-          });
+          } else {
+            console.log("Realtime event arrived ...");
+            // TODO: REAL-TIME QUERIE EVENT ARRIVED!
+          }
+          return callback();
         }
       }
 
@@ -110,6 +116,12 @@
         else $('.simulate_button_gradient').fadeOut("slow");
       }
 
+      function toggleDatabaseOptions() {
+        console.log($('.database_option_div').css('display'));
+        if($('.database_option_div').css('display') == 'none') $('.database_option_div').slideDown("slow");
+        else $('.database_option_div').slideUp("slow");
+      }
+
       $('#search').submit(function(e) {
         e.preventDefault();
         search_result = $('#search_field').val();
@@ -130,7 +142,8 @@
           var oldHeight = $('.tab-pane.active').height();
           var newHeight = $(target).height();
           $(target).height(oldHeight);
-
+          console.log(oldHeight);
+          console.log(newHeight);
           setTimeout(function() {
             $(".tab-pane.active").height(newHeight);
           }, 300);
@@ -144,6 +157,15 @@
             } else if(overflowHeight < tabHeight) {
               $(".tab-pane.active").height($('.tab-pane.active .overflow_div').outerHeight());
             }
+          }
+        }
+      }
+
+      window.onclick = function(e) {
+        if($('.database_option_div').css('display') == 'block') {
+          var target = $(e.target).closest($('.database_option_div')).length;
+          if(!target) {
+            toggleDatabaseOptions();
           }
         }
       }
