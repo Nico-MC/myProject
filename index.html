@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- DATABASE -->
     <!-- <script src="https://www.baqend.com/js-sdk/latest/baqend.min.js"></script> -->
+    <script type="text/javascript" src="//unpkg.com/@reactivex/rxjs@5.2.0/dist/global/Rx.js"></script>
+    <!-- include the SDK after rxjs -->
     <script type="text/javascript" src="//www.baqend.com/js-sdk/latest/baqend-realtime.js"></script>
     <!-- MODULES -->
     <script type="text/javascript" src="modules/phaser.min.js"></script>
@@ -26,59 +28,88 @@
     <script type="text/javascript">
 
       // Load mit Vorsicht genießen, da asynchron.
-      function transferToLogin(sk, update, callback) {
-        console.log(DB.User.me.securitykey == sk);
+      // Für synchones Laden Ajax
+      function transferToLogin(sk, update) {
         if(DB.User.me.securitykey == sk) {
           if(!update) {
-            $.when( $('section .register_container').fadeOut("slow") ).done(function() {
-              $('section').load('assets/content/content.html .login_content', function() {
-                DB.User.find(DB.User.me.id).singleResult({depth: 2}, function(user) {
-                  if(user.items.itemlist.length == 0) {
-                    $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
-                  } else {
-                    var items = user.items.itemlist;
-                    items.forEach(function(item) {
-                      if(item.name == "gold") {
-                        $('.inventar_div').append('<div class="inventar_item gold"></div>');
-                      } else if(item.name == "iron") {
-                        $('.inventar_div').append('<div class="inventar_item iron"></div>');
-                      }
-                    });
-                    $('.inventar_item').click(function(e) {
-                      var target = e.target;
-                      console.log(target);
-                    });
-                  }
-                });
-                startGame();
-              });
+            $.ajax({
+              url: "assets/content/content.html",
+              success: function(data) {
+                var data = $(data).filter('.login_content');
+                $('section').html(data);
+                loadLogin(); //race conditions? https://stackoverflow.com/questions/8611145/race-conditions-with-javascript-event-handling
+              }
             });
+            function loadLogin() {
+              DB.User.find(DB.User.me.id).singleResult({depth: 2}, function(user) {
+                if(user.items.itemlist.length == 0) {
+                  $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
+                } else {
+                  var items = user.items.itemlist;
+                  items.forEach(function(item) {
+                    if(item.name == "gold") {
+                      $('.inventar_div').append('<div class="inventar_item gold"></div>');
+                    } else if(item.name == "iron") {
+                      $('.inventar_div').append('<div class="inventar_item iron"></div>');
+                    }
+                  });
+                }
+              });
+              $('.inventar_item').click(function(e) {
+                var target = e.target;
+                console.log(target);
+              });
+
+              $('#search').submit(function(e) {
+                e.preventDefault();
+                search_result = $('#search_field').val();
+                search(search_result);
+              });
+              // Clear text search_field
+              $("#search_field").val("");
+
+              $('#check_realtime').change(function() {
+                checkRealtime();
+              });
+
+              startGame();
+              checkRealtime(sk);
+            }
           } else {
             console.log("Realtime event arrived ...");
             // TODO: REAL-TIME QUERIE EVENT ARRIVED!
           }
-          return callback();
         }
       }
 
       function transferToRegister() {
-        $('section').load('assets/content/content.html .register_container', function() {
+        $.ajax({
+          url: "assets/content/content.html",
+          success: function(data) {
+            var data = $(data).filter('.register_container');
+            $('section').html(data);
+            loadRegister();
+          }
+        });
+        function loadRegister() {
           $('.register_div').fadeIn(2000);
           // Click on register-button
           $("#register").submit(function(event) {
             event.preventDefault();
             register($(this).serializeArray(), function(sk) {
-              transferToLogin(sk);
+              transferToLogin(sk, false);
             });
           });
           // Click on login-button
           $("#login").submit(function(event) {
             event.preventDefault();
             login($(this).serializeArray(), function(sk) {
-              transferToLogin(sk);
+              $.when( $('section .register_container').fadeOut("slow") ).done(function() {
+                 transferToLogin(sk, false);
+              });
             });
           });
-        });
+        }
       }
 
       function errormessage(message) {
@@ -117,19 +148,19 @@
       }
 
       function toggleDatabaseOptions() {
-        console.log($('.database_option_div').css('display'));
         if($('.database_option_div').css('display') == 'none') $('.database_option_div').slideDown("slow");
         else $('.database_option_div').slideUp("slow");
       }
 
-      $('#search').submit(function(e) {
-        e.preventDefault();
-        search_result = $('#search_field').val();
-        search(search_result);
-      });
-
-      // Clear text search_field
-      $("#search_field").val("");
+      function checkRealtime(sk) {
+        var realtime = $('input[type=checkbox]#check_realtime').prop('checked');
+        if(realtime) {
+          console.log("Realtime is on.");
+          subscribeRealtime(sk);
+        } else {
+          console.log("Realtime is off.");
+        }
+      }
 
       $(window).resize(function() {
         resize();

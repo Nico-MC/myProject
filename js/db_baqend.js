@@ -1,8 +1,7 @@
 /* --- VARIABLES --- */
-var search_result = "";
-var query;
+
 $(document).ready(function() {
-  DB.connect("misty-shape-74").then(function() {
+  DB.connect('misty-shape-74', true).then(function() {
     console.log("Verbunden");
   });
 })
@@ -11,9 +10,8 @@ DB.ready().then(function() {
   if (DB.User.me) {
     //do additional things if user is logged in
     console.log('Willkommen ' + DB.User.me.username); //the username of the user
-    transferToLogin(DB.User.me.securitykey, false, function() {
-      // subscribeRealtime(DB.User.me.securitykey);
-    });
+    transferToLogin(DB.User.me.securitykey, false);
+    subscribeRealtime(DB.User.me.securitykey);
   } else {
     //do additional things if user is not logged in
     transferToRegister();
@@ -78,27 +76,31 @@ function search(search_result) {
 }
 
 function subscribeRealtime(sk) {
-  var query;
+  console.log("Check websocket ...");
   if(DB.User.me.securitykey == sk) {
-    DB.User.find(DB.User.me.id).singleResult(function(user) {
-      var itemlist_ID = user.items.id;
-      query = DB.Items.find(itemlist_ID);
+    // var query = DB.User.find(DB.User.me.id).singleResult(function(user) {
+    //   var itemlist_ID = user.items.id;
+    //   query = DB.Items.find(itemlist_ID);
+    // });
+
+    var query = DB.Item.find();
+    query.resultStream(function(items){ // this is where the websocket connection is established.
+        console.log(items); // never logs anything
     });
-    setTimeout(function() {
-      testWebsocketConnection();
-      console.log("Subscribe Realtime queries ...");
-      console.log(query);
-      query.resultStream(function(result) {
-        console.log(result)
-      });
-    }, 3000);
+
+    // setTimeout(function() {
+    //   var ws = new WebSocket('ws://misty-shape-74.events.baqend.com/v1/events'); // also ws:// can be used
+    //   ws.onopen = function() { console.log('opened') };
+    //   ws.onclose = function() { console.log('closed') };
+    //   //expect opened to be logged but closed is called immediately wss://misty-shape-74.events.baqend.com/v1/events
+    // }, 5000)
   }
 }
 
 function testWebsocketConnection() {
-  var ws = new WebSocket('wss://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
-  ws.onopen = function() { console.log('opened') };
-  ws.onclose = function() { console.log('closed') };
+  // var ws = new WebSocket('ws://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
+  // ws.onopen = function() { console.log('opened') };
+  // ws.onclose = function() { console.log('closed') };
   //expect opened to be logged but closed is called immediately
 }
 
@@ -130,7 +132,6 @@ function simulate() {
   setTimeout(function() {
     console.log("Init step one ...");
     stepOneInit(function(item) {
-      console.log("Init step one ...");
       stepOne(item);
     });
   }, timeFirst);
@@ -147,8 +148,6 @@ function simulate() {
   }
 
   function stepOne(item) {
-    console.log(item);
-    console.log("Item saved.");
     console.log("Pushing item to itemlist ...");
     DB.User.find(DB.User.me,{depth:2}).singleResult(function(user) {
       user.items.itemlist
