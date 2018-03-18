@@ -6,9 +6,10 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="my_collapse collapse navbar-collapse" id="navbarText">
+        <a class="navbar-brand" href="javascript:toggleProfileOptions()">Profil</a>
         <a class="navbar-brand" href="javascript:toggleDatabaseOptions()">Datenbank</a>
         <a class="navbar-brand" href="#">Dokumentation</a>
-        <a class="navbar-brand" href="javascript:logout()">Logout</a>
+        <!-- <a class="navbar-brand" href="javascript:logout()">Logout</a> -->
       </div>
 
       <button class="simulate_button_gradient" type="button" name="button" onclick="simulate()">Simulieren</button>
@@ -101,8 +102,15 @@
 
   <div class="database_option_div bg-secondary">
     <div class="checkbox">
-      <input id="check_realtime" type="checkbox" name="realtime" checked>
+      <input id="check_realtime" type="checkbox" name="realtime">
       <span>Enable Realtime</span>
+    </div>
+  </div>
+
+  <div class="profile_option_div bg-secondary">
+    <div class="profile">
+      <span class="username">Benutzername: </span>
+      <center><a href="javascript:logout()">Logout</a></center>
     </div>
   </div>
 </div>

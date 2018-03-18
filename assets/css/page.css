@@ -113,6 +113,7 @@
   margin: 0 auto;
 }
 
+.profile_option_div,
 .database_option_div {
   position: absolute;
   transform: translate(-50%, 0);
@@ -120,8 +121,15 @@
   top: 50px;
   display: none;
   box-shadow: 0 0 0 2px;
-  padding: 15px;
+}
+
+.database_option_div {
   line-height: 0;
+  padding: 15px;
+}
+
+.profile_option_div {
+  padding: 4px 15px 8px 10px;
 }
 
 .database_option_div span {
@@ -134,6 +142,10 @@
   -moz-transform: scale(1.5); /* FF */
   -webkit-transform: scale(1.5); /* Safari and Chrome */
   -o-transform: scale(1.5); /* Opera */
+}
+
+.profile_option_div span {
+  display:block;
 }
 
 .flex {

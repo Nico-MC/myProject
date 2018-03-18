@@ -10,8 +10,7 @@ DB.ready().then(function() {
   if (DB.User.me) {
     //do additional things if user is logged in
     console.log('Willkommen ' + DB.User.me.username); //the username of the user
-    transferToLogin(DB.User.me.securitykey, false);
-    subscribeRealtime(DB.User.me.securitykey);
+    transferToLogin(DB.User.me.securitykey);
   } else {
     //do additional things if user is not logged in
     transferToRegister();
@@ -75,32 +74,37 @@ function search(search_result) {
   console.log(search_result);
 }
 
-function subscribeRealtime(sk) {
-  console.log("Check websocket ...");
+function subscribeRealtime(sk, callback) {
   if(DB.User.me.securitykey == sk) {
-    // var query = DB.User.find(DB.User.me.id).singleResult(function(user) {
-    //   var itemlist_ID = user.items.id;
-    //   query = DB.Items.find(itemlist_ID);
-    // });
+    testWebsocketConnection();
 
-    var query = DB.Item.find();
-    query.resultStream(function(items){ // this is where the websocket connection is established.
-        console.log(items); // never logs anything
-    });
+    var onNext = function(event) {
+      console.log(event);
+    }
+    var onError = function(err) {
+      console.log(err);
+    }
+    var onComplete = function() {
+      console.log('I am offline!');
+    }
 
-    // setTimeout(function() {
-    //   var ws = new WebSocket('ws://misty-shape-74.events.baqend.com/v1/events'); // also ws:// can be used
-    //   ws.onopen = function() { console.log('opened') };
-    //   ws.onclose = function() { console.log('closed') };
-    //   //expect opened to be logged but closed is called immediately wss://misty-shape-74.events.baqend.com/v1/events
-    // }, 5000)
+    var useritems = DB.User.me.items;
+    var query = DB.Items.find().equal('id', useritems.id);
+    var stream = query.eventStream();
+    var subscriptionFirst = stream.subscribe(onNext, onError, onComplete);
+
+
+
+    
+    return callback([subscriptionFirst]);
   }
 }
 
 function testWebsocketConnection() {
   // var ws = new WebSocket('ws://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
-  // ws.onopen = function() { console.log('opened') };
-  // ws.onclose = function() { console.log('closed') };
+  var ws = new WebSocket('ws://misty-shape-74.events.baqend.com/v1/events');
+  ws.onopen = function() { console.log('Websocket opened') };
+  ws.onclose = function() { console.log('Websocket closed') };
   //expect opened to be logged but closed is called immediately
 }
 
@@ -125,7 +129,8 @@ function initUser(username, callback) {
 }
 
 function simulate() {
-  var timeFirst = 000;
+  var timeFirst = 1000;
+  var timeSecond = 2000;
 
   console.log("Start simulating ...");
 
@@ -137,7 +142,7 @@ function simulate() {
   }, timeFirst);
 
   function stepOneInit(callback) {
-    item = new DB.Item({
+    var item = new DB.Item({
       'name': 'gold',
       'type': 'ore',
       'cost': 100,
