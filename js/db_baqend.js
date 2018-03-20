@@ -1,10 +1,12 @@
 /* --- VARIABLES --- */
+var itemsID = null;
 
 $(document).ready(function() {
-  DB.connect('misty-shape-74', true).then(function() {
+  DB.connect('misty-shape-74', false).then(function() {
     console.log("Verbunden");
   });
 })
+
 //Wait for connection
 DB.ready().then(function() {
   if (DB.User.me) {
@@ -88,10 +90,8 @@ function subscribeRealtime(sk, callback) {
 
     var useritems = DB.User.me.items;
     var query = DB.Item.find();
-    var stream = query.eventStream();
+    var stream = query.eventStream({initial:false});
     var subscriptionFirst = stream.subscribe(onNext, onError);
-
-
 
 
     return callback([subscriptionFirst]);
@@ -115,6 +115,26 @@ function initUser(username, callback) {
   });
 
   return callback(user, user.securitykey);
+}
+
+// Initialize all important VARIABLES
+function init(callback) {
+  console.log("Start Init ...");
+  getItemsTodoID(function() {
+    console.log(2);
+    return callback();
+  });
+}
+
+// Get ID of user items todo
+function getItemsTodoID(callback) {
+  DB.Items.find()
+  .equal('user', DB.User.me)
+  .singleResult(function(items) {
+    itemsID = items.id;
+    console.log(1);
+    return callback();
+  });
 }
 
 function createItemlist() {
@@ -142,8 +162,10 @@ function simulate() {
   console.log("Start simulating ...");
 
   setTimeout(function() {
+    // Push item
     stepOne(item1, function() {
       setTimeout(function() {
+        // delete item
         // stepTwo();
       }, timeSecond);
     })
@@ -157,37 +179,14 @@ function simulate() {
   }
   function stepTwo() {
     console.log("Step 2: Deleting item ...");
-    // deleteItem("/db/Item/c5a52e7c-4dd2-48be-8765-52f8ade7a824");
+    deleteItem("/db/Item/f3101937-ad77-41f8-b2a4-c6fdd6d5c4cf");
   }
 }
 
-// Create and Pushes the given item
+// Create and Push the given item
 function addItem(item) {
-  // Version 1
-  // DB.Items.find({depth:true})
-  //         .equal('user',DB.User.me)
-  //         .singleResult(function(items) {
-  //           items.itemlist.push(new DB.Item(item));
-  //           items.save({depth:true});
-  //           console.log(items);
-  //         });
-
-  // Version 2
-  // item.save().then(function(savedItem) {
-  //   DB.Items.find()
-  //           .equal('user',DB.User.me)
-  //           .singleResult(function(itemlist) {
-  //             DB.Items.load(itemlist.id).then(function(result) {
-  //               result.partialUpdate()
-  //                     .push('itemlist', savedItem.id)
-  //                     .execute();
-  //             });
-  //           });
-  // });
-
-  // Version 3
   item.insert().then(function(savedItem) {
-    DB.Items.load('/db/Items/4ae6f102-5dcd-4b0f-a8e9-fd52a0f0677e').then(function(items) {
+    DB.Items.load(itemsID).then(function(items) {
       items.partialUpdate()
            .push('itemlist', savedItem.id)
            .execute();
@@ -196,11 +195,11 @@ function addItem(item) {
 }
 
 function deleteItem(id) {
-  //Remove from list
+  // Remove and delete the given item
   DB.Item.load(id).then(function(item) {
     item.delete();
   });
-  DB.Items.load(DB.User.me.items.id, {depth: 1}).then(function(itemlist) {
+  DB.Items.load(itemsID, {depth: 1}).then(function(itemlist) {
     itemlist.partialUpdate()
       .remove("itemlist", id)
       .execute();
