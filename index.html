@@ -39,11 +39,16 @@
               loadLogin(); //race conditions? https://stackoverflow.com/questions/8611145/race-conditions-with-javascript-event-handling
             }
           });
+
           function loadLogin() {
             DB.Items.find()
                     .equal('user', DB.User.me)
                     .singleResult(function(items) {
-                      initItems(items.itemlist);
+                      DB.Items.load(items.id, {depth: 1}).then(function(loadedItems) {
+                        console.log("Itemlist:")
+                        console.log(loadedItems)
+                        initItems(loadedItems.itemlist);
+                      });
                       $('.profile_option_div .username').text("Benutzername: " + DB.User.me.username);
                     });
 
@@ -98,7 +103,7 @@
       }
 
       function updateItems(event) {
-        
+
         console.log(event);
       }
 

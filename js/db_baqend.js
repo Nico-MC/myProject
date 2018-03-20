@@ -119,12 +119,12 @@ function initUser(username, callback) {
 
 function createItemlist() {
   // items object for each individual user
-  var items = new DB.Items(
+  new DB.Items(
     {
       'itemlist': new DB.List(),
       'user': DB.User.me
     }
-  ).save();
+  ).save({depth:1});
 }
 
 function simulate() {
@@ -161,14 +161,37 @@ function simulate() {
   }
 }
 
+// Create and Pushes the given item
 function addItem(item) {
-  item.save().then(function(savedItem) {
-    DB.Items.find()
-            .equal('user',DB.User.me)
-            .singleResult(function(listofitems) {
-              listofitems.itemlist.push(item);
-              listofitems.save();
-            });
+  // Version 1
+  // DB.Items.find({depth:true})
+  //         .equal('user',DB.User.me)
+  //         .singleResult(function(items) {
+  //           items.itemlist.push(new DB.Item(item));
+  //           items.save({depth:true});
+  //           console.log(items);
+  //         });
+
+  // Version 2
+  // item.save().then(function(savedItem) {
+  //   DB.Items.find()
+  //           .equal('user',DB.User.me)
+  //           .singleResult(function(itemlist) {
+  //             DB.Items.load(itemlist.id).then(function(result) {
+  //               result.partialUpdate()
+  //                     .push('itemlist', savedItem.id)
+  //                     .execute();
+  //             });
+  //           });
+  // });
+
+  // Version 3
+  item.insert().then(function(savedItem) {
+    DB.Items.load('/db/Items/4ae6f102-5dcd-4b0f-a8e9-fd52a0f0677e').then(function(items) {
+      items.partialUpdate()
+           .push('itemlist', savedItem.id)
+           .execute();
+    });
   });
 }
 
