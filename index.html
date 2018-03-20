@@ -40,10 +40,13 @@
             }
           });
           function loadLogin() {
-            DB.User.find(DB.User.me.id).singleResult({depth: 2}, function(user) {
-              updateItems(user.items.itemlist);
-              $('.profile_option_div .username').text("Benutzername: " + user.username);
-            });
+            DB.Items.find()
+                    .equal('user', DB.User.me)
+                    .singleResult(function(items) {
+                      initItems(items.itemlist);
+                      $('.profile_option_div .username').text("Benutzername: " + DB.User.me.username);
+                    });
+
             $('.inventar_item').click(function(e) {
               var target = e.target;
               console.log(target);
@@ -79,7 +82,7 @@
         }
       }
 
-      function updateItems(itemlist) {
+      function initItems(itemlist) {
         if(itemlist.length == 0) {
           $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
         } else {
@@ -92,6 +95,11 @@
           });
         }
         resize();
+      }
+
+      function updateItems(event) {
+        
+        console.log(event);
       }
 
       function transferToRegister() {

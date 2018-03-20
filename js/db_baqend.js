@@ -31,6 +31,7 @@ function register(data, callback) {
             initUser(username, function(user, sk) {
               DB.User.register(user, password).then(function() {
                 registermessage(function() {
+                  createItemlist();
                   return callback(sk);
                 });
               });
@@ -79,23 +80,20 @@ function subscribeRealtime(sk, callback) {
     testWebsocketConnection();
 
     var onNext = function(event) {
-      console.log(event);
+      updateItems(event);
     }
     var onError = function(err) {
       console.log(err);
     }
-    var onComplete = function() {
-      console.log('I am offline!');
-    }
 
     var useritems = DB.User.me.items;
-    var query = DB.Items.find().equal('id', useritems.id);
+    var query = DB.Item.find();
     var stream = query.eventStream();
-    var subscriptionFirst = stream.subscribe(onNext, onError, onComplete);
+    var subscriptionFirst = stream.subscribe(onNext, onError);
 
 
 
-    
+
     return callback([subscriptionFirst]);
   }
 }
@@ -109,57 +107,79 @@ function testWebsocketConnection() {
 }
 
 function initUser(username, callback) {
-  // items object for each individual user
-  var items = new DB.Items(
-    {
-      'itemlist': new DB.List()
-    }
-  );
-  items.save();
-
   console.log("Initialize User ...");
   // user object
   var user = new DB.User({
     'username': username,
-    'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64),
-    'items': items
+    'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64)
   });
 
   return callback(user, user.securitykey);
 }
 
+function createItemlist() {
+  // items object for each individual user
+  var items = new DB.Items(
+    {
+      'itemlist': new DB.List(),
+      'user': DB.User.me
+    }
+  ).save();
+}
+
 function simulate() {
   var timeFirst = 1000;
-  var timeSecond = 2000;
+  var timeSecond = 3000;
+
+  var item1 = new DB.Item({
+    'name': 'gold',
+    'type': 'ore',
+    'cost': 100,
+    'weight': 10,
+    'isAuction': false
+  });
 
   console.log("Start simulating ...");
 
   setTimeout(function() {
-    console.log("Init step one ...");
-    stepOneInit(function(item) {
-      stepOne(item);
-    });
+    stepOne(item1, function() {
+      setTimeout(function() {
+        // stepTwo();
+      }, timeSecond);
+    })
   }, timeFirst);
 
-  function stepOneInit(callback) {
-    var item = new DB.Item({
-      'name': 'gold',
-      'type': 'ore',
-      'cost': 100,
-      'weight': 10,
-      'isAuction': false
-    });
-    return callback(item);
-  }
+  function stepOne(item, callback) {
+    console.log("Step 1: Pushing item ...");
+    addItem(item);
 
-  function stepOne(item) {
-    console.log("Pushing item to itemlist ...");
-    DB.User.find(DB.User.me,{depth:2}).singleResult(function(user) {
-      user.items.itemlist
-        .push(item);
-      DB.User.me.save({depth:2});
-    });
+    return callback();
   }
+  function stepTwo() {
+    console.log("Step 2: Deleting item ...");
+    // deleteItem("/db/Item/c5a52e7c-4dd2-48be-8765-52f8ade7a824");
+  }
+}
 
-  resize();
+function addItem(item) {
+  item.save().then(function(savedItem) {
+    DB.Items.find()
+            .equal('user',DB.User.me)
+            .singleResult(function(listofitems) {
+              listofitems.itemlist.push(item);
+              listofitems.save();
+            });
+  });
+}
+
+function deleteItem(id) {
+  //Remove from list
+  DB.Item.load(id).then(function(item) {
+    item.delete();
+  });
+  DB.Items.load(DB.User.me.items.id, {depth: 1}).then(function(itemlist) {
+    itemlist.partialUpdate()
+      .remove("itemlist", id)
+      .execute();
+  });
 }
