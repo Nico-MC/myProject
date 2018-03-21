@@ -3,7 +3,7 @@ var itemsID = null;
 
 $(document).ready(function() {
   DB.connect('misty-shape-74', false).then(function() {
-    console.log("Verbunden");
+    console.log("Connected");
   });
 })
 
@@ -11,14 +11,13 @@ $(document).ready(function() {
 DB.ready().then(function() {
   if (DB.User.me) {
     //do additional things if user is logged in
-    console.log('Willkommen ' + DB.User.me.username); //the username of the user
+    console.log('Willkommen ' + DB.User.me.username + '!'); //the username of the user
     transferToLogin(DB.User.me.securitykey);
   } else {
     //do additional things if user is not logged in
     transferToRegister();
   }
 });
-
 
 function register(data, callback) {
   var username = data[0].value;
@@ -77,26 +76,6 @@ function search(search_result) {
   console.log(search_result);
 }
 
-function subscribeRealtime(sk, callback) {
-  if(DB.User.me.securitykey == sk) {
-    testWebsocketConnection();
-
-    var onNext = function(event) {
-      updateItems(event);
-    }
-    var onError = function(err) {
-      console.log(err);
-    }
-
-    var useritems = DB.User.me.items;
-    var query = DB.Item.find();
-    var stream = query.eventStream({initial:false});
-    var subscriptionFirst = stream.subscribe(onNext, onError);
-
-
-    return callback([subscriptionFirst]);
-  }
-}
 
 function testWebsocketConnection() {
   // var ws = new WebSocket('ws://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
@@ -122,6 +101,7 @@ function init(callback) {
   console.log("Start Init ...");
   getItemsTodoID(function() {
     console.log(2);
+    console.log("Init finished.");
     return callback();
   });
 }
@@ -147,6 +127,25 @@ function createItemlist() {
   ).save({depth:1});
 }
 
+function subscribeRealtime(sk, callback) {
+  if(DB.User.me.securitykey == sk) {
+    testWebsocketConnection();
+
+    var useritems = DB.User.me.items;
+    var query = DB.Items.find()
+    .equal('user', DB.User.me);
+    var stream = query.eventStream({initial:false, matchTypes:'change'});
+    var subscriptionFirst = stream.subscribe(function(items) {
+      updateItems(items.data.itemlist);
+    }, function() {
+      console.log(err);
+    });
+
+
+    return callback([subscriptionFirst]);
+  }
+}
+
 function simulate() {
   var timeFirst = 1000;
   var timeSecond = 3000;
@@ -166,7 +165,7 @@ function simulate() {
     stepOne(item1, function() {
       setTimeout(function() {
         // delete item
-        // stepTwo();
+        stepTwo();
       }, timeSecond);
     })
   }, timeFirst);
@@ -179,7 +178,7 @@ function simulate() {
   }
   function stepTwo() {
     console.log("Step 2: Deleting item ...");
-    deleteItem("/db/Item/f3101937-ad77-41f8-b2a4-c6fdd6d5c4cf");
+    deleteItem("/db/Item/7c0fc47b-4181-4d29-8935-74aa71199b80");
   }
 }
 
@@ -187,9 +186,13 @@ function simulate() {
 function addItem(item) {
   item.insert().then(function(savedItem) {
     DB.Items.load(itemsID).then(function(items) {
-      items.partialUpdate()
-           .push('itemlist', savedItem.id)
-           .execute();
+      if(items != null) {
+        items.partialUpdate()
+             .push('itemlist', savedItem.id)
+             .execute();
+      }
+    }, function(err) {
+      console.log("ERROR:\n"+err+"\nCan't insert item.")
     });
   });
 }
@@ -197,11 +200,14 @@ function addItem(item) {
 function deleteItem(id) {
   // Remove and delete the given item
   DB.Item.load(id).then(function(item) {
-    item.delete();
+    if(item != null) item.delete();
+    else console.log("Object is null - Can't delete item.");
   });
   DB.Items.load(itemsID, {depth: 1}).then(function(itemlist) {
-    itemlist.partialUpdate()
+    if(itemlist != null) {
+      itemlist.partialUpdate()
       .remove("itemlist", id)
       .execute();
+    } else console.log("Object is null - Can't remove item from itemlist.");
   });
 }

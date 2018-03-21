@@ -43,12 +43,11 @@
           });
 
           function loadLogin() {
-            console.log(itemsID);
             DB.Items.load(itemsID, {depth: 1}).then(function(loadedItems) {
-              console.log("Itemlist:");
-              console.log(loadedItems);
+              // console.log("Itemlist:");
+              // console.log(loadedItems);
 
-              initItems(loadedItems.itemlist);
+              loadItems(loadedItems.itemlist);
             });
             $('.profile_option_div .username').text("Benutzername: " + DB.User.me.username);
 
@@ -87,26 +86,6 @@
         }
       }
 
-      function initItems(itemlist) {
-        if(itemlist.length == 0) {
-          $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
-        } else {
-          itemlist.forEach(function(item) {
-            if(item.name == "gold") {
-              $('.inventar_div').append('<div id="'+item.id+'" class="inventar_item gold"></div>');
-            } else if(item.name == "iron") {
-              $('.inventar_div').append('<div id="'+item.id+'" class="inventar_item iron"></div>');
-            }
-          });
-        }
-        resize();
-      }
-
-      function updateItems(event) {
-
-        console.log(event);
-      }
-
       function transferToRegister() {
         $.ajax({
           url: "assets/content/content.html",
@@ -135,6 +114,28 @@
             });
           });
         }
+      }
+
+      function loadItems(itemlist) {
+        if(itemlist.length == 0) {
+          $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
+        } else {
+          var loadedItems = $('.inventar_div .inventar_item').toArray();
+          itemlist.forEach(function(item) {
+            if(item.name == "gold") {
+              $('.inventar_div').append('<div id="'+item.id+'" class="inventar_item gold"></div>');
+            } else if(item.name == "iron") {
+              $('.inventar_div').append('<div id="'+item.id+'" class="inventar_item iron"></div>');
+            }
+          });
+        }
+        resize();
+      }
+
+      function updateItems(itemlist) {
+        console.log("New item arrived:");
+        console.log(itemlist);
+        loadItems(itemlist);
       }
 
       function errormessage(message) {
