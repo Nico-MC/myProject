@@ -1,5 +1,6 @@
 /* --- VARIABLES --- */
 var itemsID = null;
+var realtime = "off";
 
 $(document).ready(function() {
   DB.connect('misty-shape-74', false).then(function() {
@@ -121,7 +122,7 @@ function createItemlist() {
   // items object for each individual user
   new DB.Items(
     {
-      'itemlist': new DB.List(),
+      'itemlist': new DB.Map(),
       'user': DB.User.me
     }
   ).save({depth:1});
@@ -132,11 +133,11 @@ function subscribeRealtime(sk, callback) {
     testWebsocketConnection();
 
     var useritems = DB.User.me.items;
-    var query = DB.Items.find()
-    .equal('user', DB.User.me);
-    var stream = query.eventStream({initial:false, matchTypes:'change'});
-    var subscriptionFirst = stream.subscribe(function(items) {
-      updateItems(items.data.itemlist);
+    var query = DB.Item.find()
+                        .equal('user', DB.User.me);
+    var stream = query.resultStream({initial:false});
+    var subscriptionFirst = stream.subscribe(function(itemlist) {
+      updateItems(itemlist);
     }, function() {
       console.log(err);
     });
@@ -147,18 +148,19 @@ function subscribeRealtime(sk, callback) {
 }
 
 function simulate() {
-  var timeFirst = 1000;
-  var timeSecond = 3000;
+  var startingIn = 1000;
+  var firstPause = 3000;
 
   var item1 = new DB.Item({
     'name': 'gold',
     'type': 'ore',
     'cost': 100,
     'weight': 10,
-    'isAuction': false
+    'isAuction': false,
+    'uid': DB.User.me.id
   });
 
-  console.log("Start simulating ...");
+  console.log("Start simulating " + startingIn/1000 + " seconds ...");
 
   setTimeout(function() {
     // Push item
@@ -166,9 +168,9 @@ function simulate() {
       setTimeout(function() {
         // delete item
         stepTwo();
-      }, timeSecond);
-    })
-  }, timeFirst);
+      }, 1000);
+    });
+  }, 0);
 
   function stepOne(item, callback) {
     console.log("Step 1: Pushing item ...");
@@ -178,7 +180,8 @@ function simulate() {
   }
   function stepTwo() {
     console.log("Step 2: Deleting item ...");
-    deleteItem("/db/Item/7c0fc47b-4181-4d29-8935-74aa71199b80");
+    // deleteItem("/db/Item/4591344b-0619-4f02-902f-182216a161a6");
+    popItem();
   }
 }
 
@@ -186,11 +189,28 @@ function simulate() {
 function addItem(item) {
   item.insert().then(function(savedItem) {
     DB.Items.load(itemsID).then(function(items) {
-      if(items != null) {
+      if(items.itemlist.has(savedItem.name)) {
         items.partialUpdate()
-             .push('itemlist', savedItem.id)
-             .execute();
+        .execute().then(function(result) {
+          result.itemlist.get(savedItem.name).push(savedItem);
+          result.save({depth:2});
+          console.log(result);
+        });
+      } else {
+        items.partialUpdate()
+        .put("itemlist", savedItem.name, [])
+        .execute().then(function(result) {
+          result.itemlist.get(savedItem.name).push(savedItem);
+          result.save({depth:2});
+          console.log(result);
+        });
       }
+
+      // if(items != null) {
+      //   items.partialUpdate()
+      //        .push('itemlist', savedItem.id)
+      //        .execute();
+      // }
     }, function(err) {
       console.log("ERROR:\n"+err+"\nCan't insert item.")
     });
@@ -200,14 +220,23 @@ function addItem(item) {
 function deleteItem(id) {
   // Remove and delete the given item
   DB.Item.load(id).then(function(item) {
-    if(item != null) item.delete();
-    else console.log("Object is null - Can't delete item.");
+    if(item != null) {
+      item.delete().then(function() {
+        DB.Items.load(itemsID, {depth:1}).then(function(itemlist) {
+          itemlist.partialUpdate()
+          .remove("itemlist", id)
+          .execute();
+        });
+      });
+    } else console.log("Object is null - Can't delete item.");
   });
-  DB.Items.load(itemsID, {depth: 1}).then(function(itemlist) {
-    if(itemlist != null) {
-      itemlist.partialUpdate()
-      .remove("itemlist", id)
-      .execute();
-    } else console.log("Object is null - Can't remove item from itemlist.");
-  });
+}
+
+function popItem() {
+  // Pop and item
+  // DB.Items.load(itemsID, {depth:1}).then(function(itemlist) {
+  //   itemlist.partialUpdate()
+  //   .pop("itemlist")
+  //   .execute();
+  // });
 }

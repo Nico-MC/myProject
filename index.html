@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>    <title>myproject</title>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>myproject</title>
     <!-- CSS -->
     <!-- <link href="https://fonts.googleapis.com/css?family=Skranji:700" rel="stylesheet"-->
     <link rel="stylesheet" type="text/css" href="assets/css/page.css">
@@ -43,11 +44,8 @@
           });
 
           function loadLogin() {
-            DB.Items.load(itemsID, {depth: 1}).then(function(loadedItems) {
-              // console.log("Itemlist:");
-              // console.log(loadedItems);
-
-              loadItems(loadedItems.itemlist);
+            DB.Items.load(itemsID, {depth: 2}).then(function(loadedItems) {
+              initItems(loadedItems.itemlist);
             });
             $('.profile_option_div .username').text("Benutzername: " + DB.User.me.username);
 
@@ -116,26 +114,33 @@
         }
       }
 
-      function loadItems(itemlist) {
-        if(itemlist.length == 0) {
+      function initItems(itemlist) {
+        if(itemlist.size == 0) {
           $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
         } else {
-          var loadedItems = $('.inventar_div .inventar_item').toArray();
           itemlist.forEach(function(item) {
-            if(item.name == "gold") {
-              $('.inventar_div').append('<div id="'+item.id+'" class="inventar_item gold"></div>');
-            } else if(item.name == "iron") {
-              $('.inventar_div').append('<div id="'+item.id+'" class="inventar_item iron"></div>');
-            }
+            // console.log(item);
+            $('.inventar_div').append('<div id="'+item.id+'" class="inventar_item '+item.data.name+'"></div>');
           });
         }
         resize();
       }
 
       function updateItems(itemlist) {
+        if($('.no_items').length) $('.no_items').remove();
         console.log("New item arrived:");
         console.log(itemlist);
-        loadItems(itemlist);
+
+
+        var arr = $( ".inventar_div .inventar_item" )
+                  .map(function() {
+                    return this.id;
+                  });
+        console.log(arr);
+        // itemlist.forEach(function(item) {
+        //   console.log(item.id);
+        // });
+        // loadItems(itemlist);
       }
 
       function errormessage(message) {

@@ -146,6 +146,7 @@ input[type=text]#search_field:focus {
   height: 32px;
   margin-right: 10px;
   background-size: 100%;
+  display: none;
 }
 
 .gold {
