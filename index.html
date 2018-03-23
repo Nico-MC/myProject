@@ -200,8 +200,8 @@
       function drop(e) {
           e.preventDefault();
           var classNameToInsert = e.dataTransfer.getData("text");
-          $('.auction_item').attr('class', 'auction_item');
-          $('.auction_item').addClass(classNameToInsert);
+          $('.auction_item .background_overflow_div').attr('class', 'background_overflow_div');
+          $('.auction_item .background_overflow_div').addClass(classNameToInsert);
       }
 
       function getClassName(className, index) {
