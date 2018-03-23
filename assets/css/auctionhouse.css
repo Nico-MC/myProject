@@ -122,6 +122,15 @@ input[type=text]#search_field:focus {
       -ms-transition:0.5s ease;
         -o-transition:0.5s ease;
           transition:0.5s ease;
+
+  /* for drop */
+  background-size: 100%;
+    -webkit-background-size: 100%;
+      -moz-background-size: 100%;
+        -ms-background-size: 100%;
+
+  background-repeat: no-repeat;
+  background-position: 50%;
 }
 
 .create_auction_div .auction_item:hover {
@@ -147,6 +156,25 @@ input[type=text]#search_field:focus {
   margin-right: 10px;
   background-size: 100%;
   display: none;
+  position: relative;
+}
+
+  .inventar_div .inventar_item:hover {
+    -ms-transform: scale(1.2);
+        -moz-transform: scale(1.2);
+        -webkit-transform: scale(1.2);
+        -o-transform: scale(1.2);
+        transform: scale(1.2);
+  }
+
+.inventar_div .inventar_item .item_number {
+  position: absolute;
+  bottom: -5px;
+  right: 0;
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
 }
 
 .gold {

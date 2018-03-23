@@ -118,9 +118,8 @@
         if(itemlist.size == 0) {
           $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
         } else {
-          itemlist.forEach(function(item) {
-            // console.log(item);
-            $('.inventar_div').append('<div id="'+item.id+'" class="inventar_item '+item.data.name+'"></div>');
+          itemlist.forEach(function(value, key) {
+            $('<div class="inventar_item '+key+'" draggable="true" ondragstart="drag(event)"><span class="item_number strokeme">2</span></div>').appendTo('.inventar_div').show();
           });
         }
         resize();
@@ -132,15 +131,6 @@
         console.log(itemlist);
 
 
-        var arr = $( ".inventar_div .inventar_item" )
-                  .map(function() {
-                    return this.id;
-                  });
-        console.log(arr);
-        // itemlist.forEach(function(item) {
-        //   console.log(item.id);
-        // });
-        // loadItems(itemlist);
       }
 
       function errormessage(message) {
@@ -197,6 +187,25 @@
         } else {
           return false;
         }
+      }
+
+      function allowDrop(e) {
+        e.preventDefault();
+      }
+
+      function drag(e) {
+        e.dataTransfer.setData("text", getClassName(e.target.className, 1));
+      }
+
+      function drop(e) {
+          e.preventDefault();
+          var classNameToInsert = e.dataTransfer.getData("text");
+          $('.auction_item').attr('class', 'auction_item');
+          $('.auction_item').addClass(classNameToInsert);
+      }
+
+      function getClassName(className, index) {
+        return className.split(" ")[index];
       }
 
       $(window).resize(function() {

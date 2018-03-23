@@ -136,8 +136,8 @@ function subscribeRealtime(sk, callback) {
     var query = DB.Item.find()
                         .equal('user', DB.User.me);
     var stream = query.resultStream({initial:false});
-    var subscriptionFirst = stream.subscribe(function(itemlist) {
-      updateItems(itemlist);
+    var subscriptionFirst = stream.subscribe(function(itemMap) {
+      updateItems(itemMap);
     }, function() {
       console.log(err);
     });
@@ -152,9 +152,9 @@ function simulate() {
   var firstPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'gold',
-    'type': 'ore',
-    'cost': 100,
+    'name': 'Banane',
+    'type': 'fruit',
+    'cost': 2,
     'weight': 10,
     'isAuction': false,
     'uid': DB.User.me.id
@@ -192,16 +192,16 @@ function addItem(item) {
       if(items.itemlist.has(savedItem.name)) {
         items.partialUpdate()
         .execute().then(function(result) {
-          result.itemlist.get(savedItem.name).push(savedItem);
-          result.save({depth:2});
+          result.itemlist.get(savedItem.name).push(savedItem.id);
+          result.save();
           console.log(result);
         });
       } else {
         items.partialUpdate()
         .put("itemlist", savedItem.name, [])
         .execute().then(function(result) {
-          result.itemlist.get(savedItem.name).push(savedItem);
-          result.save({depth:2});
+          result.itemlist.get(savedItem.name).push(savedItem.id);
+          result.save();
           console.log(result);
         });
       }
@@ -239,4 +239,8 @@ function popItem() {
   //   .pop("itemlist")
   //   .execute();
   // });
+}
+
+function addAuction(e) {
+  console.log(e);
 }
