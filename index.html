@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="assets/css/game.css">
     <link rel="stylesheet" type="text/css" href="assets/css/auctionhouse.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- DATABASE -->
     <!-- <script src="https://www.baqend.com/js-sdk/latest/baqend.min.js"></script> -->
@@ -119,21 +120,22 @@
           $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
         } else if(option == 'init') {
           itemlist.forEach(function(value, key) {
-            console.log(value);
             $('<div class="inventar_item '+key+'" draggable="true" ondragstart="drag(event)"><span class="item_number strokeme">'+value.length+'</span></div>').appendTo('.inventar_div').show();
           });
         } else if(option == 'update') {
-
+          itemlist.forEach(function(value, key) {
+            $('.item_number').html(value.length);
+          });
         }
         resize();
       }
 
-      function updateItems(itemlist) {
-        if($('.no_items').length) $('.no_items').remove();
+      function updateItems(items) {
+        // if($('.no_items').length) $('.no_items').remove();
         console.log("New item arrived:");
-        console.log(itemlist);
+        console.log(items);
 
-        loadItems(itemlist, 'update');
+        loadItems(items.data.itemlist, 'update');
       }
 
       function errormessage(message) {

@@ -64,14 +64,26 @@
           </div>
           <div class="tab-pane fade" id="tab3">
             <div class="overflow_div flex">
+              <!-- left box -->
               <div class="create_auction_div bg-secondary">
-                <div class="headline"><span>Auktionsgegenstand</span></div>
-                <div class="auction_item" ondrop="drop(event)" ondragover="allowDrop(event)">
-                  <div class="background_overflow_div">
+                <div class="part">
+                  <div class="headline"><span>Auktionsgegenstand</span></div>
+                  <div class="auction_item" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <div class="background_overflow_div">
 
+                    </div>
                   </div>
                 </div>
+                <div class="part">
+                   <form>
+                     <div class="starting_price_div">
+                       <input id="startingPrice" class="starting_price" name="startingPrice" placeholder="Startpreis" type="text">
+                       <div class="fa fa-eur euroicon" aria-hidden="true"></div>
+                     </div>
+                  </form>
+                </div>
               </div>
+              <!-- right box -->
               <div class="show_auction_div bg-secondary">
                 <div class="headline"><span>Inventar</span></div>
                 <div class="inventar_div flex_box">

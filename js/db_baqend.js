@@ -135,7 +135,7 @@ function subscribeRealtime(sk, callback) {
     var useritems = DB.User.me.items;
     var query = DB.Items.find()
                         .equal('user', DB.User.me);
-    var stream = query.eventStream();
+    var stream = query.eventStream({initial:true});
     var subscriptionFirst = stream.subscribe(function(itemMap) {
       updateItems(itemMap);
     }, function() {
@@ -148,8 +148,9 @@ function subscribeRealtime(sk, callback) {
 }
 
 function simulate() {
-  var startingIn = 1000;
-  var firstPause = 3000;
+  var firstPause = 4000;
+  var secondPause = 7000;
+  var thirdPause = 3000;
 
   var item1 = new DB.Item({
     'name': 'gold',
@@ -160,35 +161,41 @@ function simulate() {
     'uid': DB.User.me.id
   });
 
-  console.log("Start simulating " + startingIn/1000 + " seconds ...");
-
+  console.log("Start simulating!");
+  // setInterval(loop,1000);
+  console.log("Step 1: Pushing item in " + firstPause/1000 + " seconds ...");
   setTimeout(function() {
-    // Push item
-    stepOne(item1, function() {
+    stepOne(item1);
+    console.log("Step 2: Pop item in " + secondPause/1000 + " seconds ...");
+    setTimeout(function() {
+      stepTwo();
+      console.log("Step 3: " + thirdPause/1000 + " seconds ...");
       setTimeout(function() {
-        // delete item
-        stepTwo();
-      }, 1000);
-    });
-  }, 0);
+        stepThree();
+      }, thirdPause);
+    }, secondPause);
+  }, firstPause);
 
-  function stepOne(item, callback) {
-    console.log("Step 1: Pushing item ...");
+
+  function loop() {
+    console.log("sos");
+  }
+  function stepOne(item) {
     addItem(item);
-
-    return callback();
   }
   function stepTwo() {
-    console.log("Step 2: Deleting item ...");
     // deleteItem("/db/Item/4591344b-0619-4f02-902f-182216a161a6");
-    popItem();
+    popItem('gold');
+  }
+  function stepThree() {
+
   }
 }
 
 // Create and Push the given item
 function addItem(item) {
   item.insert().then(function(savedItem) {
-    DB.Items.load(itemsID, {refresh: true}).then(function(items) {
+    DB.Items.load(itemsID, {refresh:true}).then(function(items) {
       if(items.itemlist.has(savedItem.name)) {
         var newArr = items.itemlist.get(savedItem.name);
         newArr.push(savedItem.id);
@@ -222,12 +229,14 @@ function deleteItem(id) {
   });
 }
 
-function popItem() {
+function popItem(itemName) {
   // Pop and item
-  DB.Items.load(itemsID, {depth:1}).then(function(itemlist) {
-    itemlist.partialUpdate()
-    .pop("itemlist")
-    .execute();
+  DB.Items.load(itemsID, {refresh:true}).then(function(items) {
+    var newArr = items.itemlist.get(itemName);
+    newArr.pop();
+    items.partialUpdate()
+         .put("itemlist", itemName, newArr)
+         .execute();
   });
 }
 
