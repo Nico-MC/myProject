@@ -75,12 +75,14 @@
                   </div>
                 </div>
                 <div class="part">
-                   <form>
-                     <div class="starting_price_div">
-                       <input id="startingPrice" class="starting_price" name="startingPrice" placeholder="Startpreis" type="text">
-                       <div class="fa fa-eur euroicon" aria-hidden="true"></div>
-                     </div>
-                  </form>
+                 <form>
+                   <span>Startpreis</span>
+                   <div class="starting_price_div">
+                     <input id="startingPrice" name="startingPrice" placeholder="0" type="text">
+                     <div class="fa fa-eur euroicon" aria-hidden="true"></div>
+                   </div>
+                 </form>
+                 <button class="create_auction_button" type="button" name="button" onclick="createAuction()">Auktion erstellen</button>
                 </div>
               </div>
               <!-- right box -->
@@ -125,7 +127,9 @@
 
   <div class="profile_option_div bg-secondary">
     <div class="profile">
-      <span class="username">Benutzername: </span>
+      Benutzername: <span class="username"></span>
+      <br>
+      Kontostand: <span class="bankbalance"></span>&#8364;
       <center><a href="javascript:logout()">Logout</a></center>
     </div>
   </div>

@@ -48,7 +48,9 @@
             DB.Items.load(itemsID, {depth: 2}).then(function(loadedItems) {
               loadItems(loadedItems.itemlist, 'init');
             });
-            $('.profile_option_div .username').text("Benutzername: " + DB.User.me.username);
+            // load user profile_option_div
+            $('.profile_option_div .username').text(DB.User.me.username);
+            $('.profile_option_div .bankbalance').text(DB.User.me.bankbalance);
 
             $('.inventar_item').click(function(e) {
               var target = e.target;
