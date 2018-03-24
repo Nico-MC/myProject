@@ -133,9 +133,9 @@ function subscribeRealtime(sk, callback) {
     testWebsocketConnection();
 
     var useritems = DB.User.me.items;
-    var query = DB.Item.find()
+    var query = DB.Items.find()
                         .equal('user', DB.User.me);
-    var stream = query.resultStream({initial:false});
+    var stream = query.eventStream();
     var subscriptionFirst = stream.subscribe(function(itemMap) {
       updateItems(itemMap);
     }, function() {
@@ -152,8 +152,8 @@ function simulate() {
   var firstPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'Banane',
-    'type': 'fruit',
+    'name': 'gold',
+    'type': 'ore',
     'cost': 2,
     'weight': 10,
     'isAuction': false,
@@ -188,29 +188,19 @@ function simulate() {
 // Create and Push the given item
 function addItem(item) {
   item.insert().then(function(savedItem) {
-    DB.Items.load(itemsID).then(function(items) {
+    DB.Items.load(itemsID, {refresh: true}).then(function(items) {
       if(items.itemlist.has(savedItem.name)) {
+        var newArr = items.itemlist.get(savedItem.name);
+        newArr.push(savedItem.id);
         items.partialUpdate()
-        .execute().then(function(result) {
-          result.itemlist.get(savedItem.name).push(savedItem.id);
-          result.save();
-          console.log(result);
-        });
+             .put("itemlist", savedItem.name, newArr)
+             .execute();
       } else {
+        var arr = [savedItem.id];
         items.partialUpdate()
-        .put("itemlist", savedItem.name, [])
-        .execute().then(function(result) {
-          result.itemlist.get(savedItem.name).push(savedItem.id);
-          result.save();
-          console.log(result);
-        });
+             .put("itemlist", savedItem.name, arr)
+             .execute();
       }
-
-      // if(items != null) {
-      //   items.partialUpdate()
-      //        .push('itemlist', savedItem.id)
-      //        .execute();
-      // }
     }, function(err) {
       console.log("ERROR:\n"+err+"\nCan't insert item.")
     });
@@ -234,11 +224,11 @@ function deleteItem(id) {
 
 function popItem() {
   // Pop and item
-  // DB.Items.load(itemsID, {depth:1}).then(function(itemlist) {
-  //   itemlist.partialUpdate()
-  //   .pop("itemlist")
-  //   .execute();
-  // });
+  DB.Items.load(itemsID, {depth:1}).then(function(itemlist) {
+    itemlist.partialUpdate()
+    .pop("itemlist")
+    .execute();
+  });
 }
 
 function addAuction(e) {

@@ -45,7 +45,7 @@
 
           function loadLogin() {
             DB.Items.load(itemsID, {depth: 2}).then(function(loadedItems) {
-              initItems(loadedItems.itemlist);
+              loadItems(loadedItems.itemlist, 'init');
             });
             $('.profile_option_div .username').text("Benutzername: " + DB.User.me.username);
 
@@ -114,13 +114,16 @@
         }
       }
 
-      function initItems(itemlist) {
+      function loadItems(itemlist, option) {
         if(itemlist.size == 0) {
           $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
-        } else {
+        } else if(option == 'init') {
           itemlist.forEach(function(value, key) {
-            $('<div class="inventar_item '+key+'" draggable="true" ondragstart="drag(event)"><span class="item_number strokeme">2</span></div>').appendTo('.inventar_div').show();
+            console.log(value);
+            $('<div class="inventar_item '+key+'" draggable="true" ondragstart="drag(event)"><span class="item_number strokeme">'+value.length+'</span></div>').appendTo('.inventar_div').show();
           });
+        } else if(option == 'update') {
+
         }
         resize();
       }
@@ -130,7 +133,7 @@
         console.log("New item arrived:");
         console.log(itemlist);
 
-
+        loadItems(itemlist, 'update');
       }
 
       function errormessage(message) {
