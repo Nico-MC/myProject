@@ -64,25 +64,35 @@
           </div>
           <div class="tab-pane fade" id="tab3">
             <div class="overflow_div flex">
-              <!-- left box -->
-              <div class="create_auction_div bg-secondary">
-                <div class="part">
-                  <div class="headline"><span>Auktionsgegenstand</span></div>
-                  <div class="auction_item" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <div class="background_overflow_div">
+              <!-- left upper box -->
+              <div class="create_auction_container">
+                <div class="create_auction_div bg-secondary">
+                  <div class="part">
+                    <div class="headline"><span>Auktionsgegenstand</span></div>
+                    <div class="auction_item" ondrop="drop(event)" ondragover="allowDrop(event)">
+                      <div class="background_overflow_div">
 
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div class="part">
-                 <form>
-                   <span>Startpreis</span>
-                   <div class="starting_price_div">
-                     <input id="startingPrice" name="startingPrice" placeholder="0" type="text">
-                     <div class="fa fa-eur euroicon" aria-hidden="true"></div>
-                   </div>
-                 </form>
-                 <button class="create_auction_button" type="button" name="button" onclick="createAuction()">Auktion erstellen</button>
+                  <!-- left bottom box -->
+                <div class="create_auction_div bg-secondary">
+                  <div class="part1">
+                   <form>
+                     <span>Anfangsgebot</span>
+                     <div class="starting_price_div">
+                       <input id="startingPrice" name="startingPrice" placeholder="0" type="text">
+                       <div class="fa fa-eur euroicon" aria-hidden="true"></div>
+                     </div>
+                     <span>Kaufpreis (optional)</span>
+                     <div class="buy_out_div">
+                       <input id="buyOut" name="buyOut" placeholder="0" type="text">
+                       <div class="fa fa-eur euroicon" aria-hidden="true"></div>
+                     </div>
+                   </form>
+                   <button class="create_auction_button" type="button" name="button" onclick="createAuction()">Auktion erstellen</button>
+                  </div>
                 </div>
               </div>
               <!-- right box -->

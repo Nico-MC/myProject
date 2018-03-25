@@ -118,9 +118,11 @@
       }
 
       function loadItems(itemlist, option) {
-        if(itemlist.size == 0) {
+        if(itemlist.size === 1) {
           $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
-        } else if(option == 'init') {
+          return -1;
+        }
+        if(option == 'init') {
           itemlist.forEach(function(value, key) {
             $('<div class="inventar_item '+key+'" draggable="true" ondragstart="drag(event)"><span class="item_number strokeme">'+value.length+'</span></div>').appendTo('.inventar_div').show();
           });

@@ -91,7 +91,8 @@ function initUser(username, callback) {
   // user object
   var user = new DB.User({
     'username': username,
-    'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64)
+    'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64),
+    'bankbalance': 0.0
   });
 
   return callback(user, user.securitykey);
@@ -193,7 +194,7 @@ function simulate() {
 }
 
 // Create and Push the given item
-function addItem(item) {
+function addItem(item, callback) {
   item.insert().then(function(savedItem) {
     DB.Items.load(itemsID, {refresh:true}).then(function(items) {
       if(items.itemlist.has(savedItem.name)) {
@@ -201,12 +202,16 @@ function addItem(item) {
         newArr.push(savedItem.id);
         items.partialUpdate()
              .put("itemlist", savedItem.name, newArr)
-             .execute();
+             .execute().then(function() {
+               return callback();
+             });
       } else {
         var arr = [savedItem.id];
         items.partialUpdate()
              .put("itemlist", savedItem.name, arr)
-             .execute();
+             .execute().then(function() {
+               return callback();
+             });
       }
     }, function(err) {
       console.log("ERROR:\n"+err+"\nCan't insert item.")
@@ -214,7 +219,7 @@ function addItem(item) {
   });
 }
 
-function deleteItem(id) {
+function deleteItem(id, callback) {
   // Remove and delete the given item
   DB.Item.load(id).then(function(item) {
     if(item != null) {
@@ -222,21 +227,25 @@ function deleteItem(id) {
         DB.Items.load(itemsID, {depth:1}).then(function(itemlist) {
           itemlist.partialUpdate()
           .remove("itemlist", id)
-          .execute();
+          .execute().then(function() {
+            return callback();
+          });
         });
       });
     } else console.log("Object is null - Can't delete item.");
   });
 }
 
-function popItem(itemName) {
+function popItem(itemName, callback) {
   // Pop and item
   DB.Items.load(itemsID, {refresh:true}).then(function(items) {
     var newArr = items.itemlist.get(itemName);
     newArr.pop();
     items.partialUpdate()
          .put("itemlist", itemName, newArr)
-         .execute();
+         .execute().then(function() {
+           return callback();
+         });
   });
 }
 
