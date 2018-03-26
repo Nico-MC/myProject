@@ -68,7 +68,7 @@
               <div class="create_auction_container">
                 <div class="create_auction_div bg-secondary">
                   <div class="part">
-                    <div class="headline"><span>Auktionsgegenstand</span></div>
+                    <span class="headline">Auktionsgegenstand</span>
                     <div class="auction_item" ondrop="drop(event)" ondragover="allowDrop(event)">
                       <div class="background_overflow_div">
 
@@ -80,24 +80,30 @@
                 <div class="create_auction_div bg-secondary">
                   <div class="part1">
                    <form>
-                     <span>Anfangsgebot</span>
+                     <span class="headline">Anfangsgebot</span>
                      <div class="starting_price_div">
                        <input id="startingPrice" name="startingPrice" placeholder="0" type="text">
                        <div class="fa fa-eur euroicon" aria-hidden="true"></div>
                      </div>
-                     <span>Kaufpreis (optional)</span>
+                     <span class="headline">Kaufpreis (optional)</span>
                      <div class="buy_out_div">
                        <input id="buyOut" name="buyOut" placeholder="0" type="text">
                        <div class="fa fa-eur euroicon" aria-hidden="true"></div>
                      </div>
+                     <span style="margin-bottom: 10px" class="headline">Dauer</span>
+                     <div id="auction_duration_slider_hours" class="auction_duration_slider flex-child"></div>
+                     <div id="auction_duration_slider_minutes" class="auction_duration_slider flex-child"></div>
+                     <div class="show_auction_duration">
+                       <input id="auctionDuration" name="auctionDuration" placeholder="0:0" type="text" disabled>
+                     </div>
                    </form>
-                   <button class="create_auction_button" type="button" name="button" onclick="createAuction()">Auktion erstellen</button>
+                   <button class="create_auction_button flex-child" type="button" name="button" onclick="createAuction()">Auktion erstellen</button>
                   </div>
                 </div>
               </div>
               <!-- right box -->
               <div class="show_auction_div bg-secondary">
-                <div class="headline"><span>Inventar</span></div>
+                <span class="headline">Inventar</span>
                 <div class="inventar_div flex_box">
 
                 </div>

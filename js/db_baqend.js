@@ -134,7 +134,7 @@ function subscribeRealtime(sk, callback) {
     testWebsocketConnection();
 
     var useritems = DB.User.me.items;
-    var query = DB.Items.find()
+    var query = DB.Items.find({depth:true})
                         .equal('user', DB.User.me);
     var stream = query.eventStream({initial:true});
     var subscriptionFirst = stream.subscribe(function(itemMap) {
@@ -182,11 +182,15 @@ function simulate() {
     console.log("sos");
   }
   function stepOne(item) {
-    addItem(item);
+    addItem(item, function() {
+
+    });
   }
   function stepTwo() {
     // deleteItem("/db/Item/4591344b-0619-4f02-902f-182216a161a6");
-    popItem('gold');
+    popItem('gold', function() {
+
+    });
   }
   function stepThree() {
 
@@ -241,11 +245,20 @@ function popItem(itemName, callback) {
   DB.Items.load(itemsID, {refresh:true}).then(function(items) {
     var newArr = items.itemlist.get(itemName);
     newArr.pop();
-    items.partialUpdate()
-         .put("itemlist", itemName, newArr)
-         .execute().then(function() {
-           return callback();
-         });
+    // if(newArr.length == 0) {
+    //   items.partialUpdate()
+    //        .remove("itemlist", itemName)
+    //        .execute().then(function() {
+    //          return callback();
+    //        });
+    // } else {
+      items.partialUpdate()
+           .put("itemlist", itemName, newArr)
+           .execute().then(function() {
+             return callback();
+           });
+    // }
+
   });
 }
 

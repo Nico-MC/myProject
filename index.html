@@ -8,17 +8,19 @@
     <link rel="stylesheet" type="text/css" href="assets/css/page.css">
     <link rel="stylesheet" type="text/css" href="assets/css/game.css">
     <link rel="stylesheet" type="text/css" href="assets/css/auctionhouse.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/jquery-ui.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- DATABASE -->
     <!-- <script src="https://www.baqend.com/js-sdk/latest/baqend.min.js"></script> -->
-    <script type="text/javascript" src="//unpkg.com/@reactivex/rxjs@5.2.0/dist/global/Rx.js"></script>
+    <!-- <script type="text/javascript" src="//unpkg.com/@reactivex/rxjs@5.2.0/dist/global/Rx.js"></script> -->
     <!-- include the SDK after rxjs -->
     <script type="text/javascript" src="//www.baqend.com/js-sdk/latest/baqend-realtime.js"></script>
     <!-- MODULES -->
     <script type="text/javascript" src="modules/phaser.min.js"></script>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
@@ -38,7 +40,7 @@
             success: function(data) {
               var data = $(data).filter('.login_content');
               $('section').html(data);
-              init(function(status) {
+              init(function() {
                 loadLogin(); //race conditions? https://stackoverflow.com/questions/8611145/race-conditions-with-javascript-event-handling
               });
             }
@@ -46,11 +48,47 @@
 
           function loadLogin() {
             DB.Items.load(itemsID, {depth: 2}).then(function(loadedItems) {
-              loadItems(loadedItems.itemlist, 'init');
+              loadItems(loadedItems.itemlist);
             });
             // load user profile_option_div
             $('.profile_option_div .username').text(DB.User.me.username);
             $('.profile_option_div .bankbalance').text(DB.User.me.bankbalance);
+
+            // query-ui slider
+            var slider_hours = $("#auction_duration_slider_hours").slider();
+            var slider_minutes = $("#auction_duration_slider_minutes").slider();
+            var initSlider = function() {
+              var options_hours = {
+                min: 0,
+                max: 48,
+                value: 0,
+                slide: function(e, ui) {
+                  var hours = ui.value;
+                  var minutes = slider_minutes.slider("value");
+                  $('#auctionDuration').val(hours + ":" + minutes);
+
+                  if(ui.value == 48) {
+                    slider_minutes.slider("disable");
+                    $('#auctionDuration').val(hours + ":" + 0);
+                  } else {
+                    slider_minutes.slider("enable");
+                  }
+                }
+              }
+              slider_hours.slider('option', options_hours);
+              var options_minutes = {
+                min: 0,
+                max: 59,
+                value: 0,
+                slide: function(e, ui) {
+                  var hours = slider_hours.slider("value");
+                  var minutes = ui.value;
+                  $('#auctionDuration').val(hours + ":" + minutes);
+                }
+              }
+              slider_minutes.slider('option', options_minutes);
+            }
+            initSlider();
 
             $('.inventar_item').click(function(e) {
               var target = e.target;
@@ -117,29 +155,64 @@
         }
       }
 
-      function loadItems(itemlist, option) {
-        if(itemlist.size === 1) {
-          $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
-          return -1;
-        }
-        if(option == 'init') {
+      function loadItems(itemlist) {
+        // var scan = function() {
+        //   var loadedElements = $('.inventar_div').find('.inventar_item').toArray();
+        //   $(loadedElements).each(function(index, element) {
+        //     console.log(getClassName(element.className, 1));
+        //   });
+        // };
+
+        // if itemlist is empty:
+        // if(itemlist.size === 0) {
+        //   if($('.inventar_div .no_items').length == 0)
+        //     $('.inventar_div > .inventar_item').hide('slow').promise().done(function() {
+        //       $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
+        //       $('.inventar_div .no_items').fadeIn("slow");
+        //     });
+        //   return -1;
+        // }
+
+        // if itemlist is not empty:
+        function render(callback) {
           itemlist.forEach(function(value, key) {
-            $('<div class="inventar_item '+key+'" draggable="true" ondragstart="drag(event)"><span class="item_number strokeme">'+value.length+'</span></div>').appendTo('.inventar_div').show();
+            if(value.length != 0) {
+              $('.inventar_div .no_items').fadeOut('fast').promise().done(function() {
+                $(this).remove();
+                if($('.inventar_div').find('.' + key).length === 0) {
+                  $('<div class="inventar_item '+key+'" draggable="true" ondragstart="drag(event)"><span class="item_number strokeme">'+value.length+'</span></div>').appendTo('.inventar_div').show('slow');
+                } else {
+                  $('.inventar_item.'+key+' .item_number').html(value.length);
+                }
+              });
+            } else {
+              $('.inventar_item.'+key).hide('slow', function() { $(this).remove(); });
+            }
           });
-        } else if(option == 'update') {
-          itemlist.forEach(function(value, key) {
-            $('.item_number').html(value.length);
-          });
+
+          return callback();
         }
-        resize();
+
+        render(function() {
+          setTimeout(function() {
+            if($('.inventar_div > .inventar_item').length === 0 && $('.inventar_div > .no_items').length === 0) {
+              $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
+              $('.inventar_div .no_items').fadeIn("fast");
+            }
+          }, 1000);
+          resize();
+        });
+
       }
 
       function updateItems(items) {
         // if($('.no_items').length) $('.no_items').remove();
-        console.log("New item arrived:");
+        console.log("Item object updated:");
         console.log(items);
 
-        loadItems(items.data.itemlist, 'update');
+
+
+        loadItems(items.data.itemlist);
       }
 
       function errormessage(message) {
