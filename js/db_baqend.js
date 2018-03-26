@@ -187,7 +187,6 @@ function simulate() {
     });
   }
   function stepTwo() {
-    // deleteItem("/db/Item/4591344b-0619-4f02-902f-182216a161a6");
     popItem('gold', function() {
 
     });

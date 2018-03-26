@@ -156,23 +156,6 @@
       }
 
       function loadItems(itemlist) {
-        // var scan = function() {
-        //   var loadedElements = $('.inventar_div').find('.inventar_item').toArray();
-        //   $(loadedElements).each(function(index, element) {
-        //     console.log(getClassName(element.className, 1));
-        //   });
-        // };
-
-        // if itemlist is empty:
-        // if(itemlist.size === 0) {
-        //   if($('.inventar_div .no_items').length == 0)
-        //     $('.inventar_div > .inventar_item').hide('slow').promise().done(function() {
-        //       $('.inventar_div').html('<span class="no_items">Keine Items vorhanden.</span>');
-        //       $('.inventar_div .no_items').fadeIn("slow");
-        //     });
-        //   return -1;
-        // }
-
         // if itemlist is not empty:
         function render(callback) {
           itemlist.forEach(function(value, key) {
@@ -206,11 +189,8 @@
       }
 
       function updateItems(items) {
-        // if($('.no_items').length) $('.no_items').remove();
         console.log("Item object updated:");
         console.log(items);
-
-
 
         loadItems(items.data.itemlist);
       }
