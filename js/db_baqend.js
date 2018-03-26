@@ -130,21 +130,25 @@ function createItemlist() {
 }
 
 function subscribeRealtime(sk, callback) {
+  var subList = [];
   if(DB.User.me.securitykey == sk) {
     testWebsocketConnection();
+    subscribeToItems();
 
-    var useritems = DB.User.me.items;
-    var query = DB.Items.find({depth:true})
-                        .equal('user', DB.User.me);
-    var stream = query.eventStream({initial:true});
-    var subscriptionFirst = stream.subscribe(function(itemMap) {
-      updateItems(itemMap);
-    }, function() {
-      console.log(err);
-    });
+    function subscribeToItems() {
+      var query = DB.Items.find({depth:true})
+      .equal('user', DB.User.me);
+      var stream = query.eventStream({initial:true});
+      var subscriptionFirst = stream.subscribe(function(itemMap) {
+        updateItems(itemMap);
+      }, function() {
+        console.log(err);
+      });
+      subList.push(subscriptionFirst);
+    }
 
 
-    return callback([subscriptionFirst]);
+    return callback(subList);
   }
 }
 
@@ -244,23 +248,29 @@ function popItem(itemName, callback) {
   DB.Items.load(itemsID, {refresh:true}).then(function(items) {
     var newArr = items.itemlist.get(itemName);
     newArr.pop();
-    // if(newArr.length == 0) {
-    //   items.partialUpdate()
-    //        .remove("itemlist", itemName)
-    //        .execute().then(function() {
-    //          return callback();
-    //        });
-    // } else {
-      items.partialUpdate()
-           .put("itemlist", itemName, newArr)
-           .execute().then(function() {
-             return callback();
-           });
-    // }
+    items.partialUpdate()
+         .put("itemlist", itemName, newArr)
+         .execute().then(function() {
+           return callback();
+         });
 
   });
 }
 
-function addAuction(e) {
-  console.log(e);
+function createAuction(startingPrice, buyoutPrice, auctionTime) {
+  var hours = auctionTime.split(":")[0];
+  var minutes = auctionTime.split(":")[1];
+
+  if(startingPrice > 0) {
+    if(buyoutPrice >= 0 || buyoutPrice === "") {
+      console.log("Ok, create the auction!");
+
+      var time = {
+        'start': ...,
+        'end': ...
+      }
+      var auction = new DB.Auctions()
+
+    }
+  }
 }

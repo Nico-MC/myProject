@@ -67,12 +67,11 @@
                   var minutes = slider_minutes.slider("value");
                   $('#auctionDuration').val(hours + ":" + minutes);
 
+                  if(ui.value == 1) slider_minutes.slider("option", "min", 1);
                   if(ui.value == 48) {
                     slider_minutes.slider("disable");
                     $('#auctionDuration').val(hours + ":" + 0);
-                  } else {
-                    slider_minutes.slider("enable");
-                  }
+                  } else slider_minutes.slider("enable");
                 }
               }
               slider_hours.slider('option', options_hours);
@@ -268,6 +267,14 @@
 
       function getClassName(className, index) {
         return className.split(" ")[index];
+      }
+
+      function clickAuctionButton() {
+        var startingPrice = $('#startingPrice').val();
+        var buyoutPrice = $('#buyOut').val();
+        var auctionTime = $('#auctionDuration').val();
+
+        createAuction(startingPrice, buyoutPrice, auctionTime);
       }
 
       $(window).resize(function() {
