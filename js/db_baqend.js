@@ -1,6 +1,8 @@
 /* --- VARIABLES --- */
 var itemsID = null;
 var realtime = "off";
+var droppedItem = null;
+var timestamp;
 
 $(document).ready(function() {
   DB.connect('misty-shape-74', false).then(function() {
@@ -34,6 +36,7 @@ function register(data, callback) {
               DB.User.register(user, password).then(function() {
                 registermessage(function() {
                   createItemlist();
+                  createAuctionList();
                   return callback(sk);
                 });
               });
@@ -101,11 +104,21 @@ function initUser(username, callback) {
 // Initialize all important VARIABLES
 function init(callback) {
   console.log("Start Init ...");
+  setTimestamp();
   getItemsTodoID(function() {
     console.log(2);
     console.log("Init finished.");
     return callback();
   });
+}
+
+function setTimestamp() {
+  timestamp = moment().toDate();
+  console.log(timestamp);
+  setInterval(function() {
+    timestamp = moment().toDate();
+    console.log(timestamp);
+  }, 60000);
 }
 
 // Get ID of user items todo
@@ -126,7 +139,16 @@ function createItemlist() {
       'itemlist': new DB.Map(),
       'user': DB.User.me
     }
-  ).save({depth:1});
+  ).save();
+}
+
+function createAuctionList() {
+  new DB.Auctions(
+    {
+      'user': DB.User.me,
+      'auctionlist': []
+    }
+  ).save();
 }
 
 function subscribeRealtime(sk, callback) {
@@ -162,8 +184,7 @@ function simulate() {
     'type': 'ore',
     'cost': 2,
     'weight': 10,
-    'isAuction': false,
-    'uid': DB.User.me.id
+    'isAuction': false
   });
 
   console.log("Start simulating!");
@@ -261,16 +282,36 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
   var hours = auctionTime.split(":")[0];
   var minutes = auctionTime.split(":")[1];
 
-  if(startingPrice > 0) {
-    if(buyoutPrice >= 0 || buyoutPrice === "") {
-      console.log("Ok, create the auction!");
+  if(droppedItem != null) {
+    if(startingPrice > 0) {
+      if(buyoutPrice >= 0 || buyoutPrice === "") {
+        console.log("Ok, let's create the auction!");
+        var startDate = moment().toDate();
+        var endDate = new Date();
+        var timezoneOffset = startDate.getTimezoneOffset();
+        endDate.setHours(startDate.getHours()+parseInt(hours));
+        endDate.setMinutes(startDate.getMinutes()+parseInt(minutes));
 
-      var time = {
-        'start': ...,
-        'end': ...
+        DB.Items.load(itemsID).then(function(items) {
+          var itemlist = items.itemlist.get(droppedItem);
+          var item = itemlist[itemlist.length-1];
+          DB.Item.load(item).then(function(loadedItem) {
+            new DB.Auctions({
+              'user': DB.User.me,
+              'auctionlist': [
+                {
+                  'item': item,
+                  'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset })
+                }
+              ]
+            }).save({depth:true});
+          });
+          itemlist.pop(item);
+          items.partialUpdate()
+               .put("itemlist", droppedItem, itemlist)
+               .execute();
+        });
       }
-      var auction = new DB.Auctions()
-
     }
   }
 }

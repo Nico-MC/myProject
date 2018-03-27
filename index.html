@@ -19,6 +19,7 @@
     <script type="text/javascript" src="//www.baqend.com/js-sdk/latest/baqend-realtime.js"></script>
     <!-- MODULES -->
     <script type="text/javascript" src="modules/phaser.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
@@ -50,6 +51,11 @@
             DB.Items.load(itemsID, {depth: 2}).then(function(loadedItems) {
               loadItems(loadedItems.itemlist);
             });
+            DB.Auctions.find()
+                       .equal('user', DB.User.me)
+                       .singleResult(function(auctionItems) {
+                         loadAuctionItems(auctionItems.auctionlist);
+                       });
             // load user profile_option_div
             $('.profile_option_div .username').text(DB.User.me.username);
             $('.profile_option_div .bankbalance').text(DB.User.me.bankbalance);
@@ -63,15 +69,21 @@
                 max: 48,
                 value: 0,
                 slide: function(e, ui) {
-                  var hours = ui.value;
-                  var minutes = slider_minutes.slider("value");
-                  $('#auctionDuration').val(hours + ":" + minutes);
+                  if(ui.value == 0) {
+                    slider_minutes.slider("option", "min", 1);
+                  }
+                  else {
+                    slider_minutes.slider("option", "min", 0);
 
-                  if(ui.value == 1) slider_minutes.slider("option", "min", 1);
+                  }
                   if(ui.value == 48) {
                     slider_minutes.slider("disable");
                     $('#auctionDuration').val(hours + ":" + 0);
                   } else slider_minutes.slider("enable");
+
+                  var hours = ui.value;
+                  var minutes = slider_minutes.slider("value");
+                  $('#auctionDuration').val(hours + ":" + minutes);
                 }
               }
               slider_hours.slider('option', options_hours);
@@ -86,6 +98,8 @@
                 }
               }
               slider_minutes.slider('option', options_minutes);
+
+              $('#auctionDuration').val("0:1");
             }
             initSlider();
 
@@ -194,6 +208,15 @@
         loadItems(items.data.itemlist);
       }
 
+      function loadAuctionItems(auctionItems) {
+        console.log(auctionItems);
+        if(auctionItems.length == 0) {
+          $('.auction_div').html('<span class="no_items">Keine Items vorhanden.</span>');
+        } else {
+          console.log(auctionItems);
+        }
+      }
+
       function errormessage(message) {
         $('.alert').css('color', '#721c24');
         $('.alert').css('background-color', '#f8d7da');
@@ -263,6 +286,7 @@
           var classNameToInsert = e.dataTransfer.getData("text");
           $('.auction_item .background_overflow_div').attr('class', 'background_overflow_div');
           $('.auction_item .background_overflow_div').addClass(classNameToInsert);
+          droppedItem = classNameToInsert;
       }
 
       function getClassName(className, index) {
