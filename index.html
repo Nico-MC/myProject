@@ -51,11 +51,10 @@
             DB.Items.load(itemsID, {depth: 2}).then(function(loadedItems) {
               loadItems(loadedItems.itemlist);
             });
-            DB.Auctions.find()
-                       .equal('user', DB.User.me)
-                       .singleResult(function(auctionItems) {
-                         loadAuctionItems(auctionItems.auctionlist);
-                       });
+            DB.Auctions.load(auctionsID, {depth: 2}).then(function(auctionItems) {
+              loadAuctionItems(auctionItems.auctionlist);
+            });
+
             // load user profile_option_div
             $('.profile_option_div .username').text(DB.User.me.username);
             $('.profile_option_div .bankbalance').text(DB.User.me.bankbalance);
@@ -74,12 +73,14 @@
                   }
                   else {
                     slider_minutes.slider("option", "min", 0);
-
                   }
                   if(ui.value == 48) {
                     slider_minutes.slider("disable");
-                    $('#auctionDuration').val(hours + ":" + 0);
-                  } else slider_minutes.slider("enable");
+                    slider_minutes.slider("option", "max", 0);
+                  } else {
+                    slider_minutes.slider("enable");
+                    slider_minutes.slider("option", "max", 59);
+                  }
 
                   var hours = ui.value;
                   var minutes = slider_minutes.slider("value");
@@ -209,11 +210,11 @@
       }
 
       function loadAuctionItems(auctionItems) {
-        console.log(auctionItems);
         if(auctionItems.length == 0) {
           $('.auction_div').html('<span class="no_items">Keine Items vorhanden.</span>');
         } else {
-          console.log(auctionItems);
+          auctionItems.forEach(function(auctionItem) {
+          });
         }
       }
 
