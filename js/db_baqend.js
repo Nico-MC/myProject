@@ -168,20 +168,33 @@ function subscribeRealtime(sk, callback) {
   if(DB.User.me.securitykey == sk) {
     testWebsocketConnection();
     subscribeToItems();
+    subscribeToAuctions();
 
     function subscribeToItems() {
       var query = DB.Items.find({depth:true})
-      .equal('user', DB.User.me);
+                          .equal('user', DB.User.me);
       var stream = query.eventStream({initial:true});
-      var subscriptionFirst = stream.subscribe(function(itemMap) {
+      var subscriptionItems = stream.subscribe(function(itemMap) {
         updateItems(itemMap);
-      }, function() {
+      }, function(err) {
         console.log(err);
       });
-      subList.push(subscriptionFirst);
+      subList.push(subscriptionItems);
     }
 
-
+    // loadAuctionItems
+    function subscribeToAuctions() {
+      var query = DB.Auctions.find({depth:true})
+                             .equal('user', DB.User.me);
+      var stream = query.eventStream({initial:true});
+      var subscriptionAuctions = stream.subscribe(function(auctionList) {
+        updateAuctionItems(auctionList);
+      }, function(err) {
+        console.log(err);
+      });
+      subList.push(subscriptionAuctions);
+    }
+    
     return callback(subList);
   }
 }
@@ -201,6 +214,7 @@ function simulate() {
 
   console.log("Start simulating!");
   // setInterval(loop,1000);
+  // Start callback hell ...
   console.log("Step 1: Pushing item in " + firstPause/1000 + " seconds ...");
   setTimeout(function() {
     stepOne(item1);
@@ -335,6 +349,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
                         .execute().then(function() {
                           createAuctionMessage("Auktion erstellt!", true);
                           if(itemlist.length == 0) resetDrop();
+
                         });
           });
         });

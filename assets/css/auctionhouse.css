@@ -304,11 +304,13 @@ input[type=text]#search_field:focus {
   justify-content: left;
 }
 
+.auction_div .no_items,
 .inventar_div .no_items {
   font-weight: 100;
   display: none;
 }
 
+.auction_div .auction_item,
 .inventar_div .inventar_item {
   width: 64px;
   height: 32px;
@@ -326,6 +328,7 @@ input[type=text]#search_field:focus {
       transform: scale(1.2);
 }
 
+.auction_div .auction_item .item_number,
 .inventar_div .inventar_item .item_number {
   position: absolute;
   bottom: -5px;
