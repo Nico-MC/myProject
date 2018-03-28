@@ -2,6 +2,7 @@
   width: 100%;
   /* display: none; */
   position: relative;
+  min-width: 540px;
 }
 
 .auctionhouse_content {
@@ -188,8 +189,35 @@ input[type=text]#search_field:focus {
   color: #2a2a2a;
 }
 
+.auction_duration_slider_container {
+  justify-content: center;
+  flex-direction: row;
+  align-items: center;
+}
+
+.auction_duration_slider#auction_duration_slider_hours {
+  margin-bottom: 7px;
+}
+
+.show_auction_duration {
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+.show_auction_duration input {
+  -moz-box-shadow: inset 0 0 10px #000000;
+  -webkit-box-shadow: inset 0 0 10px #000000;
+  box-shadow: inset 0 0 10px #000000;
+  width: 60px;
+  border-radius: 33px;
+  text-align: center;
+  max-width: 100%;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
 .create_auction_button {
-  margin-right: 15px;
   outline: 0 !important;
   cursor: pointer;
   outline: none;
@@ -199,7 +227,6 @@ input[type=text]#search_field:focus {
   box-shadow: 0 4px #414141;
   width: 100%;
   height: 30px;
-  margin-top: 30px;
 
   background-image: -moz-linear-gradient(top, #4e4e4e, #181818);
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#4e4e4e), to(#181818));
@@ -214,31 +241,23 @@ input[type=text]#search_field:focus {
   transform: translateY(2px);
 }
 
-.auction_duration_slider_container {
-  justify-content: center;
-  flex-direction: row;
-  align-items: center;
-}
-
-.auction_duration_slider#auction_duration_slider_hours {
-  margin-bottom: 7px;
-}
-
-.show_auction_duration {
+.create_auction_button_error {
   text-align: center;
-  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-top: 30px;
+  color: #6c1313;
+  font-weight: bold;
+  position: relative;
 }
 
-.show_auction_duration input {
-  -moz-box-shadow: inset 0 0 10px #000000;
-  -webkit-box-shadow: inset 0 0 10px #000000;
-  box-shadow: inset 0 0 10px #000000;
-  width: 60px;
-  border-radius: 33px;
-  text-align: center;
-  max-width: 100%;
-  padding-right: 5px;
-  padding-left: 5px;
+.create_auction_button_error > div {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-left: 0 auto;
+  display: inline-block;
+  display: none;
 }
 
 .timeicon {

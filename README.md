@@ -13,6 +13,9 @@ Projektwiederherstellung:
 >git checkout <commit>
 
 Upcoming changes:
-- daily lootbox filled with random item
+- Daily lootbox filled with random item
+- Bank balance (backend)
+- Selectable div to choose realtime database, like meteor, firebase, parse
+- Search algorithm to show all available auctions
 
 Copyright by © Nico Noster, 2017-2018

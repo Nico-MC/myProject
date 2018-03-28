@@ -302,14 +302,20 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
         var startDate = moment().toDate();
         var endDate = moment().toDate();
         var timezoneOffset = startDate.getTimezoneOffset();
-        var amount = 2;
+        var amount = 1;
+        var puffer = [];
         endDate.setHours(startDate.getHours()+parseInt(hours));
         endDate.setMinutes(startDate.getMinutes()+parseInt(minutes));
 
         // Process
-        var puffer = [];
         DB.Items.load(itemsID).then(function(items) {
           var itemlist = items.itemlist.get(droppedItem);
+          if(itemlist.length === 0) {
+            createAuctionMessage("Du hast keine Items.", false);
+            resetDrop();
+            return -1;
+          }
+          console.log("lol?");
 
           for(var i=0; i<amount; i++)
             puffer.push(itemlist.pop());
@@ -317,21 +323,29 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
           items.partialUpdate()
                .put("itemlist", droppedItem, itemlist)
                .execute();
+
+          var auctionObject = {};
+          auctionObject[droppedItem] = puffer;
+          auctionObject['time'] = new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset });
+
+          console.log("lol!");
+          DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
+            auctionsTodo.partialUpdate()
+                        .push("auctionlist", auctionObject)
+                        .execute().then(function() {
+                          createAuctionMessage("Auktion erstellt!", true);
+                          if(itemlist.length == 0) resetDrop();
+                        });
+          });
         });
-
-        var auctionObject = {
-          'itemlist': {
-            droppedItem: puffer
-          },
-          'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset })
-        }
-
-
-        DB.Auctions.partialUpdate()
-                  .execute().then(function(result) {
-                    console.log(result);
-                  });
       }
+    } else {
+      if(startingPrice == "") createAuctionMessage("Bitte gebe einen Startpreis an.", false);
+      else if(startingPrice < 1) createAuctionMessage("Startpreis muss größer 0 sein.", false);
+      return -1;
     }
+  } else {
+    createAuctionMessage("Auktionsgegenstand fehlt.", false);
+    return -1;
   }
 }

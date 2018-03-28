@@ -18,7 +18,7 @@
     <!-- include the SDK after rxjs -->
     <script type="text/javascript" src="//www.baqend.com/js-sdk/latest/baqend-realtime.js"></script>
     <!-- MODULES -->
-    <script type="text/javascript" src="modules/phaser.min.js"></script>
+    <!-- <script type="text/javascript" src="modules/phaser.min.js"></script> -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
@@ -48,10 +48,10 @@
           });
 
           function loadLogin() {
-            DB.Items.load(itemsID, {depth: 2}).then(function(loadedItems) {
+            DB.Items.load(itemsID, {depth: true}).then(function(loadedItems) {
               loadItems(loadedItems.itemlist);
             });
-            DB.Auctions.load(auctionsID, {depth: 2}).then(function(auctionItems) {
+            DB.Auctions.load(auctionsID, {depth: true}).then(function(auctionItems) {
               loadAuctionItems(auctionItems.auctionlist);
             });
 
@@ -134,7 +134,7 @@
               }
             });
 
-            startGame();
+            // startGame();
           }
         }
       }
@@ -236,6 +236,18 @@
         });
       }
 
+      function createAuctionMessage(message, success) {
+        var errorDiv = $('.create_auction_button_error > div');
+        if(success) $(errorDiv).css('color', '#1d6e15');
+        else $(errorDiv).css('color', '#6c1313');
+        $(errorDiv).text(message);
+        $(errorDiv).slideDown('slow', function() {
+          setTimeout(function() {
+            $(errorDiv).slideUp('slow');
+          }, 2000);
+        });
+      }
+
       function switchRegister() {
         if($('.register_div #register').css('display') != 'none') {
           $('.register_div #register').slideUp("slow", function() {
@@ -285,9 +297,15 @@
       function drop(e) {
           e.preventDefault();
           var classNameToInsert = e.dataTransfer.getData("text");
-          $('.auction_item .background_overflow_div').attr('class', 'background_overflow_div');
+          // $('.auction_item .background_overflow_div').attr('class', 'background_overflow_div');
           $('.auction_item .background_overflow_div').addClass(classNameToInsert);
           droppedItem = classNameToInsert;
+      }
+
+      function resetDrop() {
+        droppedItem = null;
+        var getClass = getClassName($('.auction_item .background_overflow_div').attr('class'), 1);
+        $('.auction_item .background_overflow_div').removeClass(getClass);
       }
 
       function getClassName(className, index) {
