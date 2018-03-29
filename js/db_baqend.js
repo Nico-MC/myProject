@@ -194,7 +194,7 @@ function subscribeRealtime(sk, callback) {
       });
       subList.push(subscriptionAuctions);
     }
-    
+
     return callback(subList);
   }
 }
@@ -205,7 +205,7 @@ function simulate() {
   var thirdPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'gold',
+    'name': 'iron',
     'type': 'ore',
     'cost': 2,
     'weight': 10,
@@ -329,7 +329,6 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             resetDrop();
             return -1;
           }
-          console.log("lol?");
 
           for(var i=0; i<amount; i++)
             puffer.push(itemlist.pop());
@@ -342,7 +341,6 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
           auctionObject[droppedItem] = puffer;
           auctionObject['time'] = new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset });
 
-          console.log("lol!");
           DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
             auctionsTodo.partialUpdate()
                         .push("auctionlist", auctionObject)

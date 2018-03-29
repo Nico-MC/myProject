@@ -203,39 +203,72 @@
       }
 
       function loadAuctionItems(auctionItems) {
-        // if auctionlist is not empty:
-        function render(callback) {
-          auctionItems.forEach(function(auctionItem) {
-            var itemKey = Object.keys(auctionItem)[0];
-            var itemVal = Object.values(auctionItem)[0];
-            var timeKey = Object.keys(auctionItem)[1];
-            var timeVal = Object.values(auctionItem)[1];
-            if(itemVal.length != 0) {
-              $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
-                $(this).remove();
-                if($('.auction_div').find('.auction_item#' + timeVal.end).length === 0) {
-                  $('<div id="'+ timeVal.end +'" class="auction_item '+itemKey+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemVal.length+'</span></div>').appendTo('.auction_div').show('slow');
-                } else {
-                  $('.auction_item.'+itemKey+' .auction_number').html(itemVal.length);
+        function render() {
+          // if auctionlist is not empty:
+          if(auctionItems.length != 0) {
+            var auctionElements = [];
+
+            auctionItems.forEach(function(auctionItem) {
+              var itemKey = Object.keys(auctionItem)[0];
+              var itemVal = auctionItem[itemKey];
+              var timeKey = Object.keys(auctionItem)[1];
+              var timeVal = auctionItem[timeKey];
+              var pushLoadedAuctionItem = function() {
+                auctionElements.push($('.auction_div .auction_item' + escapeID(timeVal.end))[0]);
+              };
+
+              if(itemVal.length != 0) {
+                $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
+                  $(this).remove();
+                  if($('.auction_div').find('.auction_item' + escapeID(timeVal.end)).length === 0) {
+                    $('<div id="'+ timeVal.end +'" class="auction_item '+itemKey+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemVal.length+'</span></div>').appendTo('.auction_div').show('slow');
+                  } else {
+                    $('.auction_item.'+itemKey+' .auction_number').html(itemVal.length);
+                  }
+                });
+              } else {
+                $('.auction_item' + escapeID(timeVal.end)).hide('slow', function() { $(this).remove(); });
+              }
+
+              pushLoadedAuctionItem();
+            });
+
+            // This is to filter the old element and remove them immediately
+            if($('.auction_div > .auction_item').length != 0) {
+              var loadedElements = $('.auction_div').children().toArray();
+              $(loadedElements).each(function(key, val) {
+                if($.inArray(val, auctionElements) == -1) {
+                  console.log("Delete item");
+                  $(val).hide('slow', function() { $(this).remove(); });
                 }
               });
-            } else {
-              $('.auction_item.'+ItemKey).hide('slow', function() { $(this).remove(); });
             }
-          });
-
-          return callback();
+          } else if(auctionItems.length === 0 && $('.auction_div .no_items').length === 0) {
+            $('.auction_div').children().hide("slow").promise().done(function() {
+              $('.auction_div').html('<span class="no_items">Keine aktuellen Auktionen.</span>');
+              $('.auction_div .no_items').fadeIn("fast");
+            });
+          }
         }
 
-        render(function() {
+        render(function(auctionElements) {
           setTimeout(function() {
-            if($('.auction_div > .auction_item').length === 0 && $('.auction_div > .no_items').length === 0) {
-              $('.auction_div').html('<span class="no_items">Keine Items vorhanden.</span>');
-              $('.auction_div .no_items').fadeIn("fast");
+            if(auctionItems.length === 0 && $('.auction_div .no_items').length === 0) {
+              $('.auction_div').children().hide("slow").promise().done(function() {
+                $('.auction_div').html('<span class="no_items">Keine aktuellen Auktionen.</span>');
+                $('.auction_div .no_items').fadeIn("fast");
+              });
             }
           }, 1000);
+
+
+
           resize();
         });
+      }
+
+      function escapeID(id) {
+        return "#" + id.replace( /(:|\.|\[|\]|,|=|@)/g, "\\$1" );
       }
 
       function updateItems(items) {
@@ -243,7 +276,7 @@
       }
 
       function updateAuctionItems(auctions) {
-        loadItems(auctions.data.auctionlist);
+        loadAuctionItems(auctions.data.auctionlist);
       }
 
       function errormessage(message) {
