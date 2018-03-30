@@ -125,7 +125,6 @@ function setTimestamp() {
   timestamp = moment().toDate();
   setInterval(function() {
     timestamp = moment().toDate();
-    console.log(timestamp);
   }, 60000);
 }
 
@@ -336,7 +335,6 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
         var endDate = moment().toDate();
         var timezoneOffset = startDate.getTimezoneOffset();
         var amount = 1;
-        var puffer = [];
         endDate.setHours(startDate.getHours()+parseInt(hours));
         endDate.setMinutes(startDate.getMinutes()+parseInt(minutes));
 
@@ -349,16 +347,17 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             return -1;
           }
 
+          var puffer = new DB.List();
           for(var i=0; i<amount; i++)
             puffer.push(itemlist.pop());
 
+            console.log(puffer);
           items.partialUpdate()
                .put("itemlist", droppedItem, itemlist)
                .execute();
-               console.log(puffer);
           var auctionObject = {
             'name': droppedItem,
-            'items': puffer,
+            'itemlist': puffer,
             'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset })
           }
           var auction = new DB.Auction(auctionObject);

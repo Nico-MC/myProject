@@ -202,9 +202,8 @@
             var auctionElements = [];
             auctions.forEach(function(auction) {
               var name = auction.name;
-              var items = auction.items;
+              var itemlist = auction.itemlist;
               var time = auction.time;
-              console.log(name);
               var pushLoadedAuctionItem = function() {
                 auctionElements.push($('.auction_div .auction_item' + escapeID(time.end))[0]);
               };
@@ -213,7 +212,8 @@
                 $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
                   $(this).remove();
                   if($('.auction_div').find('.auction_item' + escapeID(time.end)).length === 0) {
-                    $('<div id="'+ time.end +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+items.length+'</span></div>').appendTo('.auction_div').show('slow');
+                    console.log(auction);
+                    $('<div id="'+ time.end +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.auction_div').show('slow');
                   } else {
                     $('.auction_item.'+name+' .auction_number').html(items.length);
                   }
