@@ -247,23 +247,23 @@
       }
 
       function loadSearchResult(auctions) {
-        console.log(auctions);
+        if($('.search_content_div').children().length != 0) {
+          $('.search_content_div').fadeOut("slow", function() {
+            $('.search_content_div').html('');
+          });
+        }
 
-        // if($('#search_field').val().length == 0) {
-        //   auctions.forEach(function(auctionObject) {
-        //     console.log(auctions);
-        //     var auctionlist = auctionObject.items;
-        //     auctionlist.forEach(function(auction) {
-        //       var auctionKey = Object.keys(auction)[0];
-        //       var auctionVal = auction[auctionKey];
-        //       var items = auctionVal['items'];
-        //       var time = auctionVal['time'];
-        //       console.log(items);
-        //     });
-        //   });
-        // } else {
-        //   console.log("Realtime searching disabled.");
-        // }
+        $('.search_content_div').fadeIn("slow", function() {
+          auctions.forEach(function(auction) {
+            console.log(auction);
+            var html = '<div class="search_content_row flex"> \
+                          <div style="display:none" id="'+auction.id+'" class="searched_item '+auction.name+'"></div> \
+                        </div>';
+            $(html).appendTo('.search_content_div').promise().done(function() {
+              $('.searched_item').show(2000);
+            });
+          });
+        });
       }
 
 

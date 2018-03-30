@@ -37,7 +37,19 @@
   margin-bottom: 30px;
 }
 
+.search_content_div {
+  flex-direction: column;
+}
+
 .search_content_div .searched_item {
+
+}
+
+.search_content_div .search_content_row {
+  margin-bottom: 15px;
+}
+
+.search_content_div .search_content_row:last-child {
 
 }
 
@@ -87,6 +99,7 @@ input[type=text]#search_field:focus {
   min-width: 268px;
 }
 
+.search_content_div,
 .create_auction_div,
 .show_inventar_div,
 .show_auction_div {
@@ -312,10 +325,14 @@ input[type=text]#search_field:focus {
 .inventar_div .inventar_item {
   width: 64px;
   height: 32px;
-  margin-right: 10px;
   background-size: 100%;
-  display: none;
   position: relative;
+}
+
+.auction_div .auction_item,
+.inventar_div .inventar_item {
+  display: none;
+  margin-right: 10px;
 }
 
 .inventar_div .inventar_item:hover {

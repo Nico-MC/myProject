@@ -224,11 +224,10 @@ function simulate() {
   var thirdPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'gold',
+    'name': 'iron',
     'type': 'ore',
     'cost': 2,
-    'weight': 10,
-    'isAuction': false
+    'weight': 10
   });
 
   console.log("Start simulating!");
@@ -330,7 +329,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
 
   if(droppedItem != null) {
     if(startingPrice > 0) {
-      if(buyoutPrice >= 0 || buyoutPrice === "") {
+      if((buyoutPrice >= 0 && buyoutPrice > startingPrice) || buyoutPrice === "") {
         console.log("Ok, let's create the auction!");
         // Data
         var startDate = moment().toDate();
@@ -350,25 +349,21 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             return -1;
           }
 
-          for(var i=0; i<amount; i++) {
-            var ref = DB.Item.ref(itemlist.pop());
-            puffer.push(ref);
-          }
+          for(var i=0; i<amount; i++)
+            puffer.push(DB.Item.ref(itemlist.pop()));
 
           items.partialUpdate()
                .put("itemlist", droppedItem, itemlist)
                .execute();
-          var auctionObject = {
+
+          new DB.Auction({
             'name': droppedItem,
             'itemlist': puffer,
             'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset })
-          }
-          var auction = new DB.Auction(auctionObject);
-
-          auction.insert().then(function() {
+          }).insert().then(function(insertedAuction) {
             DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
               auctionsTodo.partialUpdate()
-              .push("auctionlist", auction)
+              .push("auctionlist", insertedAuction)
               .execute().then(function() {
                 createAuctionMessage("Auktion erstellt!", true);
                 if(itemlist.length == 0) resetDrop();
@@ -376,9 +371,9 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             });
           });
         });
-      }
+      } else createAuctionMessage("Kauf ist nicht kleiner als Gebot.", false);
     } else {
-      if(startingPrice == "") createAuctionMessage("Bitte gebe einen Startpreis an.", false);
+      if(startingPrice == "") createAuctionMessage("Startpreis fehlt.", false);
       else if(startingPrice < 1) createAuctionMessage("Startpreis muss größer 0 sein.", false);
       return -1;
     }
