@@ -212,10 +212,9 @@
                 $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
                   $(this).remove();
                   if($('.auction_div').find('.auction_item' + escapeID(time.end)).length === 0) {
-                    console.log(auction);
                     $('<div id="'+ time.end +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.auction_div').show('slow');
                   } else {
-                    $('.auction_item.'+name+' .auction_number').html(items.length);
+                    $('.auction_item.'+name+' .auction_number').html(itemlist.length);
                   }
                 });
               } else {
@@ -248,6 +247,8 @@
       }
 
       function loadSearchResult(auctions) {
+        console.log(auctions);
+
         // if($('#search_field').val().length == 0) {
         //   auctions.forEach(function(auctionObject) {
         //     console.log(auctions);

@@ -116,7 +116,9 @@ function getDataForInitload() {
   DB.Auctions.load(auctionsID, {depth: true}).then(function(auctionObject) {
     loadAuctionItems(auctionObject.auctionlist);
   });
-  DB.Auctions.find().resultList(function(auctionItems) {
+  DB.Auction.find()
+            .ascending('name')
+            .resultList(function(auctionItems) {
     loadSearchResult(auctionItems);
   });
 }
@@ -202,8 +204,8 @@ function subscribeRealtime(sk, callback) {
     }
 
     function subscribeToAuctions() {
-      var query = DB.Auctions.find({depth:true});
-      var stream = query.eventStream({initial:true});
+      var query = DB.Auction.find({depth:true}).ascending('name');
+      var stream = query.resultStream();
       var subscriptionAuctions = stream.subscribe(function(auctionList) {
         updateSearchContent(auctionList);
       }, function(err) {
@@ -335,6 +337,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
         var endDate = moment().toDate();
         var timezoneOffset = startDate.getTimezoneOffset();
         var amount = 1;
+        var puffer = [];
         endDate.setHours(startDate.getHours()+parseInt(hours));
         endDate.setMinutes(startDate.getMinutes()+parseInt(minutes));
 
@@ -347,11 +350,11 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             return -1;
           }
 
-          var puffer = new DB.List();
-          for(var i=0; i<amount; i++)
-            puffer.push(itemlist.pop());
+          for(var i=0; i<amount; i++) {
+            var ref = DB.Item.ref(itemlist.pop());
+            puffer.push(ref);
+          }
 
-            console.log(puffer);
           items.partialUpdate()
                .put("itemlist", droppedItem, itemlist)
                .execute();
