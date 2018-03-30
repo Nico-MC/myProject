@@ -76,11 +76,6 @@ String.prototype.hashCode = function() {
   return hash;
 };
 
-function search(search_result) {
-  console.log(search_result);
-}
-
-
 function testWebsocketConnection() {
   // var ws = new WebSocket('ws://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
   var ws = new WebSocket('ws://misty-shape-74.events.baqend.com/v1/events');
@@ -112,7 +107,18 @@ function init(callback) {
       return callback();
     });
   });
+}
 
+function getDataForInitload() {
+  DB.Items.load(itemsID, {depth: true}).then(function(loadedItems) {
+    loadItems(loadedItems.itemlist);
+  });
+  DB.Auctions.load(auctionsID, {depth: true}).then(function(auctionObject) {
+    loadAuctionItems(auctionObject.auctionlist);
+  });
+  DB.Auctions.find().resultList(function(auctionItems) {
+    loadSearchResult(auctionItems);
+  });
 }
 
 function setTimestamp() {
@@ -168,6 +174,7 @@ function subscribeRealtime(sk, callback) {
   if(DB.User.me.securitykey == sk) {
     testWebsocketConnection();
     subscribeToItems();
+    subscribeToUserAuctions();
     subscribeToAuctions();
 
     function subscribeToItems() {
@@ -183,12 +190,23 @@ function subscribeRealtime(sk, callback) {
     }
 
     // loadAuctionItems
-    function subscribeToAuctions() {
+    function subscribeToUserAuctions() {
       var query = DB.Auctions.find({depth:true})
                              .equal('user', DB.User.me);
       var stream = query.eventStream({initial:true});
+      var subscriptionUserAuctions = stream.subscribe(function(auctionList) {
+        updateAuctionItems(auctionList.data.auctionlist);
+      }, function(err) {
+        console.log(err);
+      });
+      subList.push(subscriptionUserAuctions);
+    }
+
+    function subscribeToAuctions() {
+      var query = DB.Auctions.find({depth:true});
+      var stream = query.eventStream({initial:true});
       var subscriptionAuctions = stream.subscribe(function(auctionList) {
-        updateAuctionItems(auctionList);
+        updateSearchContent(auctionList);
       }, function(err) {
         console.log(err);
       });
@@ -205,7 +223,7 @@ function simulate() {
   var thirdPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'iron',
+    'name': 'gold',
     'type': 'ore',
     'cost': 2,
     'weight': 10,
@@ -293,14 +311,15 @@ function deleteItem(id, callback) {
 function popItem(itemName, callback) {
   // Pop and item
   DB.Items.load(itemsID, {refresh:true}).then(function(items) {
-    var newArr = items.itemlist.get(itemName);
-    newArr.pop();
-    items.partialUpdate()
-         .put("itemlist", itemName, newArr)
-         .execute().then(function() {
-           return callback();
-         });
-
+    newArr = items.itemlist.get(itemName);
+    if(typeof newArr != 'undefined') {
+      newArr.pop();
+      items.partialUpdate()
+      .put("itemlist", itemName, newArr)
+      .execute().then(function() {
+        return callback();
+      });
+    } else console.log("No item named '" + itemName + "' in itemlist - Itemlist not poppable.");
   });
 }
 
@@ -336,19 +355,23 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
           items.partialUpdate()
                .put("itemlist", droppedItem, itemlist)
                .execute();
+               console.log(puffer);
+          var auctionObject = {
+            'name': droppedItem,
+            'items': puffer,
+            'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset })
+          }
+          var auction = new DB.Auction(auctionObject);
 
-          var auctionObject = {};
-          auctionObject[droppedItem] = puffer;
-          auctionObject['time'] = new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset });
-
-          DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
-            auctionsTodo.partialUpdate()
-                        .push("auctionlist", auctionObject)
-                        .execute().then(function() {
-                          createAuctionMessage("Auktion erstellt!", true);
-                          if(itemlist.length == 0) resetDrop();
-
-                        });
+          auction.insert().then(function() {
+            DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
+              auctionsTodo.partialUpdate()
+              .push("auctionlist", auction)
+              .execute().then(function() {
+                createAuctionMessage("Auktion erstellt!", true);
+                if(itemlist.length == 0) resetDrop();
+              });
+            });
           });
         });
       }
@@ -360,5 +383,31 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
   } else {
     createAuctionMessage("Auktionsgegenstand fehlt.", false);
     return -1;
+  }
+}
+
+function searchRealtime(obj) {
+  var textInput = obj.value;
+  var auction
+  console.log(textInput);
+
+  DB.Auctions.load().then(function() {
+    console.log();
+  });
+}
+
+function browseAfterAuctions() {
+  searchInput = $('#search_field').val();
+  if(searchInput.length == 0) {
+    DB.Auctions.find().resultList(function(auctionlist) {
+      loadSearchResult(auctionlist);
+    });
+  } else if(searchInput.length > 0) {
+    var filter = "auctionlist." + searchInput;
+    DB.Auctions.find({depth:true})
+               .where({ "auctionlist.gold": { $exists: true, $ne: null } })
+               .resultList(function(auctions) {
+                 console.log(auctions);
+               })
   }
 }

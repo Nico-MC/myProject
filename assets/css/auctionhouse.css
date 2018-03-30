@@ -30,18 +30,15 @@
   padding: 15px;
 }
 
-.flex_box {
-  display: -webkit-box !important;
-    display: -moz-box !important;
-      display: -ms-flexbox !important;
-        display: -webkit-flex !important;
-          display: flex !important;
-}
-
 .search_bar {
   max-width: none !important;
   height: 30px !important;
   flex: 1;
+  margin-bottom: 30px;
+}
+
+.search_content_div .searched_item {
+
 }
 
 input[type="text"]#search_field {
@@ -310,6 +307,7 @@ input[type=text]#search_field:focus {
   display: none;
 }
 
+.search_content_div .searched_item,
 .auction_div .auction_item,
 .inventar_div .inventar_item {
   width: 64px;
