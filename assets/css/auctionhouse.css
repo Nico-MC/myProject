@@ -37,10 +37,6 @@
   margin-bottom: 30px;
 }
 
-.search_content_slide_div {
-  display: none;
-}
-
 .search_content_div {
   flex-direction: column;
   padding-bottom: 0 !important;

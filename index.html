@@ -246,61 +246,25 @@
           resizeAuto();
       }
 
-      function loadSearchContent(auctions, option) {
-        // auctions can be multible objects
-        if(option == 'init') {
-          renderAll(function() {
-            if($('.search_content_div').children().length == 0) {
-              $('.search_content_div').html('<span class="no_items">Keine aktuellen Auktionen.</span>');
-              $('.search_content_div .no_items').fadeIn("fast");
-            }
-            $('.search_content_slide_div').show("slow");
-          });
-        // realtime triggered - auctions is only one single event
-        } else if(option == 'update') {
-          console.log(auctions);
-          var matchType = auctions.matchType;
-          var auctionKey = auctions.data.key;
-          var auctionName = auctions.data.name;
-          if(matchType == 'remove') {
-            $('.searched_item#'+auctionKey).parent().hide("slow", function() {
-              this.remove();
-              $('.search_content_div').children().hide("slow").promise().done(function() {
-                $('.search_content_div').html('<span class="no_items">Keine aktuellen Auktionen.</span>');
-                $('.search_content_div .no_items').show("slow", function() { resizeAuto(); });
-              });
-            });
-          } else if(matchType == 'add') {
-            $('.search_content_div .no_items').hide("fast").promise().done(function() {
-              this.remove();
-              if($('.searched_item#'+auctionKey).length == 0) {
-                var html = '<div style="display: none" class="search_content_row flex"> \
-                <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
-                </div>';
+      function loadSearchContent(auctions) {
+        var auctionElements = [];
+        auctions.forEach(function(auction) {
+          var auctionName = auction.name;
+          var auctionTime = auction.time;
+          var auctionUser = auction.user;
+          var auctionKey = auction.key;
+          var html = '<div style="display: none" class="search_content_row flex"> \
+          <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
+          </div>';
 
-                var insertAfterThis = $('.searched_item.'+auctionName).parent().last();
-                if(insertAfterThis.length != 0) {
-                  $(html).insertAfter(insertAfterThis).show("slow", function() { resizeAuto(); });
-                } else $(html).appendTo('.search_content_div').show("slow");
-              }
-            });
-          }
-        } else if(option == 'search') {
-        }
-
-        function renderAll(callback) {
-          if(auctions.length == 0) return callback();
-          var itemsProcessed = 0;
-          auctions.forEach(function(auction) {
-            var html = '<div class="search_content_row flex"> \
-            <div id="'+auction.key+'" class="searched_item '+auction.name+'"></div> \
-            </div>';
-            $(html).appendTo('.search_content_div').promise().done(function() {
-              itemsProcessed++;
-            });
-            if(itemsProcessed == auctions.length) return callback();
-          });
-        }
+          if($('.searched_item#' + auctionKey).length == 0) $(html).appendTo('.search_content_div').show("slow");
+          auctionElements.push($('.searched_item#' + auctionKey).parent()[0]);
+        });
+        var loadedElements = $('.searched_item').parent().toArray();
+        var difference = $.grep(loadedElements,function(x) {return $.inArray(x, auctionElements) < 0});
+        difference.forEach(function(auction) {
+          $(auction).hide("slow", function() { this.remove() });
+        });
       }
 
 
@@ -313,7 +277,7 @@
       }
 
       function updateSearchContent(auctionObject) {
-        loadSearchContent(auctionObject, 'update');
+        loadSearchContent(auctionObject);
       }
 
       function escapeID(id) {

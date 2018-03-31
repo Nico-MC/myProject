@@ -205,9 +205,8 @@ function subscribeRealtime(sk, callback) {
 
     function subscribeToAuctions() {
       var query = DB.Auction.find({depth:true})
-                            .ascending('name')
-                            .offset(5);
-      var stream = query.eventStream({initial:true});
+                            .ascending('name');
+      var stream = query.resultStream();
       var subscriptionAuctions = stream.subscribe(function(auctionObject) {
         updateSearchContent(auctionObject);
       }, function(err) {
