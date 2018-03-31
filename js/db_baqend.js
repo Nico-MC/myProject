@@ -119,8 +119,8 @@ function getDataForInitload() {
   DB.Auction.find()
             .ascending('name')
             .resultList(function(auctionItems) {
-    loadSearchResult(auctionItems);
-  });
+              loadSearchContent(auctionItems, 'init');
+            });
 }
 
 function setTimestamp() {
@@ -204,10 +204,12 @@ function subscribeRealtime(sk, callback) {
     }
 
     function subscribeToAuctions() {
-      var query = DB.Auction.find({depth:true}).ascending('name');
-      var stream = query.resultStream();
-      var subscriptionAuctions = stream.subscribe(function(auctionList) {
-        updateSearchContent(auctionList);
+      var query = DB.Auction.find({depth:true})
+                            .ascending('name')
+                            .offset(5);
+      var stream = query.eventStream({initial:true});
+      var subscriptionAuctions = stream.subscribe(function(auctionObject) {
+        updateSearchContent(auctionObject);
       }, function(err) {
         console.log(err);
       });
@@ -224,7 +226,7 @@ function simulate() {
   var thirdPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'iron',
+    'name': 'gold',
     'type': 'ore',
     'cost': 2,
     'weight': 10
@@ -358,6 +360,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
 
           new DB.Auction({
             'name': droppedItem,
+            'user': DB.User.me,
             'itemlist': puffer,
             'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset })
           }).insert().then(function(insertedAuction) {
@@ -396,15 +399,17 @@ function searchRealtime(obj) {
 function browseAfterAuctions() {
   searchInput = $('#search_field').val();
   if(searchInput.length == 0) {
-    DB.Auctions.find().resultList(function(auctionlist) {
-      loadSearchResult(auctionlist);
-    });
+    DB.Auction.find()
+              .ascending('name')
+              .resultList(function(auctionlist) {
+                loadSearchContent(auctionlist, 'search');
+              });
   } else if(searchInput.length > 0) {
-    var filter = "auctionlist." + searchInput;
-    DB.Auctions.find({depth:true})
-               .where({ "auctionlist.gold": { $exists: true, $ne: null } })
-               .resultList(function(auctions) {
-                 console.log(auctions);
+    DB.Auction.find()
+               .ascending('name')
+               .equal('name', searchInput)
+               .resultList(function(auctionlist) {
+                 loadSearchContent(auctionlist, 'search');
                })
   }
 }

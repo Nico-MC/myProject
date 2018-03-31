@@ -37,8 +37,13 @@
   margin-bottom: 30px;
 }
 
+.search_content_slide_div {
+  display: none;
+}
+
 .search_content_div {
   flex-direction: column;
+  padding-bottom: 0 !important;
 }
 
 .search_content_div .searched_item {
@@ -50,7 +55,10 @@
 }
 
 .search_content_div .search_content_row:last-child {
+}
 
+.search_content_div .no_items {
+  margin-bottom: 15px;
 }
 
 input[type="text"]#search_field {
@@ -314,6 +322,7 @@ input[type=text]#search_field:focus {
   justify-content: left;
 }
 
+.search_content_div .no_items,
 .auction_div .no_items,
 .inventar_div .no_items {
   font-weight: 100;
