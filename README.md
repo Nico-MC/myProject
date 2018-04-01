@@ -12,10 +12,11 @@ Projektwiederherstellung:
 >git reflog
 >git checkout <commit>
 
-Upcoming changes:
-- Daily lootbox filled with random item
-- Bank balance (backend)
-- Selectable div to choose realtime database, like meteor, firebase, parse
-- Search algorithm to show all available auctions
+### Upcoming changes:
+- [ ] Daily lootbox filled with random item
+- [ ] Bank balance (backend)
+- [ ] Selectable div to choose realtime database, like meteor, firebase, parse
+- [x] Search algorithm to show all available auctions [finished]
+- [ ] Edit tasks frontend
 
 Copyright by © Nico Noster, 2017-2018
