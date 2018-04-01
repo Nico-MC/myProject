@@ -105,8 +105,12 @@
 
             $('#search').submit(function(e) {
               e.preventDefault();
-              browseAfterAuctions();
             });
+
+            $('#search_field').keyup(function() {
+                searchRealtime();
+            });
+
             // Clear text search_field
             $("#search_field").val("");
 
@@ -247,6 +251,7 @@
       }
 
       function loadSearchContent(auctions) {
+        auctionClassNames = [];
         var auctionElements = [];
         auctions.forEach(function(auction) {
           var auctionName = auction.name;
@@ -257,13 +262,15 @@
           <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
           </div>';
 
-          if($('.searched_item#' + auctionKey).length == 0) $(html).appendTo('.search_content_div').show("slow");
+          if($('.searched_item#' + auctionKey).length == 0) $(html).appendTo('.search_content_div').promise().done(function() { searchRealtime(); resizeAuto(); });
           auctionElements.push($('.searched_item#' + auctionKey).parent()[0]);
+          // This is for searching after available auctions in search bar (look function: searchRealtime())
+          if(!auctionClassNames.includes(auctionName)) auctionClassNames.push(auctionName);
         });
         var loadedElements = $('.searched_item').parent().toArray();
-        var difference = $.grep(loadedElements,function(x) {return $.inArray(x, auctionElements) < 0});
+        var difference = $.grep(loadedElements, function(x) { return $.inArray(x, auctionElements) < 0 });
         difference.forEach(function(auction) {
-          $(auction).hide("slow", function() { this.remove() });
+          $(auction).hide("slow", function() { this.remove(); resizeAuto(); });
         });
       }
 
@@ -362,6 +369,7 @@
 
       function drop(e) {
           e.preventDefault();
+          resetDrop();
           var classNameToInsert = e.dataTransfer.getData("text");
           // $('.auction_item .background_overflow_div').attr('class', 'background_overflow_div');
           $('.auction_item .background_overflow_div').addClass(classNameToInsert);

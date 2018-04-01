@@ -3,6 +3,7 @@ var itemsID = null, auctionsID = null;
 var realtime = "off";
 var droppedItem = null;
 var timestamp;
+var auctionClassNames = [];
 
 $(document).ready(function() {
   DB.connect('misty-shape-74', false).then(function() {
@@ -225,9 +226,8 @@ function simulate() {
   var thirdPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'gold',
+    'name': 'iron',
     'type': 'ore',
-    'cost': 2,
     'weight': 10
   });
 
@@ -249,7 +249,7 @@ function simulate() {
 
 
   function loop() {
-    console.log("sos");
+    console.log("loop");
   }
   function stepOne(item) {
     addItem(item, function() {
@@ -361,7 +361,10 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             'name': droppedItem,
             'user': DB.User.me,
             'itemlist': puffer,
-            'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset })
+            'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset }),
+            'amount': amount,
+            'startingprice': startingPrice,
+            'buyoutprice': buyoutPrice
           }).insert().then(function(insertedAuction) {
             DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
               auctionsTodo.partialUpdate()
@@ -385,14 +388,20 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
   }
 }
 
-function searchRealtime(obj) {
-  var textInput = obj.value;
-  var auction
-  console.log(textInput);
+function searchRealtime() {
+  var searchInput = $('#search_field').val().toLowerCase();
+  var loadedElements = $('.searched_item').toArray();
 
-  DB.Auctions.load().then(function() {
-    console.log();
+  loadedElements.forEach(function(loadedElement) {
+    var className = getClassName(loadedElement.className, 1).toLowerCase();
+    if(className.indexOf(searchInput) > -1) $(loadedElement).parent().show("slow");
+    else $(loadedElement).parent().hide("slow");
   });
+
+
+  // // check match
+  // var re = new RegExp(searchInput, 'g');
+  // if(loadedAuctionNames[0].match(re));
 }
 
 function browseAfterAuctions() {
