@@ -259,21 +259,33 @@
           var auctionUser = auction.user;
           var auctionKey = auction.key;
           var html = '<div style="display: none" class="search_content_row flex"> \
-          <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
-          </div>';
+                        <div class="searched_item_div"> \
+                          <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
+                        </div> \
+                      </div>';
 
-          if($('.searched_item#' + auctionKey).length == 0) $(html).appendTo('.search_content_div').promise().done(function() { searchRealtime(); resizeAuto(); });
-          auctionElements.push($('.searched_item#' + auctionKey).parent()[0]);
+          if($('.searched_item#' + auctionKey).length == 0) $(html).appendTo('.search_content_div').promise().done(function() { searchRealtime(); });
+          auctionElements.push($('.searched_item#' + auctionKey).parents('.search_content_row')[0]);
           // This is for searching after available auctions in search bar (look function: searchRealtime())
-          if(!auctionClassNames.includes(auctionName)) auctionClassNames.push(auctionName);
+          if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
         });
-        var loadedElements = $('.searched_item').parent().toArray();
+        console.log(auctionClassNames);
+        var loadedElements = $('.searched_item').parents('.search_content_row').toArray();
         var difference = $.grep(loadedElements, function(x) { return $.inArray(x, auctionElements) < 0 });
         difference.forEach(function(auction) {
           $(auction).hide("slow", function() { this.remove(); resizeAuto(); });
         });
       }
 
+      function searchRealtime() {
+        var searchInput = $('#search_field').val().toLowerCase();
+        var loadedElements = $('.searched_item').toArray();
+        loadedElements.forEach(function(loadedElement) {
+          var className = getClassName(loadedElement.className, 1).toLowerCase();
+          if(className.indexOf(searchInput) > -1) $('#' + loadedElement.id).parents('.search_content_row').show("slow", function() { resizeAuto(); });
+          else $('#' + loadedElement.id).parents('.search_content_row').hide("slow", function() { resizeAuto(); });
+        });
+      }
 
       function updateItems(items) {
         loadItems(items.data.itemlist);
@@ -432,6 +444,7 @@
           }
         }
       }
+
     </script>
 
     <!-- LOADING GAME -->

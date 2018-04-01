@@ -388,22 +388,6 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
   }
 }
 
-function searchRealtime() {
-  var searchInput = $('#search_field').val().toLowerCase();
-  var loadedElements = $('.searched_item').toArray();
-
-  loadedElements.forEach(function(loadedElement) {
-    var className = getClassName(loadedElement.className, 1).toLowerCase();
-    if(className.indexOf(searchInput) > -1) $(loadedElement).parent().show("slow");
-    else $(loadedElement).parent().hide("slow");
-  });
-
-
-  // // check match
-  // var re = new RegExp(searchInput, 'g');
-  // if(loadedAuctionNames[0].match(re));
-}
-
 function browseAfterAuctions() {
   searchInput = $('#search_field').val();
   if(searchInput.length == 0) {

@@ -39,7 +39,7 @@
 
 .search_content_div {
   flex-direction: column;
-  padding-bottom: 0 !important;
+  padding: 0 !important;
 }
 
 .search_content_div .searched_item {
@@ -47,7 +47,23 @@
 }
 
 .search_content_div .search_content_row {
-  margin-bottom: 15px;
+  /* margin-bottom: 15px; */
+  padding: 15px 0 15px 15px;
+  border-radius: 5px;
+
+  /* -moz-transition: -moz-box-shadow .1s;
+    -ms-transition: -ms-box-shadow .1s;
+      -o-transition: -o-box-shadow .1s;
+        -webkit-transition: -webkit-box-shadow .1s;
+          transition: box-shadow .1s; */
+}
+
+.search_content_div .search_content_row:hover {
+  -moz-box-shadow: inset 0 0 10px #000000;
+    -webkit-box-shadow: inset 0 0 10px #000000;
+      box-shadow: inset 0 0 10px #000000;
+
+  border-radius: 5px;
 }
 
 .search_content_div .search_content_row:last-child {
