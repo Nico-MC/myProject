@@ -18,5 +18,7 @@ Projektwiederherstellung:
 - [ ] Selectable div to choose realtime database, like meteor, firebase, parse
 - [x] Search algorithm to show all available auctions [finished]
 - [ ] Edit tasks frontend
+- [ ] Expired auctions need to go back to user inventory
+- [ ] Update interval for auctions end time
 
 Copyright by © Nico Noster, 2017-2018

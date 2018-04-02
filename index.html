@@ -20,6 +20,7 @@
     <!-- MODULES -->
     <!-- <script type="text/javascript" src="modules/phaser.min.js"></script> -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
+    <script src="modules/moment-timezone-with-data.js"></script>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
@@ -250,26 +251,65 @@
           resizeAuto();
       }
 
+      function getRemainingTime(givenTime, timezonOffset) {
+        var now = moment().utcOffset(timezonOffset);
+        return givenTime.diff(now, 'seconds');
+      }
+
       function loadSearchContent(auctions) {
         auctionClassNames = [];
+        auctionEnds = [];
         var auctionElements = [];
         auctions.forEach(function(auction) {
-          var auctionName = auction.name;
-          var auctionTime = auction.time;
-          var auctionUser = auction.user;
-          var auctionKey = auction.key;
-          var html = '<div style="display: none" class="search_content_row flex"> \
-                        <div class="searched_item_div"> \
-                          <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
-                        </div> \
-                      </div>';
 
-          if($('.searched_item#' + auctionKey).length == 0) $(html).appendTo('.search_content_div').promise().done(function() { searchRealtime(); });
-          auctionElements.push($('.searched_item#' + auctionKey).parents('.search_content_row')[0]);
-          // This is for searching after available auctions in search bar (look function: searchRealtime())
-          if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
+          /* TIME */
+          var auctionStart = moment(auction.time.start);
+          var auctionEnd = moment(auction.time.end);
+          // This is for checking the remaining time of all items
+          auctionEnds.push(auctionEnd);
+          var auctionTimezoneOffset = auction.time.timezoneOffset;
+          var diff = getRemainingTime(auctionEnd, auctionTimezoneOffset);
+          var auctionExpired = moment.duration(diff);
+
+          if(diff > 0) {
+            var auctionName = auction.name;
+            var auctionKey = auction.key;
+            /* PRICE */
+            var auctionUser = auction.user.username;
+            var auctionStartingPrice = auction.startingprice;
+            var auctionBuyoutPrice = auction.buyoutprice;
+            if(auctionBuyoutPrice == 0) buyoutDiv = '';
+            else buyoutDiv = '<div class="buyout_price">Sofortkauf: <span>'+auctionBuyoutPrice+' €'+'</span></div>'
+
+            if($('.searched_item#' + auctionKey).length == 0) {
+              var html = '<div style="display: none" class="search_content_row flex"> \
+                            <div class="auction_item_div category_content flex-child"> \
+                              <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
+                            </div> \
+                            <div class="auction_bidder_div category_content flex-child"> \
+                               <div>'+auctionUser+'</div> \
+                            </div> \
+                            <div class="auction_end_div category_content flex-child"> \
+                               <div>'+diff+'</div> \
+                            </div> \
+                            <div class="auction_price_div category_content flex-child"> \
+                              <div class="auction_price"> \
+                               <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
+                               '+buyoutDiv+' \
+                              </div> \
+                            </div> \
+                          </div>';
+
+              $(html).appendTo('.search_content_div');
+            }
+            auctionElements.push($('.searched_item#' + auctionKey).parents('.search_content_row')[0]);
+            // This is for searching after available auctions in search bar (look function: searchRealtime())
+            if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
+          }
         });
-        console.log(auctionClassNames);
+        // After render show content
+        searchRealtime();
+        // If realtime event arrives, check if item need to be removed
         var loadedElements = $('.searched_item').parents('.search_content_row').toArray();
         var difference = $.grep(loadedElements, function(x) { return $.inArray(x, auctionElements) < 0 });
         difference.forEach(function(auction) {
