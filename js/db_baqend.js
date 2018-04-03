@@ -266,6 +266,18 @@ function simulate() {
   }
 }
 
+function pushItemlist(givenItemlist, callback) {
+  DB.Items.load(itemsID).then(function(itemsTodo) {
+    var newArr = itemsTodo.itemlist.concat(givenItemlist);
+    items.partialUpdate
+         .set("itemlist", newArr)
+         .execute().then(function() {
+           console.log("Concat array.");
+           return callback();
+         });
+  });
+}
+
 // Create and Push the given item
 function addItem(item, callback) {
   item.insert().then(function(savedItem) {
@@ -367,11 +379,12 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             'buyoutprice': buyoutPrice
           }).insert().then(function(insertedAuction) {
             DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
-              auctionsTodo.partialUpdate()
-              .push("auctionlist", insertedAuction)
-              .execute().then(function() {
+              var newArr = auctionsTodo.auctionlist;
+              newArr.push(insertedAuction);
+              auctionsTodo.auctionlist = newArr;
+              auctionsTodo.save({depth:true}, function() {
                 createAuctionMessage("Auktion erstellt!", true);
-                if(itemlist.length == 0) resetDrop();
+                resetDrop();
               });
             });
           });
@@ -386,6 +399,12 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
     createAuctionMessage("Auktionsgegenstand fehlt.", false);
     return -1;
   }
+}
+
+function deleteAuction(auction) {
+  // DB.Auctions.partialUpdate(auctionsID)
+             // .remove("auctionlist", auction)
+             // .execute();
 }
 
 function browseAfterAuctions() {

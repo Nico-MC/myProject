@@ -209,31 +209,26 @@
               var name = auction.name;
               var itemlist = auction.itemlist;
               var time = auction.time;
-              var pushLoadedAuctionItem = function() {
-                auctionElements.push($('.auction_div .auction_item' + escapeID(time.end))[0]);
-              };
+              var auctionKey = auction.key;
 
-              if(auctions.length != 0) {
-                $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
-                  $(this).remove();
-                  if($('.auction_div').find('.auction_item' + escapeID(time.end)).length === 0) {
-                    $('<div id="'+ time.end +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.auction_div').show('slow');
-                  } else {
-                    $('.auction_item.'+name+' .auction_number').html(itemlist.length);
-                  }
-                });
-              } else {
-                $('.auction_item' + escapeID(time.end)).hide('slow', function() { $(this).remove(); });
-              }
-
-              pushLoadedAuctionItem();
+              $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
+                $(this).remove();
+                if($('.auction_div').find('.auction_item#' + auctionKey).length === 0) {
+                  $('<div id="'+ auctionKey +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.auction_div').show('slow');
+                } else {
+                  $('.auction_item.'+name+' .auction_number').html(itemlist.length);
+                }
+              });
+              auctionElements.push(auction.key);
             });
 
-            // This is to filter the old element and remove them immediately
+            // This is to filter the old elements and remove them immediately
             if($('.auction_div > .auction_item').length != 0) {
               var loadedElements = $('.auction_div').children().toArray();
+
               $(loadedElements).each(function(key, val) {
-                if($.inArray(val, auctionElements) == -1) {
+                console.log($.inArray(val.id, auctionElements));
+                if($.inArray(val.id, auctionElements) == -1) {
                   console.log("Delete item");
                   $(val).hide('slow', function() { $(this).remove(); });
                 }
@@ -260,8 +255,9 @@
         auctionClassNames = [];
         auctionEnds = [];
         var auctionElements = [];
-        auctions.forEach(function(auction) {
 
+
+        auctions.forEach(function(auction) {
           /* TIME */
           var auctionStart = moment(auction.time.start);
           var auctionEnd = moment(auction.time.end);
@@ -305,6 +301,8 @@
             auctionElements.push($('.searched_item#' + auctionKey).parents('.search_content_row')[0]);
             // This is for searching after available auctions in search bar (look function: searchRealtime())
             if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
+          } else {
+            deleteAuction(auction);
           }
         });
         // After render show content
@@ -340,7 +338,7 @@
       }
 
       function escapeID(id) {
-        return "#" + id.replace( /(:|\.|\[|\]|,|=|@)/g, "\\$1" );
+        // return "#" + id.replace( /(:|\.|\[|\]|,|=|@)/g, "\\$1" );
       }
 
       function errormessage(message) {
