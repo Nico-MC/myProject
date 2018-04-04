@@ -227,7 +227,6 @@
               var loadedElements = $('.auction_div').children().toArray();
 
               $(loadedElements).each(function(key, val) {
-                console.log($.inArray(val.id, auctionElements));
                 if($.inArray(val.id, auctionElements) == -1) {
                   console.log("Delete item");
                   $(val).hide('slow', function() { $(this).remove(); });
@@ -248,53 +247,63 @@
 
       function getRemainingTime(givenTime, timezonOffset) {
         var now = moment().utcOffset(timezonOffset);
-        return givenTime.diff(now, 'seconds');
+        return givenTime.diff(now);
       }
 
       function loadSearchContent(auctions) {
         auctionClassNames = [];
-        auctionEnds = [];
         var auctionElements = [];
-
+        var notExpiredAuctions = [];
+        var auctionExpiredCount = 0;
 
         auctions.forEach(function(auction) {
           /* TIME */
           var auctionStart = moment(auction.time.start);
           var auctionEnd = moment(auction.time.end);
           // This is for checking the remaining time of all items
-          auctionEnds.push(auctionEnd);
           var auctionTimezoneOffset = auction.time.timezoneOffset;
-          var diff = getRemainingTime(auctionEnd, auctionTimezoneOffset);
-          var auctionExpired = moment.duration(diff);
+          var diff = moment.duration(getRemainingTime(auctionEnd, auctionTimezoneOffset));
+          var expiryTime = function() {
+            var time = "";
+            if(diff.days() != 0) time += diff.days() + ":";
+            if(diff.hours() != 0) time += diff.hours() + ":";
+            if(diff.minutes() != 0) time += diff.minutes() + ":";
+            if(diff.seconds() != 0) time += diff.seconds();
+            return time;
+          };
 
-          if(diff > 0) {
+          console.log(diff.asSeconds());
+
+          if(diff.asSeconds() > 0) {
             var auctionName = auction.name;
             var auctionKey = auction.key;
             /* PRICE */
             var auctionUser = auction.user.username;
             var auctionStartingPrice = auction.startingprice;
             var auctionBuyoutPrice = auction.buyoutprice;
+
+            notExpiredAuctions.push(auction);
             if(auctionBuyoutPrice == 0) buyoutDiv = '';
             else buyoutDiv = '<div class="buyout_price">Sofortkauf: <span>'+auctionBuyoutPrice+' €'+'</span></div>'
 
             if($('.searched_item#' + auctionKey).length == 0) {
               var html = '<div style="display: none" class="search_content_row flex"> \
-                            <div class="auction_item_div category_content flex-child"> \
-                              <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
-                            </div> \
-                            <div class="auction_bidder_div category_content flex-child"> \
-                               <div>'+auctionUser+'</div> \
-                            </div> \
-                            <div class="auction_end_div category_content flex-child"> \
-                               <div>'+diff+'</div> \
-                            </div> \
-                            <div class="auction_price_div category_content flex-child"> \
-                              <div class="auction_price"> \
-                               <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
-                               '+buyoutDiv+' \
-                              </div> \
-                            </div> \
-                          </div>';
+              <div class="auction_item_div category_content flex-child"> \
+              <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
+              </div> \
+              <div class="auction_bidder_div category_content flex-child"> \
+              <div>'+auctionUser+'</div> \
+              </div> \
+              <div class="auction_end_div category_content flex-child"> \
+              <div>'+expiryTime()+'</div> \
+              </div> \
+              <div class="auction_price_div category_content flex-child"> \
+              <div class="auction_price"> \
+              <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
+              '+buyoutDiv+' \
+              </div> \
+              </div> \
+              </div>';
 
               $(html).appendTo('.search_content_div');
             }
@@ -302,9 +311,13 @@
             // This is for searching after available auctions in search bar (look function: searchRealtime())
             if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
           } else {
-            deleteAuction(auction);
+            // auction.delete();
+            auctionExpiredCount++;
+            console.log(1);
           }
         });
+        if(notExpiredAuctions.length != 0) checkExpiredAuctions(notExpiredAuctions, auctionExpiredCount);
+
         // After render show content
         searchRealtime();
         // If realtime event arrives, check if item need to be removed

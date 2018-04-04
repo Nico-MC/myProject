@@ -120,7 +120,7 @@ function getDataForInitload() {
   DB.Auction.find()
             .ascending('name')
             .resultList(function(auctionItems) {
-              loadSearchContent(auctionItems, 'init');
+              loadSearchContent(auctionItems);
             });
 }
 
@@ -217,52 +217,6 @@ function subscribeRealtime(sk, callback) {
     }
 
     return callback(subList);
-  }
-}
-
-function simulate() {
-  var firstPause = 4000;
-  var secondPause = 7000;
-  var thirdPause = 3000;
-
-  var item1 = new DB.Item({
-    'name': 'iron',
-    'type': 'ore',
-    'weight': 10
-  });
-
-  console.log("Start simulating!");
-  // setInterval(loop,1000);
-  // Start callback hell ...
-  console.log("Step 1: Pushing item in " + firstPause/1000 + " seconds ...");
-  setTimeout(function() {
-    stepOne(item1);
-    console.log("Step 2: Pop item in " + secondPause/1000 + " seconds ...");
-    setTimeout(function() {
-      stepTwo();
-      console.log("Step 3: " + thirdPause/1000 + " seconds ...");
-      setTimeout(function() {
-        stepThree();
-      }, thirdPause);
-    }, secondPause);
-  }, firstPause);
-
-
-  function loop() {
-    console.log("loop");
-  }
-  function stepOne(item) {
-    addItem(item, function() {
-
-    });
-  }
-  function stepTwo() {
-    popItem('gold', function() {
-
-    });
-  }
-  function stepThree() {
-
   }
 }
 
@@ -376,7 +330,8 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset }),
             'amount': amount,
             'startingprice': startingPrice,
-            'buyoutprice': buyoutPrice
+            'buyoutprice': buyoutPrice,
+            'expired': false
           }).insert().then(function(insertedAuction) {
             DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
               var newArr = auctionsTodo.auctionlist;
@@ -401,10 +356,15 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
   }
 }
 
-function deleteAuction(auction) {
-  // DB.Auctions.partialUpdate(auctionsID)
-             // .remove("auctionlist", auction)
-             // .execute();
+
+
+function checkExpiredAuctions(notExpiredAuctions, auctionExpiredCount) {
+  console.log(2);
+  DB.Auctions.load(auctionsID).then(function(auctionsTodo) {
+    auctionsTodo.auctionlist = notExpiredAuctions;
+    auctionsTodo.save();
+  });
+  if(auctionExpiredCount != 0) alert(auctionExpiredCount + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
 }
 
 function browseAfterAuctions() {
@@ -422,5 +382,58 @@ function browseAfterAuctions() {
                .resultList(function(auctionlist) {
                  loadSearchContent(auctionlist, 'search');
                })
+  }
+}
+
+
+
+
+
+
+
+
+function simulate() {
+  var firstPause = 4000;
+  var secondPause = 7000;
+  var thirdPause = 3000;
+
+  var item1 = new DB.Item({
+    'name': 'iron',
+    'type': 'ore',
+    'weight': 10
+  });
+
+  console.log("Start simulating!");
+  // setInterval(loop,1000);
+  // Start callback hell ...
+  console.log("Step 1: Pushing item in " + firstPause/1000 + " seconds ...");
+  setTimeout(function() {
+    stepOne(item1);
+    console.log("Step 2: Pop item in " + secondPause/1000 + " seconds ...");
+    setTimeout(function() {
+      stepTwo();
+      console.log("Step 3: " + thirdPause/1000 + " seconds ...");
+      setTimeout(function() {
+        stepThree();
+      }, thirdPause);
+    }, secondPause);
+  }, firstPause);
+
+
+  function loop() {
+    console.log("loop");
+  }
+  function stepOne(item) {
+    addItem(item, function() {
+
+    });
+  }
+  function stepTwo() {
+    popItem('gold', function() {
+
+    });
+  }
+  function stepThree() {
+
   }
 }
