@@ -4,6 +4,7 @@ var realtime = "off";
 var droppedItem = null;
 var timestamp;
 var auctionClassNames = [];
+var timeIntervallID;
 
 $(document).ready(function() {
   DB.connect('misty-shape-74', false).then(function() {
@@ -100,7 +101,6 @@ function initUser(username, callback) {
 // Initialize all important VARIABLES
 function init(callback) {
   console.log("Start Init ...");
-  setTimestamp();
   getItemsTodoID(function() {
     console.log(2);
     getAuctionsID(function() {
@@ -115,20 +115,13 @@ function getDataForInitload() {
     loadItems(loadedItems.itemlist);
   });
   DB.Auctions.load(auctionsID, {depth: true}).then(function(auctionObject) {
-    loadAuctionItems(auctionObject.auctionlist);
+    loadAuctionItems(auctionObject);
   });
   DB.Auction.find()
             .ascending('name')
             .resultList(function(auctionItems) {
               loadSearchContent(auctionItems);
             });
-}
-
-function setTimestamp() {
-  timestamp = moment().toDate();
-  setInterval(function() {
-    timestamp = moment().toDate();
-  }, 60000);
 }
 
 // Get ID of user items todo
@@ -197,7 +190,7 @@ function subscribeRealtime(sk, callback) {
                              .equal('user', DB.User.me);
       var stream = query.eventStream({initial:true});
       var subscriptionUserAuctions = stream.subscribe(function(auctionList) {
-        updateAuctionItems(auctionList.data.auctionlist);
+        updateAuctionItems(auctionList.data);
       }, function(err) {
         console.log(err);
       });
@@ -215,7 +208,6 @@ function subscribeRealtime(sk, callback) {
       });
       subList.push(subscriptionAuctions);
     }
-
     return callback(subList);
   }
 }
@@ -356,16 +348,17 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
   }
 }
 
-
-
-function checkExpiredAuctions(notExpiredAuctions, auctionExpiredCount) {
-  console.log(2);
-  DB.Auctions.load(auctionsID).then(function(auctionsTodo) {
-    auctionsTodo.auctionlist = notExpiredAuctions;
-    auctionsTodo.save();
+function removeAuctionFromAuctions(nonExpiredAuctions, auctionExpiredCount) {
+  console.log(nonExpiredAuctions, auctionExpiredCount);
+  DB.Auction.load(auctionsID).then(function(auctionsTodo) {
+    auctionsTodo.auctionlist = nonExpiredAuctions;
+    // TODO: 
   });
-  if(auctionExpiredCount != 0) alert(auctionExpiredCount + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
 }
+
+// function checkExpiredAuctions(expiredAuctions) {
+//   if(auctionExpiredCount != 0) alert(auctionExpiredCount + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
+// }
 
 function browseAfterAuctions() {
   searchInput = $('#search_field').val();
@@ -383,6 +376,10 @@ function browseAfterAuctions() {
                  loadSearchContent(auctionlist, 'search');
                })
   }
+}
+
+function updateAuctionsTime() {
+  console.log("ok");
 }
 
 

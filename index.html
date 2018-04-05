@@ -129,6 +129,7 @@
                 streamlist = null;
                 console.log("All streams unsubscribed.");
                 console.log("Realtime is off.");
+                clearTimeInterval(timeIntervallID);
               }
             });
 
@@ -201,6 +202,9 @@
       }
 
       function loadAuctionItems(auctions) {
+        var auctions = auctions.auctionlist;
+        var nonExpiredAuctions = [];
+        var auctionExpiredCount = 0;
         function render() {
           // if auctionlist is not empty:
           if(auctions.length != 0) {
@@ -209,18 +213,27 @@
               var name = auction.name;
               var itemlist = auction.itemlist;
               var time = auction.time;
+              var auctionEnd = moment(time.end);
               var auctionKey = auction.key;
+              var checkAuctionExpired = function() {
+                var diff = getRemainingTime(auctionEnd, time.timezoneOffset);
+                return (diff.seconds() > 0);
+              };
 
-              $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
-                $(this).remove();
-                if($('.auction_div').find('.auction_item#' + auctionKey).length === 0) {
-                  $('<div id="'+ auctionKey +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.auction_div').show('slow');
-                } else {
-                  $('.auction_item.'+name+' .auction_number').html(itemlist.length);
-                }
-              });
-              auctionElements.push(auction.key);
+              if(checkAuctionExpired()) {
+                $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
+                  $(this).remove();
+                  if($('.auction_div').find('.auction_item#' + auctionKey).length === 0) {
+                    $('<div id="'+ auctionKey +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.auction_div').show('slow');
+                  } else {
+                    $('.auction_item.'+name+' .auction_number').html(itemlist.length);
+                  }
+                });
+                auctionElements.push(auction.key);
+                nonExpiredAuctions.push(auction);
+              } else auctionExpiredCount++;
             });
+            removeAuctionFromAuctions(nonExpiredAuctions, auctionExpiredCount);
 
             // This is to filter the old elements and remove them immediately
             if($('.auction_div > .auction_item').length != 0) {
@@ -241,83 +254,84 @@
           }
         }
 
+
           render();
           resizeAuto();
       }
 
       function getRemainingTime(givenTime, timezonOffset) {
         var now = moment().utcOffset(timezonOffset);
-        return givenTime.diff(now);
+        return moment.duration(givenTime.diff(now));
       }
 
       function loadSearchContent(auctions) {
         auctionClassNames = [];
         var auctionElements = [];
-        var notExpiredAuctions = [];
-        var auctionExpiredCount = 0;
+        var nonExpiredAuctions = [];
+        var callbackCount = 0;
 
-        auctions.forEach(function(auction) {
-          /* TIME */
-          var auctionStart = moment(auction.time.start);
-          var auctionEnd = moment(auction.time.end);
-          // This is for checking the remaining time of all items
-          var auctionTimezoneOffset = auction.time.timezoneOffset;
-          var diff = moment.duration(getRemainingTime(auctionEnd, auctionTimezoneOffset));
-          var expiryTime = function() {
-            var time = "";
-            if(diff.days() != 0) time += diff.days() + ":";
-            if(diff.hours() != 0) time += diff.hours() + ":";
-            if(diff.minutes() != 0) time += diff.minutes() + ":";
-            if(diff.seconds() != 0) time += diff.seconds();
-            return time;
-          };
+        function render(callback) {
+          auctions.forEach(function(auction) {
+            /* TIME */
+            var auctionStart = moment(auction.time.start);
+            var auctionEnd = moment(auction.time.end);
+            // This is for checking the remaining time of all items
+            var auctionTimezoneOffset = auction.time.timezoneOffset;
+            var diff = getRemainingTime(auctionEnd, auctionTimezoneOffset);
+            var expiryTime = function() {
+              var time = "";
+              if(diff.days() != 0) time += diff.days() + ":";
+              if(diff.hours() != 0) time += diff.hours() + ":";
+              if(diff.minutes() != 0) time += diff.minutes() + ":";
+              if(diff.seconds() != 0) time += diff.seconds();
+              return time;
+            };
 
-          console.log(diff.asSeconds());
+            if(diff.asSeconds() > 0) {
+              var auctionName = auction.name;
+              var auctionKey = auction.key;
+              /* PRICE */
+              var auctionUser = auction.user.username;
+              var auctionStartingPrice = auction.startingprice;
+              var auctionBuyoutPrice = auction.buyoutprice;
 
-          if(diff.asSeconds() > 0) {
-            var auctionName = auction.name;
-            var auctionKey = auction.key;
-            /* PRICE */
-            var auctionUser = auction.user.username;
-            var auctionStartingPrice = auction.startingprice;
-            var auctionBuyoutPrice = auction.buyoutprice;
+              if(auctionBuyoutPrice == 0) buyoutDiv = '';
+              else buyoutDiv = '<div class="buyout_price">Sofortkauf: <span>'+auctionBuyoutPrice+' €'+'</span></div>'
 
-            notExpiredAuctions.push(auction);
-            if(auctionBuyoutPrice == 0) buyoutDiv = '';
-            else buyoutDiv = '<div class="buyout_price">Sofortkauf: <span>'+auctionBuyoutPrice+' €'+'</span></div>'
+              if($('.searched_item#' + auctionKey).length == 0) {
+                var html = '<div style="display: none" class="search_content_row flex"> \
+                              <div class="auction_item_div category_content flex-child"> \
+                                <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
+                              </div> \
+                              <div class="auction_bidder_div category_content flex-child"> \
+                                <div>'+auctionUser+'</div> \
+                              </div> \
+                              <div class="auction_end_div category_content flex-child"> \
+                                <div>'+expiryTime()+'</div> \
+                              </div> \
+                              <div class="auction_price_div category_content flex-child"> \
+                                <div class="auction_price"> \
+                                  <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
+                                  '+buyoutDiv+' \
+                                </div> \
+                              </div> \
+                            </div>';
 
-            if($('.searched_item#' + auctionKey).length == 0) {
-              var html = '<div style="display: none" class="search_content_row flex"> \
-              <div class="auction_item_div category_content flex-child"> \
-              <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
-              </div> \
-              <div class="auction_bidder_div category_content flex-child"> \
-              <div>'+auctionUser+'</div> \
-              </div> \
-              <div class="auction_end_div category_content flex-child"> \
-              <div>'+expiryTime()+'</div> \
-              </div> \
-              <div class="auction_price_div category_content flex-child"> \
-              <div class="auction_price"> \
-              <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
-              '+buyoutDiv+' \
-              </div> \
-              </div> \
-              </div>';
-
-              $(html).appendTo('.search_content_div');
+                $(html).appendTo('.search_content_div');
+              }
+              auctionElements.push($('.searched_item#' + auctionKey).parents('.search_content_row')[0]);
+              // This is for searching after available auctions in search bar (look function: searchRealtime())
+              if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
             }
-            auctionElements.push($('.searched_item#' + auctionKey).parents('.search_content_row')[0]);
-            // This is for searching after available auctions in search bar (look function: searchRealtime())
-            if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
-          } else {
-            // auction.delete();
-            auctionExpiredCount++;
-            console.log(1);
-          }
-        });
-        if(notExpiredAuctions.length != 0) checkExpiredAuctions(notExpiredAuctions, auctionExpiredCount);
 
+            callbackCount++;
+            if(callbackCount == auctions.length) return callback();
+          });
+        }
+
+        render(function() {
+          // if(realtime == "on") setTimeInterval(auctions);
+        });
         // After render show content
         searchRealtime();
         // If realtime event arrives, check if item need to be removed
@@ -326,6 +340,7 @@
         difference.forEach(function(auction) {
           $(auction).hide("slow", function() { this.remove(); resizeAuto(); });
         });
+
       }
 
       function searchRealtime() {
@@ -455,6 +470,18 @@
         var auctionTime = $('#auctionDuration').val();
 
         createAuction(startingPrice, buyoutPrice, auctionTime);
+      }
+
+      function setTimeInterval() {
+        console.log("Start time interval ...");
+        // timeIntervallID = setInterval(function() {
+        //                     updateAuctionsTime();
+        //                   }, 1000)
+      }
+
+      function clearTimeInterval(id) {
+        console.log("Clear time interval ...");
+        clearInterval(id);
       }
 
       $(window).resize(function() {
