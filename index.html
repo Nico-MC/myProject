@@ -203,8 +203,6 @@
 
       function loadAuctionItems(auctions) {
         var auctions = auctions.auctionlist;
-        var nonExpiredAuctions = [];
-        var auctionExpiredCount = 0;
         function render() {
           // if auctionlist is not empty:
           if(auctions.length != 0) {
@@ -212,28 +210,18 @@
             auctions.forEach(function(auction) {
               var name = auction.name;
               var itemlist = auction.itemlist;
-              var time = auction.time;
-              var auctionEnd = moment(time.end);
               var auctionKey = auction.key;
-              var checkAuctionExpired = function() {
-                var diff = getRemainingTime(auctionEnd, time.timezoneOffset);
-                return (diff.seconds() > 0);
-              };
 
-              if(checkAuctionExpired()) {
-                $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
-                  $(this).remove();
-                  if($('.auction_div').find('.auction_item#' + auctionKey).length === 0) {
-                    $('<div id="'+ auctionKey +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.auction_div').show('slow');
-                  } else {
-                    $('.auction_item.'+name+' .auction_number').html(itemlist.length);
-                  }
-                });
-                auctionElements.push(auction.key);
-                nonExpiredAuctions.push(auction);
-              } else auctionExpiredCount++;
+              $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
+                $(this).remove();
+                if($('.auction_div').find('.auction_item#' + auctionKey).length === 0) {
+                  $('<div id="'+ auctionKey +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.auction_div').show('slow');
+                } else {
+                  $('.auction_item.'+name+' .auction_number').html(itemlist.length);
+                }
+              });
+              auctionElements.push(auction.key);
             });
-            removeAuctionFromAuctions(nonExpiredAuctions, auctionExpiredCount);
 
             // This is to filter the old elements and remove them immediately
             if($('.auction_div > .auction_item').length != 0) {
@@ -284,42 +272,42 @@
               if(diff.hours() != 0) time += diff.hours() + ":";
               if(diff.minutes() != 0) time += diff.minutes() + ":";
               if(diff.seconds() != 0) time += diff.seconds();
+               else time += "0";
               return time;
             };
 
-            if(diff.asSeconds() > 0) {
-              var auctionName = auction.name;
-              var auctionKey = auction.key;
-              /* PRICE */
-              var auctionUser = auction.user.username;
-              var auctionStartingPrice = auction.startingprice;
-              var auctionBuyoutPrice = auction.buyoutprice;
+            var auctionName = auction.name;
+            var auctionKey = auction.key;
+            /* PRICE */
+            var auctionUser = auction.user.username;
+            var auctionStartingPrice = auction.startingprice;
+            var auctionBuyoutPrice = auction.buyoutprice;
 
-              if(auctionBuyoutPrice == 0) buyoutDiv = '';
-              else buyoutDiv = '<div class="buyout_price">Sofortkauf: <span>'+auctionBuyoutPrice+' €'+'</span></div>'
+            if(auctionBuyoutPrice == 0) buyoutDiv = '';
+            else buyoutDiv = '<div class="buyout_price">Sofortkauf: <span>'+auctionBuyoutPrice+' €'+'</span></div>'
 
-              if($('.searched_item#' + auctionKey).length == 0) {
-                var html = '<div style="display: none" class="search_content_row flex"> \
-                              <div class="auction_item_div category_content flex-child"> \
-                                <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
-                              </div> \
-                              <div class="auction_bidder_div category_content flex-child"> \
-                                <div>'+auctionUser+'</div> \
-                              </div> \
-                              <div class="auction_end_div category_content flex-child"> \
-                                <div>'+expiryTime()+'</div> \
-                              </div> \
-                              <div class="auction_price_div category_content flex-child"> \
-                                <div class="auction_price"> \
-                                  <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
-                                  '+buyoutDiv+' \
-                                </div> \
-                              </div> \
-                            </div>';
 
-                $(html).appendTo('.search_content_div');
-              }
-              auctionElements.push($('.searched_item#' + auctionKey).parents('.search_content_row')[0]);
+            if($('.searched_item#' + auctionKey).length == 0) {
+              var html = '<div style="display: none" class="search_content_row flex"> \
+                            <div class="auction_item_div category_content flex-child"> \
+                              <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
+                            </div> \
+                            <div class="auction_bidder_div category_content flex-child"> \
+                              <div>'+auctionUser+'</div> \
+                            </div> \
+                            <div class="auction_end_div category_content flex-child"> \
+                              <div>'+expiryTime()+'</div> \
+                            </div> \
+                            <div class="auction_price_div category_content flex-child"> \
+                              <div class="auction_price"> \
+                                <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
+                                '+buyoutDiv+' \
+                              </div> \
+                            </div> \
+                          </div>';
+
+              $(html).appendTo('.search_content_div').show("slow", function() { resizeAuto(); });
+
               // This is for searching after available auctions in search bar (look function: searchRealtime())
               if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
             }
@@ -330,17 +318,8 @@
         }
 
         render(function() {
-          // if(realtime == "on") setTimeInterval(auctions);
-        });
-        // After render show content
-        searchRealtime();
-        // If realtime event arrives, check if item need to be removed
-        var loadedElements = $('.searched_item').parents('.search_content_row').toArray();
-        var difference = $.grep(loadedElements, function(x) { return $.inArray(x, auctionElements) < 0 });
-        difference.forEach(function(auction) {
-          $(auction).hide("slow", function() { this.remove(); resizeAuto(); });
-        });
 
+        });
       }
 
       function searchRealtime() {
@@ -362,7 +341,20 @@
       }
 
       function updateSearchContent(auctionObject) {
-        loadSearchContent(auctionObject);
+        console.log(auctionObject);
+        if(auctionObject.data != null) {
+          var matchType = auctionObject.matchType;
+          if(matchType == "add") {
+            var arr = [auctionObject.data];
+            loadSearchContent(arr);
+          } else if(matchType == "remove") {
+            $('#'+auctionObject.data.key).parents('.search_content_row').hide("slow", function() {
+              $(this).remove();
+              resizeAuto();
+              console.log("Item removed!");
+            });
+          }
+        } else console.log("ERROR: Couldn't read coming event");
       }
 
       function escapeID(id) {

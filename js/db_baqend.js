@@ -114,14 +114,17 @@ function getDataForInitload() {
   DB.Items.load(itemsID, {depth: true}).then(function(loadedItems) {
     loadItems(loadedItems.itemlist);
   });
-  DB.Auctions.load(auctionsID, {depth: true}).then(function(auctionObject) {
-    loadAuctionItems(auctionObject);
+  DB.Auctions.load(auctionsID, {depth: true}).then(function(auctionsTodo) {
+    lookAfterExpiredAuctions(auctionsTodo, function(auctionlist) {
+      loadAuctionItems(auctionlist);
+
+      DB.Auction.find()
+      .ascending('name')
+      .resultList(function(auctionItems) {
+        loadSearchContent(auctionItems);
+      });
+    });
   });
-  DB.Auction.find()
-            .ascending('name')
-            .resultList(function(auctionItems) {
-              loadSearchContent(auctionItems);
-            });
 }
 
 // Get ID of user items todo
@@ -200,7 +203,7 @@ function subscribeRealtime(sk, callback) {
     function subscribeToAuctions() {
       var query = DB.Auction.find({depth:true})
                             .ascending('name');
-      var stream = query.resultStream();
+      var stream = query.eventStream();
       var subscriptionAuctions = stream.subscribe(function(auctionObject) {
         updateSearchContent(auctionObject);
       }, function(err) {
@@ -322,8 +325,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset }),
             'amount': amount,
             'startingprice': startingPrice,
-            'buyoutprice': buyoutPrice,
-            'expired': false
+            'buyoutprice': buyoutPrice
           }).insert().then(function(insertedAuction) {
             DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
               var newArr = auctionsTodo.auctionlist;
@@ -348,35 +350,38 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
   }
 }
 
-function removeAuctionFromAuctions(nonExpiredAuctions, auctionExpiredCount) {
-  console.log(nonExpiredAuctions, auctionExpiredCount);
-  DB.Auction.load(auctionsID).then(function(auctionsTodo) {
-    auctionsTodo.auctionlist = nonExpiredAuctions;
-    // TODO: 
+function lookAfterExpiredAuctions(auctionsTodo, callback) {
+  var auctionlist = auctionsTodo.auctionlist;
+  var nonExpiredAuctions = [];
+  var expiredAuctions = [];
+  auctionlist.forEach(function(auction) {
+    /* TIME */
+    var auctionStart = moment(auction.time.start);
+    var auctionEnd = moment(auction.time.end);
+    // This is for checking the remaining time of all items
+    var auctionTimezoneOffset = auction.time.timezoneOffset;
+    var diff = getRemainingTime(auctionEnd, auctionTimezoneOffset);
+
+    if(diff.asSeconds() < 1) {
+      expiredAuctions.push(auction);
+      auction.delete();
+    } else {
+      nonExpiredAuctions.push(auction);
+    }
+    console.log("Pushe ...");
+  });
+  console.log("Ok jetzt weiterladen ...");
+  auctionsTodo.auctionlist = nonExpiredAuctions;
+  auctionsTodo.save().then(function() {
+    if(expiredAuctions.length != 0) {
+      if(expiredAuctions.length == 1) alert(expiredAuctions.length + " Auktion ist abgelaufen und wurde deiner Itemliste wieder hinzugefügt.")
+      else alert(expiredAuctions.length + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
+    }
+    return callback(auctionsTodo);
   });
 }
 
-// function checkExpiredAuctions(expiredAuctions) {
-//   if(auctionExpiredCount != 0) alert(auctionExpiredCount + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
-// }
-
-function browseAfterAuctions() {
-  searchInput = $('#search_field').val();
-  if(searchInput.length == 0) {
-    DB.Auction.find()
-              .ascending('name')
-              .resultList(function(auctionlist) {
-                loadSearchContent(auctionlist, 'search');
-              });
-  } else if(searchInput.length > 0) {
-    DB.Auction.find()
-               .ascending('name')
-               .equal('name', searchInput)
-               .resultList(function(auctionlist) {
-                 loadSearchContent(auctionlist, 'search');
-               })
-  }
-}
+function browseAfterAuctions() {}
 
 function updateAuctionsTime() {
   console.log("ok");
