@@ -118,7 +118,6 @@ input[type=text]#search_field:focus {
 
 .auction_price {
   display: inline-block;
-  text-align: right;
 }
 
 /* --- TAB 3 --- */

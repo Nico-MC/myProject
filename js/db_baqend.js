@@ -1,10 +1,10 @@
 /* --- VARIABLES --- */
 var itemsID = null, auctionsID = null;
-var realtime = "off";
+var realtime = false;
 var droppedItem = null;
 var timestamp;
 var auctionClassNames = [];
-var timeIntervallID;
+var timeIntervalID;
 
 $(document).ready(function() {
   DB.connect('misty-shape-74', false).then(function() {
@@ -36,6 +36,11 @@ function register(data, callback) {
           if(password === password_2) {
             initUser(username, function(user, sk) {
               DB.User.register(user, password).then(function() {
+                DB.Role.find().equal('name', 'loggedIn').singleResult(function(role) {
+                  DB.User.me.acl.allowReadAccess(role)
+                  DB.User.me.save();
+                });
+
                 registermessage(function() {
                   createItemlist();
                   createAuctionList();
@@ -100,6 +105,7 @@ function initUser(username, callback) {
 
 // Initialize all important VARIABLES
 function init(callback) {
+
   console.log("Start Init ...");
   getItemsTodoID(function() {
     console.log(2);
@@ -111,17 +117,18 @@ function init(callback) {
 }
 
 function getDataForInitload() {
-  DB.Items.load(itemsID, {depth: true}).then(function(loadedItems) {
-    loadItems(loadedItems.itemlist);
-  });
   DB.Auctions.load(auctionsID, {depth: true}).then(function(auctionsTodo) {
     lookAfterExpiredAuctions(auctionsTodo, function(auctionlist) {
       loadAuctionItems(auctionlist);
 
+      DB.Items.load(itemsID, {depth: true}).then(function(loadedItems) {
+        loadItems(loadedItems.itemlist);
+      });
+
       DB.Auction.find()
       .ascending('name')
-      .resultList(function(auctionItems) {
-        loadSearchContent(auctionItems);
+      .resultList({depth: true}, function(auctionItems) {
+        loadSearchContent(auctionItems, null);
       });
     });
   });
@@ -174,6 +181,7 @@ function subscribeRealtime(sk, callback) {
     subscribeToItems();
     subscribeToUserAuctions();
     subscribeToAuctions();
+    subscribeToAuctionsInit();
 
     function subscribeToItems() {
       var query = DB.Items.find({depth:true})
@@ -192,8 +200,8 @@ function subscribeRealtime(sk, callback) {
       var query = DB.Auctions.find({depth:true})
                              .equal('user', DB.User.me);
       var stream = query.eventStream({initial:true});
-      var subscriptionUserAuctions = stream.subscribe(function(auctionList) {
-        updateAuctionItems(auctionList.data);
+      var subscriptionUserAuctions = stream.subscribe(function(auctionsTodo) {
+        // updateAuctionItems(auctionList.data);
       }, function(err) {
         console.log(err);
       });
@@ -201,16 +209,37 @@ function subscribeRealtime(sk, callback) {
     }
 
     function subscribeToAuctions() {
-      var query = DB.Auction.find({depth:true})
+      var query = DB.Auction.find()
                             .ascending('name');
-      var stream = query.eventStream();
-      var subscriptionAuctions = stream.subscribe(function(auctionObject) {
-        updateSearchContent(auctionObject);
+      var stream = query.eventStream({initial:false});
+      var subscriptionAuctions = stream.subscribe(function(auctionTodo) {
+        updateSearchContent(auctionTodo);
       }, function(err) {
         console.log(err);
       });
       subList.push(subscriptionAuctions);
     }
+
+    // This is for initializing the auction items, if realtime checkbox is checked for the first time.
+    function subscribeToAuctionsInit() {
+      var query = DB.Auction.find()
+                            .ascending('name');
+      var stream = query.resultStream();
+      var initialized = false;
+      var subscriptionAuctionsInit = stream.subscribe(function(auctionTodos) {
+        if(initialized) {
+          console.log("Don't init.");
+        } else {
+          realtimeInitSearchContent(auctionTodos);
+          console.log("Init!");
+          initialized = true;
+        }
+      }, function(err) {
+        console.log(err);
+      });
+      subList.push(subscriptionAuctionsInit);
+    }
+
     return callback(subList);
   }
 }
@@ -291,7 +320,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
 
   if(droppedItem != null) {
     if(startingPrice > 0) {
-      if((buyoutPrice >= 0 && buyoutPrice > startingPrice) || buyoutPrice === "") {
+      if((buyoutPrice >= 0 && buyoutPrice > startingPrice) || buyoutPrice == "") {
         console.log("Ok, let's create the auction!");
         // Data
         var startDate = moment().toDate();
@@ -312,7 +341,8 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
           }
 
           for(var i=0; i<amount; i++)
-            puffer.push(DB.Item.ref(itemlist.pop()));
+            puffer.push(itemlist.pop());
+
 
           items.partialUpdate()
                .put("itemlist", droppedItem, itemlist)
@@ -338,7 +368,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             });
           });
         });
-      } else createAuctionMessage("Kauf ist nicht kleiner als Gebot.", false);
+      } else createAuctionMessage("Kauf ist nicht größer als Gebot.", false);
     } else {
       if(startingPrice == "") createAuctionMessage("Startpreis fehlt.", false);
       else if(startingPrice < 1) createAuctionMessage("Startpreis muss größer 0 sein.", false);
@@ -368,23 +398,30 @@ function lookAfterExpiredAuctions(auctionsTodo, callback) {
     } else {
       nonExpiredAuctions.push(auction);
     }
-    console.log("Pushe ...");
   });
-  console.log("Ok jetzt weiterladen ...");
   auctionsTodo.auctionlist = nonExpiredAuctions;
   auctionsTodo.save().then(function() {
     if(expiredAuctions.length != 0) {
       if(expiredAuctions.length == 1) alert(expiredAuctions.length + " Auktion ist abgelaufen und wurde deiner Itemliste wieder hinzugefügt.")
       else alert(expiredAuctions.length + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
     }
-    return callback(auctionsTodo);
+    DB.Items.load(itemsID, {depth:true}).then(function(loadedItemsTodo) {
+      var map = loadedItemsTodo.itemlist;
+      var newArr = [];
+      expiredAuctions.forEach(function(val, key) {
+        var newArr = map.get(val.name).concat(val.itemlist);
+        map.set(val.name, newArr);
+      });
+      loadedItemsTodo.auctionlist = map;
+      loadedItemsTodo.save({depth: true}).then(function() { return callback(auctionsTodo); });
+    });
   });
 }
 
 function browseAfterAuctions() {}
 
-function updateAuctionsTime() {
-  console.log("ok");
+function updateAuctionsTime(auctionTimeUpdateObjects) {
+  console.log(auctionTimeUpdateObjects);
 }
 
 
@@ -400,7 +437,7 @@ function simulate() {
   var thirdPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'iron',
+    'name': 'gold',
     'type': 'ore',
     'weight': 10
   });
