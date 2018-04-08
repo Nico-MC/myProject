@@ -339,12 +339,16 @@
       }
 
       function realtimeInitSearchContent(auctions) {
-        auctionTimeDurations = [];
-        $('.search_content_div').children('.search_content_row').hide("slow").promise().done(function() {
-          $('.search_content_div').html('');
-          loadSearchContent(auctions, function() {
+          auctionTimeDurations = [];
+          $('.search_content_div').children('.search_content_row').hide("slow").promise().done(function() {
+            $('.search_content_div').html('');
+            loadSearchContent(auctions, function() {
+                resizeAuto();
+            });
           });
-        });
+          setTimeout(function() {
+            lookAfterExpiredAuctions(null, function() {});
+          }, 4000);
       }
 
       function searchRealtime() {
@@ -359,65 +363,6 @@
 
       function escapeID(id) {
         // return "#" + id.replace( /(:|\.|\[|\]|,|=|@)/g, "\\$1" );
-      }
-
-      function errormessage(message) {
-        $('.alert').css('color', '#721c24');
-        $('.alert').css('background-color', '#f8d7da');
-        $('.alert').css('border-color', '#f5c6cb');
-        $('.alert').html(message);
-        $('.alert').toggle("slow").delay(2000).toggle("slow");
-      }
-
-      function registermessage(callback) {
-        $('.alert').css('color', '#21721c');
-        $('.alert').css('background-color', '#d8f8d7');
-        $('.alert').css('border-color', '#c6f5c6');
-        $('.alert').html("Registrierung erfolgreich!");
-        $('.alert').slideDown("slow").delay(500, function() {
-          return callback();
-        });
-      }
-
-      function createAuctionMessage(message, success) {
-        var errorDiv = $('.create_auction_button_error > div');
-        if(success) $(errorDiv).css('color', '#1d6e15');
-        else $(errorDiv).css('color', '#6c1313');
-        $(errorDiv).text(message);
-        $(errorDiv).slideDown('slow', function() {
-          setTimeout(function() {
-            $(errorDiv).slideUp('slow');
-          }, "slow");
-        });
-      }
-
-      function switchRegister() {
-        if($('.register_div #register').css('display') != 'none') {
-          $('.register_div #register').slideUp("slow", function() {
-            $('.register_div #login').slideDown("slow");
-          });
-        } else {
-          $('.register_div #login').slideUp("slow", function() {
-            $('.register_div #register').slideDown("slow");
-          });
-        }
-      }
-
-      function toggleDatabaseButton() {
-        if($('.simulate_button_gradient').css('display') == 'none') $('.simulate_button_gradient').fadeIn("slow");
-        else $('.simulate_button_gradient').fadeOut("slow");
-      }
-
-      function toggleDatabaseOptions() {
-        if(!($('.profile_option_div').css('display') == 'none')) toggleProfileOptions();
-        if($('.database_option_div').css('display') == 'none') $('.database_option_div').slideDown("slow");
-        else $('.database_option_div').slideUp("slow");
-      }
-
-      function toggleProfileOptions() {
-        if(!($('.database_option_div').css('display') == 'none')) toggleDatabaseOptions();
-        if($('.profile_option_div').css('display') == 'none') $('.profile_option_div').slideDown("slow");
-        else $('.profile_option_div').slideUp("slow");
       }
 
       function checkRealtime() {
@@ -444,16 +389,24 @@
           // $('.auction_item .background_overflow_div').attr('class', 'background_overflow_div');
           $('.auction_item .background_overflow_div').addClass(classNameToInsert);
           droppedItem = classNameToInsert;
+          $('.auction_item_name').text(capitalizeFirstLetter(classNameToInsert));
+          $('.auction_item_name_div').show("slow");
+
       }
 
-      function resetDrop() {
+      function resetDrop(hideItem) {
         droppedItem = null;
         var getClass = getClassName($('.auction_item .background_overflow_div').attr('class'), 1);
         $('.auction_item .background_overflow_div').removeClass(getClass);
+        if(hideItem) $('.auction_item_name_div').hide("slow");
       }
 
       function getClassName(className, index) {
         return className.split(" ")[index];
+      }
+
+      function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
       }
 
       function clickAuctionButton() {
@@ -464,8 +417,8 @@
         createAuction(startingPrice, buyoutPrice, auctionTime);
       }
 
-      /* ---------------- */
-      /* ----- TIME ----- */
+      /* ---------------------- */
+      /* ----- TIME START ----- */
       function getRemainingTime(givenTime, timezonOffset) {
         var now = moment().utcOffset(timezonOffset);
         return moment.duration(givenTime.diff(now));
@@ -482,14 +435,12 @@
       };
 
       function setTimeInterval() {
-        console.log("Start time interval ...");
         return setInterval(function() {
                             updateAuctionsTime();
                           }, 1000)
       }
 
       function clearTimeInterval(id) {
-        console.log("Clear time interval ...");
         clearInterval(id);
       }
 
@@ -501,23 +452,21 @@
           if(endTime.asSeconds() < 1) {
             $(insertTo).hide("slow", function() {
               auctionTimeDurations.splice(index, 1)
-              DB.Auctions.load(auctionsID).then(function(auctionsTodo) {
-                lookAfterExpiredAuctions(auctionsTodo, function() { resizeAuto(); })
-              });
+              lookAfterExpiredAuctions(null, function() { resizeAuto(); })
             });
           }
           $(insertTo.find(".endtime").text(formatTime(endTime)));
         });
       }
-      /* ----- TIME ----- */
-      /* ---------------- */
+      /* ----- TIME END ----- */
+      /* -------------------- */
 
       function auctionExpiredAlert(message) {
         $(".expired_auction_div").text(message);
         $(".expired_auction_div").slideDown("slow", function() {
           setTimeout(function() {
             $(".expired_auction_div").slideUp("slow");
-          }, 2000);
+          }, 1000);
         });
       }
 
@@ -557,7 +506,76 @@
           if(!target) {
             toggleDatabaseOptions();
           }
+        } else if($('.profile_option_div ').css('display') == 'block') {
+          var target = $(e.target).closest($('.profile_option_div')).length;
+          if(!target) {
+            toggleProfileOptions();
+          }
         }
+      }
+
+
+
+
+
+      /* ----- JQUERY UX STUFF ----- */
+      function errormessage(message) {
+        $('.alert').css('color', '#721c24');
+        $('.alert').css('background-color', '#f8d7da');
+        $('.alert').css('border-color', '#f5c6cb');
+        $('.alert').html(message);
+        $('.alert').toggle("slow").delay(2000).toggle("slow");
+      }
+
+      function registermessage(callback) {
+        $('.alert').css('color', '#21721c');
+        $('.alert').css('background-color', '#d8f8d7');
+        $('.alert').css('border-color', '#c6f5c6');
+        $('.alert').html("Registrierung erfolgreich!");
+        $('.alert').slideDown("slow").delay(500, function() {
+          return callback();
+        });
+      }
+
+      function createAuctionMessage(message, success) {
+        var errorDiv = $('.create_auction_button_error > div');
+        if(success) $(errorDiv).css('color', '#1d6e15');
+        else $(errorDiv).css('color', '#6c1313');
+        $(errorDiv).text(message);
+        $(errorDiv).slideDown('slow', function() {
+          setTimeout(function() {
+            $(errorDiv).slideUp('slow');
+          }, 750);
+        });
+      }
+
+      function switchRegister() {
+        if($('.register_div #register').css('display') != 'none') {
+          $('.register_div #register').slideUp("slow", function() {
+            $('.register_div #login').slideDown("slow");
+          });
+        } else {
+          $('.register_div #login').slideUp("slow", function() {
+            $('.register_div #register').slideDown("slow");
+          });
+        }
+      }
+
+      function toggleDatabaseButton() {
+        if($('.simulate_button_gradient').css('display') == 'none') $('.simulate_button_gradient').fadeIn("slow");
+        else $('.simulate_button_gradient').fadeOut("slow");
+      }
+
+      function toggleDatabaseOptions() {
+        if(!($('.profile_option_div').css('display') == 'none')) toggleProfileOptions();
+        if($('.database_option_div').css('display') == 'none') $('.database_option_div').slideDown("slow");
+        else $('.database_option_div').slideUp("slow");
+      }
+
+      function toggleProfileOptions() {
+        if(!($('.database_option_div').css('display') == 'none')) toggleDatabaseOptions();
+        if($('.profile_option_div').css('display') == 'none') $('.profile_option_div').slideDown("slow");
+        else $('.profile_option_div').slideUp("slow");
       }
 
     </script>

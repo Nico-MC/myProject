@@ -229,10 +229,8 @@ function subscribeRealtime(sk, callback) {
       var initialized = false;
       var subscriptionAuctionsInit = stream.subscribe(function(auctionTodos) {
         if(initialized) {
-          console.log("Don't init.");
         } else {
           realtimeInitSearchContent(auctionTodos);
-          console.log("Init!");
           initialized = true;
         }
       }, function(err) {
@@ -322,7 +320,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
   if(droppedItem != null) {
     if(startingPrice > 0) {
       if((buyoutPrice >= 0 && buyoutPrice > startingPrice) || buyoutPrice == "") {
-        console.log("Ok, let's create the auction!");
+        // console.log("Ok, let's create the auction!");
         // Data
         var startDate = moment().toDate();
         var endDate = moment().toDate();
@@ -364,7 +362,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
               auctionsTodo.auctionlist = newArr;
               auctionsTodo.save({depth:true}, function() {
                 createAuctionMessage("Auktion erstellt!", true);
-                resetDrop();
+                resetDrop(true);
               });
             });
           });
@@ -382,41 +380,52 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
 }
 
 function lookAfterExpiredAuctions(auctionsTodo, callback) {
-  var auctionlist = auctionsTodo.auctionlist;
-  var nonExpiredAuctions = [];
-  var expiredAuctions = [];
-  auctionlist.forEach(function(auction) {
-    /* TIME */
-    var auctionStart = moment(auction.time.start);
-    var auctionEnd = moment(auction.time.end);
-    // This is for checking the remaining time of all items
-    var auctionTimezoneOffset = auction.time.timezoneOffset;
-    var diff = getRemainingTime(auctionEnd, auctionTimezoneOffset);
-
-    if(diff.asSeconds() < 1) {
-      expiredAuctions.push(auction);
-      auction.delete();
-    } else {
-      nonExpiredAuctions.push(auction);
-    }
-  });
-  auctionsTodo.auctionlist = nonExpiredAuctions;
-  auctionsTodo.save().then(function() {
-    if(expiredAuctions.length != 0) {
-      if(expiredAuctions.length == 1) auctionExpiredAlert(expiredAuctions.length + " Auktion ist abgelaufen und wurde deiner Itemliste wieder hinzugefügt.")
-      else auctionExpiredAlert(expiredAuctions.length + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
-    }
-    DB.Items.load(itemsID, {depth:true}).then(function(loadedItemsTodo) {
-      var map = loadedItemsTodo.itemlist;
-      var newArr = [];
-      expiredAuctions.forEach(function(val, key) {
-        var newArr = map.get(val.name).concat(val.itemlist);
-        map.set(val.name, newArr);
-      });
-      loadedItemsTodo.auctionlist = map;
-      loadedItemsTodo.save({depth: true}).then(function() { return callback(auctionsTodo); });
+  if(auctionsTodo == null) {
+    DB.Auctions.load(auctionsID).then(function(loadedAuctionsTodo) {
+      auctionsTodo = null;
+      auctionsTodo = loadedAuctionsTodo;
+      scan();
     });
-  });
+  } else scan();
+
+
+  function scan() {
+    var auctionlist = auctionsTodo.auctionlist;
+    var nonExpiredAuctions = [];
+    var expiredAuctions = [];
+    auctionlist.forEach(function(auction) {
+      /* TIME */
+      var auctionStart = moment(auction.time.start);
+      var auctionEnd = moment(auction.time.end);
+      // This is for checking the remaining time of all items
+      var auctionTimezoneOffset = auction.time.timezoneOffset;
+      var diff = getRemainingTime(auctionEnd, auctionTimezoneOffset);
+
+      if(diff.asSeconds() < 1) {
+        expiredAuctions.push(auction);
+        auction.delete();
+      } else {
+        nonExpiredAuctions.push(auction);
+      }
+    });
+    auctionsTodo.auctionlist = nonExpiredAuctions;
+    auctionsTodo.save().then(function() {
+      if(expiredAuctions.length != 0) {
+        if(expiredAuctions.length == 1) auctionExpiredAlert(expiredAuctions.length + " Auktion ist abgelaufen und wurde deiner Itemliste wieder hinzugefügt.")
+        else auctionExpiredAlert(expiredAuctions.length + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
+      }
+      DB.Items.load(itemsID, {depth:true}).then(function(loadedItemsTodo) {
+        var map = loadedItemsTodo.itemlist;
+        var newArr = [];
+        expiredAuctions.forEach(function(val, key) {
+          var newArr = map.get(val.name).concat(val.itemlist);
+          map.set(val.name, newArr);
+        });
+        loadedItemsTodo.auctionlist = map;
+        loadedItemsTodo.save({depth: true}).then(function() { return callback(auctionsTodo); });
+      });
+    });
+  }
 }
 
 function browseAfterAuctions() {}
