@@ -5,6 +5,7 @@ var droppedItem = null;
 var timestamp;
 var auctionClassNames = [];
 var timeIntervalID;
+var auctionTimeDurations = [];
 
 $(document).ready(function() {
   DB.connect('misty-shape-74', false).then(function() {
@@ -201,7 +202,7 @@ function subscribeRealtime(sk, callback) {
                              .equal('user', DB.User.me);
       var stream = query.eventStream({initial:true});
       var subscriptionUserAuctions = stream.subscribe(function(auctionsTodo) {
-        // updateAuctionItems(auctionList.data);
+        updateAuctionItems(auctionsTodo.data);
       }, function(err) {
         console.log(err);
       });
@@ -402,8 +403,8 @@ function lookAfterExpiredAuctions(auctionsTodo, callback) {
   auctionsTodo.auctionlist = nonExpiredAuctions;
   auctionsTodo.save().then(function() {
     if(expiredAuctions.length != 0) {
-      if(expiredAuctions.length == 1) alert(expiredAuctions.length + " Auktion ist abgelaufen und wurde deiner Itemliste wieder hinzugefügt.")
-      else alert(expiredAuctions.length + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
+      if(expiredAuctions.length == 1) auctionExpiredAlert(expiredAuctions.length + " Auktion ist abgelaufen und wurde deiner Itemliste wieder hinzugefügt.")
+      else auctionExpiredAlert(expiredAuctions.length + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.")
     }
     DB.Items.load(itemsID, {depth:true}).then(function(loadedItemsTodo) {
       var map = loadedItemsTodo.itemlist;
@@ -420,10 +421,6 @@ function lookAfterExpiredAuctions(auctionsTodo, callback) {
 
 function browseAfterAuctions() {}
 
-function updateAuctionsTime(auctionTimeUpdateObjects) {
-  console.log(auctionTimeUpdateObjects);
-}
-
 
 
 
@@ -437,7 +434,7 @@ function simulate() {
   var thirdPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'gold',
+    'name': 'iron',
     'type': 'ore',
     'weight': 10
   });
