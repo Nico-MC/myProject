@@ -269,14 +269,24 @@
               var auctionStartingPrice = auction.startingprice;
               var auctionBuyoutPrice = auction.buyoutprice;
 
-              if(auctionBuyoutPrice == 0) buyoutDiv = '';
-              else buyoutDiv = '<div class="buyout_price">'+auctionBuyoutPrice+' € (Sofortkauf)</div>'
+              var checkAuctionBuyoutPrice = function() {
+                if(auctionBuyoutPrice == 0) return '';
+                else return '<div class="buyout_price">'+auctionBuyoutPrice+' € (Sofortkauf)</div>'
+              };
+              var checkAuctionButtons = function() {
+                if(auctionUser == DB.User.me.username)
+                  return '';
+                else if(auction.bidder == DB.User.me)
+                  return "<div class=your_bid>dein gebot</div>"
+                else
+                  return '<button class="bid_auction_button" type="button" name="button" onclick="clickBidAuctionButton(this)">Bieten</button> \
+                          <button class="buy_auction_button" type="button" name="button" onclick="clickBuyAuctionButton(this)">Kaufen</button>';
+              };
 
-
-              if($('.searched_item#' + auctionKey).length == 0) {
-                var html = '<div style="display: none" class="search_content_row flex"> \
+              if($('.search_content_row#' + auctionKey).length == 0) {
+                var html = '<div id="'+auctionKey+'" style="display: none" class="search_content_row flex"> \
                               <div class="auction_item_div category_content flex-child"> \
-                                <div id="'+auctionKey+'" class="searched_item '+auctionName+'"></div> \
+                                <div class="searched_item '+auctionName+'"><span class="item_number strokeme">'+auction.itemlist.length+'</span></div> \
                               </div> \
                               <div class="auction_bidder_div category_content flex-child"> \
                                 <div>'+auctionUser+'</div> \
@@ -287,15 +297,20 @@
                               <div class="auction_price_div category_content flex-child"> \
                                 <div class="auction_price"> \
                                   <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
-                                  '+buyoutDiv+' \
+                                  '+checkAuctionBuyoutPrice()+' \
                                 </div> \
+                              </div> \
+                              <div class="auction_buttons"> \
+                                '+checkAuctionButtons()+' \
                               </div> \
                             </div>';
 
                 $(html).appendTo('.search_content_div').show("slow", function() {
                   resizeAuto();
-                  auctionTimeDurations.push([$("#"+auctionKey).parents(".search_content_row"), diff]);
+                  auctionTimeDurations.push([$(".search_content_row#"+auctionKey), diff]);
                 });
+                // console.log(DB.User.me.username == auctionUser);
+                // if(auctionUser == DB.User.me.username) $("#" + auctionKey).find(".auction_buttons button").css("color", "#444444");
 
                 // This is for searching after available auctions in search bar (look function: searchRealtime())
                 if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
@@ -329,11 +344,13 @@
             var arr = [auctionTodo.data];
             loadSearchContent(arr, null);
           } else if(matchType == "remove") {
-            $('#'+auctionTodo.data.key).parents('.search_content_row').hide("slow", function() {
+            $('#'+auctionTodo.data.key).hide("slow", function() {
               $(this).remove();
               resizeAuto();
               console.log("Item removed!");
             });
+          } else if(matchType == "change") {
+            console.log($("#" + auctionTodo.data.key));
           }
         } else console.log("ERROR: Couldn't read coming event");
       }
@@ -353,11 +370,11 @@
 
       function searchRealtime() {
         var searchInput = $('#search_field').val().toLowerCase();
-        var loadedElements = $('.searched_item').toArray();
+        var loadedElements = $('.search_content_row').toArray();
         loadedElements.forEach(function(loadedElement) {
-          var className = getClassName(loadedElement.className, 1).toLowerCase();
-          if(className.indexOf(searchInput) > -1) $('#' + loadedElement.id).parents('.search_content_row').show("slow", function() { resizeAuto(); });
-          else $('#' + loadedElement.id).parents('.search_content_row').hide("slow", function() { resizeAuto(); });
+          var className = getClassName($(loadedElement).find(".searched_item").attr("class"), 1).toLowerCase();
+          if(className.indexOf(searchInput) > -1) $('.search_content_row#' + loadedElement.id).show("slow", function() { resizeAuto(); });
+          else $('.search_content_row#' + loadedElement.id).hide("slow", function() { resizeAuto(); });
         });
       }
 
@@ -409,6 +426,7 @@
         return string.charAt(0).toUpperCase() + string.slice(1);
       }
 
+      /* ----- BUTTONS ----- */
       function clickAuctionButton() {
         var startingPrice = $('#startingPrice').val();
         var buyoutPrice = $('#buyOut').val();
@@ -417,6 +435,19 @@
         createAuction(startingPrice, buyoutPrice, auctionTime);
       }
 
+      function clickBidAuctionButton(element) {
+        var auctionID = $(element).parents(".search_content_row").attr("id");
+        bidThisAuction(auctionID);
+      }
+
+      function clickBuyAuctionButton(element) {
+        var auctionID = $(element).parents(".search_content_row").attr("id");
+        buyThisAuction(auctionID);
+      }
+
+      function checkBidAuthority(auctionTodo, callback) {
+
+      }
       /* ---------------------- */
       /* ----- TIME START ----- */
       function getRemainingTime(givenTime, timezonOffset) {
@@ -546,6 +577,12 @@
           setTimeout(function() {
             $(errorDiv).slideUp('slow');
           }, 750);
+        });
+      }
+
+      function bidThisAuctionMessage(auctionID) {
+        $("#"+auctionID).find(".auction_buttons").fadeOut("slow", function() {
+          $(this).html("<div class=your_bid>dein gebot</div>").fadeIn("slow");
         });
       }
 

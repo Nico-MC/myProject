@@ -84,13 +84,13 @@ String.prototype.hashCode = function() {
   return hash;
 };
 
-function testWebsocketConnection() {
-  // var ws = new WebSocket('ws://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
-  var ws = new WebSocket('ws://misty-shape-74.events.baqend.com/v1/events');
-  ws.onopen = function() { console.log('Websocket opened') };
-  ws.onclose = function() { console.log('Websocket closed') };
-  //expect opened to be logged but closed is called immediately
-}
+// function testWebsocketConnection() {
+//   // var ws = new WebSocket('ws://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
+//   var ws = new WebSocket('ws://misty-shape-74.events.baqend.com/v1/events');
+//   ws.onopen = function() { console.log('Websocket opened') };
+//   ws.onclose = function() { console.log('Websocket closed') };
+//   //expect opened to be logged but closed is called immediately
+// }
 
 function initUser(username, callback) {
   console.log("Initialize User ...");
@@ -178,7 +178,7 @@ function createAuctionList() {
 function subscribeRealtime(sk, callback) {
   var subList = [];
   if(DB.User.me.securitykey == sk) {
-    testWebsocketConnection();
+    // testWebsocketConnection();
     subscribeToItems();
     subscribeToUserAuctions();
     subscribeToAuctions();
@@ -214,6 +214,7 @@ function subscribeRealtime(sk, callback) {
                             .ascending('name');
       var stream = query.eventStream({initial:false});
       var subscriptionAuctions = stream.subscribe(function(auctionTodo) {
+        console.log(auctionTodo);
         updateSearchContent(auctionTodo);
       }, function(err) {
         console.log(err);
@@ -430,7 +431,28 @@ function lookAfterExpiredAuctions(auctionsTodo, callback) {
 
 function browseAfterAuctions() {}
 
+function bidThisAuction(auctionID) {
+  var user = DB.User.me;
+  DB.Auction.load("/db/Auction/" + auctionID).then(function(auctionTodo) {
+    if(auctionTodo.user != user) {
+      auctionTodo.bidder = user;
+      DB.User.me.bids++;
+      DB.User.me.save();
 
+      auctionTodo.save().then(function() {
+        bidThisAuctionMessage(auctionTodo.key);
+      });
+    }
+  });
+  // console.log(auctionID);
+  // if(user == DB.User.me) return -1;
+}
+
+function buyThisAuction(auctionID) {
+  var user = DB.User.me;
+  console.log(auctionID);
+  if(user == DB.User.me) return -1;
+}
 
 
 

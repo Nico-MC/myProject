@@ -48,7 +48,7 @@
 
 .search_content_div .search_content_row {
   /* margin-bottom: 15px; */
-  padding: 15px 0 15px 20px;
+  padding: 15px 15px 15px 20px;
   border-radius: 5px;
   align-items: center;
   justify-content: center;
@@ -108,8 +108,23 @@ input[type=text]#search_field:focus {
   box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6); */
 }
 
+.auctions_category_div {
+  -moz-box-shadow: inset 0 0 10px #000000;
+  -webkit-box-shadow: inset 0 0 10px #000000;
+  box-shadow: inset 0 0 10px #000000;
+  border-radius: 7px;
+  padding: 15px;
+  color: white;
+  font-weight: 600;
+}
+
+.category_header,
 .category_content {
   flex-basis: 0 !important;
+}
+
+.category_empty {
+  width: 160px;
 }
 
 .auction_price_div .buyout_price span {
@@ -277,16 +292,50 @@ input[type=text]#search_field:focus {
   padding-left: 5px;
 }
 
+/* ----- BUTTONS ----- */
+.auction_buttons {
+  flex-grow: 0;
+  width: 160px;
+  text-align: right;
+}
+
+.buy_auction_button {
+  height: 30px;
+  width: 74px;
+  color: #a2a2a2;
+  margin-left: 3px;
+}
+
+.bid_auction_button {
+  height: 30px;
+  width: 70px;
+  color: #a2a2a2;
+}
+
+.your_bid {
+  color: green;
+  text-align: center;
+  font-weight: 400;
+  font-variant: small-caps;
+  font-size: 18px;
+  text-shadow: -1px -1px 0 #60ff00, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.create_auction_button {
+  width: 100%;
+  height: 30px;
+  color: #fff;
+}
+
+.buy_auction_button,
+.bid_auction_button,
 .create_auction_button {
   outline: 0 !important;
   cursor: pointer;
   outline: none;
-  color: #fff;
   border: none;
   border-radius: 15px;
   box-shadow: 0 4px #414141;
-  width: 100%;
-  height: 30px;
 
   background-image: -moz-linear-gradient(top, #4e4e4e, #181818);
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#4e4e4e), to(#181818));
@@ -295,6 +344,8 @@ input[type=text]#search_field:focus {
   background-image: linear-gradient(to bottom, #4e4e4e, #181818);
 }
 
+.buy_auction_button:active,
+.bid_auction_button:active,
 .create_auction_button:active {
   background-color: #3e8e41;
   box-shadow: 0 2px #414141;
@@ -395,6 +446,7 @@ input[type=text]#search_field:focus {
       transform: scale(1.2);
 }
 
+.search_content_div .searched_item .item_number,
 .auction_div .auction_item .item_number,
 .inventar_div .inventar_item .item_number {
   position: absolute;
