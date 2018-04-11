@@ -1,5 +1,5 @@
 /* --- VARIABLES --- */
-var itemsID = null, auctionsID = null;
+var itemsID = null, auctionsID = null, bidsID = null;
 var realtime = false;
 var droppedItem = null;
 var timestamp;
@@ -45,6 +45,7 @@ function register(data, callback) {
                 registermessage(function() {
                   createItemlist();
                   createAuctionList();
+                  createBidList();
                   return callback(sk);
                 });
               });
@@ -115,6 +116,7 @@ function init(callback) {
       return callback();
     });
   });
+  getBidsID();
 }
 
 function getDataForInitload() {
@@ -156,6 +158,14 @@ function getAuctionsID(callback) {
   });
 }
 
+function getBidsID() {
+  DB.Auctions.find()
+  .equal('user', DB.User.me)
+  .singleResult(function(bidsTodo) {
+    bidsID = bidsTodo.id;
+  });
+}
+
 function createItemlist() {
   // items object for each individual user
   new DB.Items(
@@ -171,6 +181,15 @@ function createAuctionList() {
     {
       'user': DB.User.me,
       'auctionlist': []
+    }
+  ).save();
+}
+
+function createBidList() {
+  new DB.Bids(
+    {
+      'user': DB.User.me,
+      'bidslist': []
     }
   ).save();
 }
@@ -403,8 +422,10 @@ function lookAfterExpiredAuctions(auctionsTodo, callback) {
       var diff = getRemainingTime(auctionEnd, auctionTimezoneOffset);
 
       if(diff.asSeconds() < 1) {
-        expiredAuctions.push(auction);
-        auction.delete();
+        if(auction.bidder == null) {
+          expiredAuctions.push(auction);
+          auction.delete();
+        }
       } else {
         nonExpiredAuctions.push(auction);
       }
@@ -433,11 +454,14 @@ function browseAfterAuctions() {}
 
 function bidThisAuction(auctionID) {
   var user = DB.User.me;
+  DB.Bids.partialUpdate(bidsID)
+         .push("bidslist", "adsdasd")
+         .execute();
   DB.Auction.load("/db/Auction/" + auctionID).then(function(auctionTodo) {
     if(auctionTodo.user != user) {
       auctionTodo.bidder = user;
-      DB.User.me.bids++;
-      DB.User.me.save();
+      user.bids++;
+      user.save();
 
       auctionTodo.save().then(function() {
         bidThisAuctionMessage(auctionTodo.key);

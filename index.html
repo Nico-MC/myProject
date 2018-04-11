@@ -480,6 +480,8 @@
         auctionTimeDurations.forEach(function(val, index) {
           var insertTo = val[0];
           var endTime = val[1].subtract(1, "seconds");
+          if(endTime.asSeconds() > 0 && endTime.asSeconds() < 11)
+            $(insertTo.find(".endtime").css("color", "#980000"));
           if(endTime.asSeconds() < 1) {
             $(insertTo).hide("slow", function() {
               auctionTimeDurations.splice(index, 1)
@@ -499,6 +501,10 @@
             $(".expired_auction_div").slideUp("slow");
           }, 1000);
         });
+      }
+
+      function expiredAuctionsWithBid(expiredAuctionsWithBid) {
+        console.log(expiredAuctionsWithBid);
       }
 
       $(window).resize(function() {
