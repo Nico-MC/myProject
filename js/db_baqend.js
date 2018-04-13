@@ -230,7 +230,7 @@ function subscribeRealtime(sk, callback) {
     }
 
     function subscribeToAuctions() {
-      var query = DB.Auction.find()
+      var query = DB.Auction.find({depth:true})
                             .ascending('name');
       var stream = query.eventStream({initial:false});
       var subscriptionAuctions = stream.subscribe(function(auctionTodo) {
@@ -243,7 +243,7 @@ function subscribeRealtime(sk, callback) {
 
     // This is for initializing the auction items, if realtime checkbox is checked for the first time.
     function subscribeToAuctionsInit() {
-      var query = DB.Auction.find()
+      var query = DB.Auction.find({depth:true})
                             .ascending('name');
       var stream = query.resultStream();
       var initialized = false;
