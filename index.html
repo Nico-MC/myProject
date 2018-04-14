@@ -229,10 +229,7 @@
               var loadedElements = $('.auction_div').children().toArray();
 
               $(loadedElements).each(function(key, val) {
-                if($.inArray(val.id, auctionElements) == -1) {
-                  console.log("Delete item");
-                  $(val).hide('slow', function() { $(this).remove(); });
-                }
+                if($.inArray(val.id, auctionElements) == -1) $(val).hide('slow', function() { $(this).remove(); });
               });
             }
           } else if(auctions.length === 0 && $('.auction_div .no_items').length === 0) {
@@ -242,16 +239,13 @@
             });
           }
         }
-
-
-          render();
-          resizeAuto();
+        render();
+        resizeAuto();
       }
 
       function loadSearchContent(auctions, callback) {
         auctionClassNames = [];
         var callbackCount = 0;
-
         function render(callback) {
           auctions.forEach(function(auction) {
             var diff = getRemainingTime(auction);
@@ -336,13 +330,11 @@
         if(auctionTodo.data != null) {
           var matchType = auctionTodo.matchType;
           if(matchType == "add") {
-            var arr = [auctionTodo.data];
-            loadSearchContent(arr, null);
+            loadSearchContent([auctionTodo.data], null);
           } else if(matchType == "remove") {
             $('#'+auctionTodo.data.key).hide("slow", function() {
               $(this).remove();
               resizeAuto();
-              console.log("Item removed!");
             });
           } else if(matchType == "change") {
           }
@@ -373,6 +365,10 @@
           if(className.indexOf(searchInput) > -1) $('.search_content_row#' + loadedElement.id).show("slow", function() { resizeAuto(); });
           else $('.search_content_row#' + loadedElement.id).hide("slow", function() { resizeAuto(); });
         });
+      }
+
+      function updateBids(bidsTodo) {
+        console.log(bidsTodo);
       }
 
       function escapeID(id) {

@@ -37,19 +37,16 @@ function register(data, callback) {
           if(password === password_2) {
             initUser(username, function(user, sk) {
               DB.User.register(user, password).then(function() {
-                DB.Role.find().equal('name', 'loggedIn').singleResult(function(role) {
-                  DB.User.me.acl.allowReadAccess(role)
-                  DB.User.me.save();
-                });
-
-                registermessage(function() {
-                  createItemlist();
-                  createAuctionList();
-                  createBidList();
-                  return callback(sk);
+                  registermessage(function() {
+                    createItemlist();
+                    createAuctionList();
+                    createBidList();
+                    setTimeout(function() {
+                      return callback(sk);
+                    }, 4000);
+                  });
                 });
               });
-            })
           } else errormessage("Passwörter stimmen nicht überein.");
         } else errormessage("Passwort ist zu kurz.");
       } else errormessage("Bitte gebe ein Passwort ein.");
@@ -101,6 +98,7 @@ function initUser(username, callback) {
     'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64),
     'bankbalance': 0.0
   });
+  console.log(user);
 
   return callback(user, user.securitykey);
 }
@@ -203,9 +201,10 @@ function subscribeRealtime(sk, callback) {
     subscribeToUserAuctions();
     subscribeToAuctions();
     subscribeToAuctionsInit();
+    subscribeToBids();
 
     function subscribeToItems() {
-      var query = DB.Items.find({depth:true})
+      var query = DB.Items.find()
                           .equal('user', DB.User.me);
       var stream = query.eventStream({initial:true});
       var subscriptionItems = stream.subscribe(function(itemMap) {
@@ -218,7 +217,7 @@ function subscribeRealtime(sk, callback) {
 
     // loadAuctionItems
     function subscribeToUserAuctions() {
-      var query = DB.Auctions.find({depth:true})
+      var query = DB.Auctions.find()
                              .equal('user', DB.User.me);
       var stream = query.eventStream({initial:true});
       var subscriptionUserAuctions = stream.subscribe(function(auctionsTodo) {
@@ -230,10 +229,11 @@ function subscribeRealtime(sk, callback) {
     }
 
     function subscribeToAuctions() {
-      var query = DB.Auction.find({depth:true})
+      var query = DB.Auction.find({refresh:true})
                             .ascending('name');
       var stream = query.eventStream({initial:false});
       var subscriptionAuctions = stream.subscribe(function(auctionTodo) {
+        console.log(auctionTodo);
         updateSearchContent(auctionTodo);
       }, function(err) {
         console.log(err);
@@ -243,7 +243,7 @@ function subscribeRealtime(sk, callback) {
 
     // This is for initializing the auction items, if realtime checkbox is checked for the first time.
     function subscribeToAuctionsInit() {
-      var query = DB.Auction.find({depth:true})
+      var query = DB.Auction.find()
                             .ascending('name');
       var stream = query.resultStream();
       var initialized = false;
@@ -259,6 +259,18 @@ function subscribeRealtime(sk, callback) {
       subList.push(subscriptionAuctionsInit);
     }
 
+    function subscribeToBids() {
+      var query = DB.Bids.find()
+                         .equal('user', DB.User.me);
+      var stream = query.eventStream({initial:true});
+      var subscriptionBids = stream.subscribe(function(bidsTodo) {
+        updateBids(bidsTodo);
+      }, function(err) {
+        console.log(err);
+      });
+      subList.push(subscriptionBids);
+    }
+
     return callback(subList);
   }
 }
@@ -269,7 +281,6 @@ function pushItemlist(givenItemlist, callback) {
     items.partialUpdate
          .set("itemlist", newArr)
          .execute().then(function() {
-           console.log("Concat array.");
            return callback();
          });
   });
@@ -369,7 +380,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
 
           new DB.Auction({
             'name': droppedItem,
-            'user': DB.User.me,
+            'user': { 'username': DB.User.me.username },
             'itemlist': puffer,
             'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset }),
             'amount': amount,
@@ -401,7 +412,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
 
 function lookAfterExpiredAuctions(auctionsTodo, callback) {
   if(auctionsTodo == null) {
-    DB.Auctions.load(auctionsID).then(function(loadedAuctionsTodo) {
+    DB.Auctions.load(auctionsID, {depth:true}).then(function(loadedAuctionsTodo) {
       auctionsTodo = null;
       auctionsTodo = loadedAuctionsTodo;
       scan();
@@ -449,10 +460,8 @@ function updateItemlist(expiredAuctions, callback) {
       if(map.has(val.name)) {
         var newArr = map.get(val.name).concat(val.itemlist);
         map.set(val.name, newArr);
-        console.log(1);
       } else {
         map.set(val.name, val.itemlist);
-        console.log(2);
       }
     });
     loadedItemsTodo.itemlist = map;
@@ -464,13 +473,14 @@ function browseAfterAuctions() {}
 
 function bidThisAuction(auctionID) {
   var user = DB.User.me;
-  DB.Auction.load("/db/Auction/" + auctionID).then(function(auctionTodo) {
+  DB.Auction.load("/db/Auction/" + auctionID, {depth:true}).then(function(auctionTodo) {
     if(auctionTodo.user != user) {
       auctionTodo.bidder = user;
+      auctionTodo.startingprice += auctionTodo.startingprice/100 * 10;
       user.bids++;
       user.save();
       auctionTodo.save().then(function(savedAuctionTodo) {
-        DB.Bids.load(bidsID).then(function(loadedBidsTodo) {
+        DB.Bids.load(bidsID, {depth:true}).then(function(loadedBidsTodo) {
           loadedBidsTodo.bidlist.push(savedAuctionTodo);
           loadedBidsTodo.save({depth:true});
           bidThisAuctionMessage(auctionTodo.key);
@@ -488,6 +498,7 @@ function lookAfterExpiredBids(itemlist, callback) {
       bidlist.forEach(function(auction, i) {
         if(getRemainingTime(auction).asSeconds() < 1) {
           expiredAuctions.push(auction);
+          auction.delete();
           bidlist.splice(i, 1);
         }
       });
