@@ -43,7 +43,7 @@ function register(data, callback) {
                     createBidList();
                     setTimeout(function() {
                       return callback(sk);
-                    }, 4000);
+                    }, 0);
                   });
                 });
               });
@@ -114,32 +114,33 @@ function init(callback) {
       return callback();
     });
   });
-  getBidsID();
 }
 
 function getDataForInitload() {
   DB.Auctions.load(auctionsID, {depth: true}).then(function(auctionsTodo) {
-    lookAfterExpiredAuctions(auctionsTodo, function(auctionlist) {
-      loadAuctionItems(auctionlist);
+    lookAfterExpiredBids(function() {
+      lookAfterExpiredAuctions(auctionsTodo, function(auctionlist) {
+        loadAuctionItems(auctionlist);
 
-      DB.Items.load(itemsID, {depth: true}).then(function(loadedItems) {
-        loadItems(loadedItems.itemlist);
-        lookAfterExpiredBids(loadedItems.itemlist, function() {});
-      });
+        DB.Items.load(itemsID, {depth: true}).then(function(loadedItems) {
+          loadItems(loadedItems.itemlist);
+        });
 
-      DB.Auction.find()
-      .ascending('name')
-      .resultList({depth: true}, function(auctionItems) {
-        loadSearchContent(auctionItems, null);
+        DB.Auction.find()
+        .ascending('name')
+        .resultList({depth: true}, function(auctionItems) {
+          loadSearchContent(auctionItems, null);
+        });
       });
     });
   });
+  getBidsID(function() {});
 }
 
 // Get ID of user items todo
 function getItemsTodoID(callback) {
   DB.Items.find()
-  .equal('user', DB.User.me)
+  .equal('user.username', DB.User.me.username)
   .singleResult(function(itemsTodo) {
     itemsID = itemsTodo.id;
     console.log(1);
@@ -157,11 +158,12 @@ function getAuctionsID(callback) {
   });
 }
 
-function getBidsID() {
+function getBidsID(callback) {
   DB.Bids.find()
-  .equal('user', DB.User.me)
+  .equal('user.username', DB.User.me.username)
   .singleResult(function(bidsTodo) {
     bidsID = bidsTodo.id;
+    return callback();
   });
 }
 
@@ -170,7 +172,7 @@ function createItemlist() {
   new DB.Items(
     {
       'itemlist': new DB.Map(),
-      'user': DB.User.me
+      'user': { 'username': DB.User.me.username },
     }
   ).save();
 }
@@ -187,8 +189,8 @@ function createAuctionList() {
 function createBidList() {
   new DB.Bids(
     {
-      'user': DB.User.me,
-      'bidlist': []
+      'user': { "username": DB.User.me.username },
+      'bidlist': {}
     }
   ).save();
 }
@@ -205,7 +207,7 @@ function subscribeRealtime(sk, callback) {
 
     function subscribeToItems() {
       var query = DB.Items.find()
-                          .equal('user', DB.User.me);
+                          .equal('user.username', DB.User.me.username);
       var stream = query.eventStream({initial:true});
       var subscriptionItems = stream.subscribe(function(itemMap) {
         updateItems(itemMap);
@@ -233,7 +235,6 @@ function subscribeRealtime(sk, callback) {
                             .ascending('name');
       var stream = query.eventStream({initial:false});
       var subscriptionAuctions = stream.subscribe(function(auctionTodo) {
-        console.log(auctionTodo);
         updateSearchContent(auctionTodo);
       }, function(err) {
         console.log(err);
@@ -344,20 +345,40 @@ function popItem(itemName, callback) {
   });
 }
 
+function updateItemlist(expiredAuctions, callback) {
+  DB.Items.load(itemsID, {depth:true}).then(function(loadedItemsTodo) {
+    var map = loadedItemsTodo.itemlist;
+    var newArr = [];
+
+    expiredAuctions.forEach(function(val, key) {
+      if(map.has(val.name)) {
+        var newArr = map.get(val.name).concat(val.itemlist);
+        map.set(val.name, newArr);
+      } else {
+        map.set(val.name, val.itemlist);
+      }
+    });
+    loadedItemsTodo.itemlist = map;
+    loadedItemsTodo.save({depth: true}).then(function() { return callback(); });
+  });
+}
+
 function createAuction(startingPrice, buyoutPrice, auctionTime) {
   var hours = auctionTime.split(":")[0];
   var minutes = auctionTime.split(":")[1];
-
+  var startingPrice = parseInt(startingPrice);
+  var buyoutPrice = parseInt(buyoutPrice);
+  if(isNaN(buyoutPrice)) buyoutPrice = 0;
   if(droppedItem != null) {
     if(startingPrice > 0) {
-      if((buyoutPrice >= 0 && buyoutPrice > startingPrice) || buyoutPrice == "") {
-        // console.log("Ok, let's create the auction!");
+      if((buyoutPrice >= 0 && buyoutPrice > startingPrice) || buyoutPrice == 0) {
         // Data
         var startDate = moment().toDate();
         var endDate = moment().toDate();
         var timezoneOffset = startDate.getTimezoneOffset();
         var amount = 1;
         var puffer = [];
+        var increaseFactor = 10; // in percent
         endDate.setHours(startDate.getHours()+parseInt(hours));
         endDate.setMinutes(startDate.getMinutes()+parseInt(minutes));
 
@@ -373,7 +394,6 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
           for(var i=0; i<amount; i++)
             puffer.push(itemlist.pop());
 
-
           items.partialUpdate()
                .put("itemlist", droppedItem, itemlist)
                .execute();
@@ -384,8 +404,9 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             'itemlist': puffer,
             'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset }),
             'amount': amount,
-            'startingprice': startingPrice,
-            'buyoutprice': buyoutPrice
+            'startingprice': startingPrice.toFixed(2),
+            'buyoutprice': buyoutPrice.toFixed(2),
+            'factor': { 'startingprice': startingPrice, 'increase': increaseFactor}
           }).insert().then(function(insertedAuction) {
             DB.Auctions.load(auctionsID, {refresh:true}).then(function(auctionsTodo) {
               var newArr = auctionsTodo.auctionlist;
@@ -424,93 +445,94 @@ function lookAfterExpiredAuctions(auctionsTodo, callback) {
     var auctionlist = auctionsTodo.auctionlist;
     var nonExpiredAuctions = [];
     var expiredAuctions = [];
-    var selledAuctions = [];
     auctionlist.forEach(function(auction) {
       var diff = getRemainingTime(auction);
 
       if(diff.asSeconds() < 1) {
-        if(auction.bidder == null) {
-          expiredAuctions.push(auction);
-          auction.delete();
-        } else {
-          selledAuctions.push(auction);
-        }
-      } else {
+        if(auction.bidder == null) expiredAuctions.push(auction);
+        else newBidAlert("Folgender Gegenstand wurde für " + auction.startingprice + " € verkauft: " + auction.name);
+        auction.delete();
+      }
+      else {
         nonExpiredAuctions.push(auction);
       }
     });
     auctionsTodo.auctionlist = nonExpiredAuctions;
     auctionsTodo.save().then(function() {
-      auctionExpiredAlert(expiredAuctions, function() {
-        // selledAuctionsAlert(selledAuctions);
-      });
       updateItemlist(expiredAuctions, function() {
+        auctionExpiredAlert(expiredAuctions, function() {
+        });
         return callback(auctionsTodo);
       });
     });
   }
 }
 
-function updateItemlist(expiredAuctions, callback) {
-  DB.Items.load(itemsID, {depth:true}).then(function(loadedItemsTodo) {
-    var map = loadedItemsTodo.itemlist;
-    var newArr = [];
-
-    expiredAuctions.forEach(function(val, key) {
-      if(map.has(val.name)) {
-        var newArr = map.get(val.name).concat(val.itemlist);
-        map.set(val.name, newArr);
-      } else {
-        map.set(val.name, val.itemlist);
-      }
-    });
-    loadedItemsTodo.itemlist = map;
-    loadedItemsTodo.save({depth: true}).then(function() { return callback(); });
+function lookAfterExpiredBids(callback) {
+  DB.Bids.load(bidsID, {depth:true}).then(function(bidsTodo) {
+    var bidlist = bidsTodo.bidlist;
+    var expiredBids = [];
+    var noneExpiredBids = new Map();
+    if(bidlist.size != 0) {
+      bidlist.forEach(function(bidVal, bidKey) {
+        if(getRemainingTime(bidVal).asSeconds() < 1) expiredBids.push(bidVal);
+        else noneExpiredBids.set(bidKey, bidVal);
+      });
+      bidsTodo.bidlist = noneExpiredBids;
+      bidsTodo.save().then(function() {
+        updateItemlist(expiredBids, function() {
+          bidExpiredAlert(expiredBids, function() {
+          });
+          return callback();
+        });
+      });
+    } else return callback();
   });
 }
 
-function browseAfterAuctions() {}
-
 function bidThisAuction(auctionID) {
-  var user = DB.User.me;
   DB.Auction.load("/db/Auction/" + auctionID, {depth:true}).then(function(auctionTodo) {
-    if(auctionTodo.user != user) {
-      auctionTodo.bidder = user;
-      auctionTodo.startingprice += auctionTodo.startingprice/100 * 10;
-      user.bids++;
-      user.save();
+    if(auctionTodo.user.username != DB.User.me.username) {
+      if(auctionTodo.bidder != null) {
+        deleteBidder(auctionTodo.bidder.username, auctionTodo.key);
+      }
+      auctionTodo.bidder = { "username": DB.User.me.username };
+      var newStartingPrice = auctionTodo.startingprice + auctionTodo.factor.startingprice/100 * auctionTodo.factor.increase;
+      if(newStartingPrice >= auctionTodo.buyoutprice && auctionTodo.buyoutprice != 0) buyThisAuction(auctionTodo);
+      else auctionTodo.startingprice = newStartingPrice;
+      DB.User.me.bids++;
+      DB.User.me.save();
       auctionTodo.save().then(function(savedAuctionTodo) {
-        DB.Bids.load(bidsID, {depth:true}).then(function(loadedBidsTodo) {
-          loadedBidsTodo.bidlist.push(savedAuctionTodo);
-          loadedBidsTodo.save({depth:true});
-          bidThisAuctionMessage(auctionTodo.key);
+        DB.Bids.load(bidsID).then(function(bidsTodo) {
+          var obj = {
+            "name": auctionTodo.name,
+            "itemlist": auctionTodo.itemlist,
+            "time": auctionTodo.time
+          };
+          bidsTodo.bidlist.set(auctionTodo.key, obj);
+          bidsTodo.save().then(function() {
+
+          });
         });
       });
     }
   });
 }
 
-function lookAfterExpiredBids(itemlist, callback) {
-  DB.Bids.load(bidsID, {depth:true}).then(function(bidsTodo) {
-    var bidlist = bidsTodo.bidlist;
-    if(bidlist.length != 0) {
-      var expiredAuctions = [];
-      bidlist.forEach(function(auction, i) {
-        if(getRemainingTime(auction).asSeconds() < 1) {
-          expiredAuctions.push(auction);
-          auction.delete();
-          bidlist.splice(i, 1);
-        }
-      });
-      bidsTodo.save({depth:true});
-      updateItemlist(expiredAuctions, function() { });
-    }
-  });
+function deleteBidder(bidder, auctionKey) {
+  DB.Bids.find()
+          .equal("user.username", bidder)
+          .singleResult(function(bidsTodo) {
+            var bidlist = bidsTodo.bidlist;
+            bidlist.delete(auctionKey);
+            bidsTodo.save();
+          });
 }
 
-function buyThisAuction(auctionID) {
-  var user = DB.User.me;
-  if(user == DB.User.me) return -1;
+function browseAfterAuctions() {}
+
+function buyThisAuction(auctionTodo) {
+
 }
 
 

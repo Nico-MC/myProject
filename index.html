@@ -255,9 +255,8 @@
               var auctionKey = auction.key;
               /* PRICE */
               var auctionUser = auction.user.username;
-              var auctionStartingPrice = auction.startingprice;
-              var auctionBuyoutPrice = auction.buyoutprice;
-
+              var auctionStartingPrice = parseFloat(auction.startingprice).toFixed(2);
+              var auctionBuyoutPrice = parseFloat(auction.buyoutprice).toFixed(2);
               var checkAuctionBuyoutPrice = function() {
                 if(auctionBuyoutPrice == 0) return '';
                 else return '<div class="buyout_price">'+auctionBuyoutPrice+' € (Sofortkauf)</div>'
@@ -265,8 +264,8 @@
               var checkAuctionButtons = function() {
                 if(auctionUser == DB.User.me.username)
                   return '';
-                else if(auction.bidder == DB.User.me)
-                  return "<div class=your_bid>dein gebot</div>"
+                else if(auction.bidder != null && auction.bidder.username == DB.User.me.username)
+                  return "<div class=your_bid>dein gebot</div>";
                 else
                   return '<button class="bid_auction_button" type="button" name="button" onclick="clickBidAuctionButton(this)">Bieten</button> \
                           <button class="buy_auction_button" type="button" name="button" onclick="clickBuyAuctionButton(this)">Kaufen</button>';
@@ -337,6 +336,12 @@
               resizeAuto();
             });
           } else if(matchType == "change") {
+            $('#'+auctionTodo.data.key).find(".starting_price").text(parseFloat(auctionTodo.data.startingprice).toFixed(2) + " €");
+            if(auctionTodo.data.user.username == DB.User.me.username) {
+              var message = "Neues Gebot für folgenden Gegenstand: " + "'" + capitalizeFirstLetter(auctionTodo.data.name) + "'";
+              newBidAlert(message, function() {});
+            }
+            bidThisAuctionMessage(auctionTodo.data);
           }
         } else console.log("ERROR: Couldn't read coming event");
       }
@@ -350,11 +355,12 @@
             });
           });
           setTimeout(function() {
-            lookAfterExpiredAuctions(null, function() {
-              resizeAuto();
+            lookAfterExpiredBids(function() {
+              lookAfterExpiredAuctions(null, function() {
+              });
             });
           }, 4000);
-          lookAfterExpiredBids(function() {});
+          // lookAfterExpiredBids(function() { resizeAuto(); });
       }
 
       function searchRealtime() {
@@ -368,7 +374,7 @@
       }
 
       function updateBids(bidsTodo) {
-        console.log(bidsTodo);
+        // console.log(bidsTodo);
       }
 
       function escapeID(id) {
@@ -384,6 +390,7 @@
         }
       }
 
+      /* ----- DRAG AND DROP ----- */
       function allowDrop(e) {
         e.preventDefault();
       }
@@ -449,7 +456,6 @@
         var auctionEnd = moment(auction.time.end);
         // This is for checking the remaining time of all items
         var auctionTimezoneOffset = auction.time.timezoneOffset;
-
         var now = moment().utcOffset(auctionTimezoneOffset);
         return moment.duration(auctionEnd.diff(now));
       }
@@ -484,10 +490,11 @@
           if(endTime.asSeconds() < 1) {
             $(insertTo).hide("slow", function() {
               auctionTimeDurations.splice(index, 1)
-              lookAfterExpiredAuctions(null, function() {
-                resizeAuto();
-                lookAfterExpiredBids(function() {});
-              })
+              lookAfterExpiredBids(function() {
+                lookAfterExpiredAuctions(null, function() {
+                  resizeAuto();
+                });
+              });
             });
           }
           $(insertTo.find(".endtime").text(formatTime(endTime)));
@@ -495,32 +502,6 @@
       }
       /* ----- TIME END ----- */
       /* -------------------- */
-
-      function auctionExpiredAlert(expiredAuctions, callback) {
-        if(expiredAuctions.length != 0) {
-          if(expiredAuctions.length == 1) $(".expired_auction_div").text(expiredAuctions.length + " Auktion ist abgelaufen und wurde deiner Itemliste wieder hinzugefügt.");
-          else $(".expired_auction_div").text(expiredAuctions.length + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.");
-          $(".expired_auction_div").slideDown("slow", function() {
-            setTimeout(function() {
-              $(".expired_auction_div").slideUp("slow", function() {
-                return callback();
-              });
-            }, 1000);
-          });
-        } else return callback();
-      }
-
-      function selledAuctionsAlert(selledAuctions) {
-        if(selledAuctions.length != 0) {
-          if(selledAuctions.length == 1) $(".expired_auction_div").text("Du hast " + selledAuctions.length + " Auktion verkauft.");
-          else $(".expired_auction_div").text("Du hast " + selledAuctions.length + " Auktionen verkauft.");
-          $(".expired_auction_div").slideDown("slow", function() {
-            setTimeout(function() {
-              $(".expired_auction_div").slideUp("slow");
-            }, 1000);
-          });
-        }
-      }
 
       $(window).resize(function() {
         resizeAuto();
@@ -601,10 +582,64 @@
         });
       }
 
-      function bidThisAuctionMessage(auctionID) {
-        $("#"+auctionID).find(".auction_buttons").fadeOut("slow", function() {
-          $(this).html("<div class=your_bid>dein gebot</div>").fadeIn("slow");
-        });
+      function bidThisAuctionMessage(auctionTodo) {
+        if(auctionTodo.user.username != DB.User.me.username) {
+          if(auctionTodo.bidder.username == DB.User.me.username) {
+            $("#"+auctionTodo.key).find(".auction_buttons").fadeOut("slow").promise().done(function() {
+              $(this).html("<div class=your_bid>dein gebot</div>").fadeIn("slow");
+            });
+          } else {
+            var html = '<button class="bid_auction_button" type="button" name="button" onclick="clickBidAuctionButton(this)">Bieten</button> \
+                        <button class="buy_auction_button" type="button" name="button" onclick="clickBuyAuctionButton(this)">Kaufen</button>';
+            $("#"+auctionTodo.key).find(".your_bid").fadeOut("slow").promise().done(function() {
+              $("#"+auctionTodo.key).find(".auction_buttons").html(html);
+              $(".bid_auction_button").css("display", "none");
+              $(".buy_auction_button").css("display", "none");
+              $(".bid_auction_button").fadeIn("slow");
+              $(".buy_auction_button").fadeIn("slow");
+            });
+          }
+        }
+      }
+
+      function auctionExpiredAlert(expiredAuctions, callback) {
+        if(expiredAuctions.length != 0) {
+          if(expiredAuctions.length == 1) $(".expired_auction_div").text(expiredAuctions.length + " Auktion ist abgelaufen und wurde deiner Itemliste wieder hinzugefügt.");
+          else $(".expired_auction_div").text(expiredAuctions.length + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.");
+          $(".expired_auction_div").slideDown("slow", function() {
+            setTimeout(function() {
+              $(".expired_auction_div").slideUp("slow", function() {
+                return callback();
+              });
+            }, 1000);
+          });
+        } else return callback();
+      }
+
+      function bidExpiredAlert(bids, callback) {
+        if(bids.length != 0) {
+          if(bids.length == 1) $(".expired_auction_div").text("Du hast " + bids.length + " Auktion gewonnen.");
+          else $(".expired_auction_div").text("Du hast " + bids.length + " Auktionen gewonnen.");
+          $(".expired_auction_div").slideDown("slow", function() {
+            setTimeout(function() {
+              $(".expired_auction_div").slideUp("slow");
+            }, 1000);
+          });
+        }
+      }
+
+      function newBidAlert(message, callback) {
+        var timeout = 0;
+        if($(".expired_auction_div").css("display") != "none") timeout = 1000;
+
+        setTimeout(function() {
+          $(".expired_auction_div").text(message);
+          $(".expired_auction_div").slideDown("slow", function() {
+            setTimeout(function() {
+              $(".expired_auction_div").slideUp("slow");
+            }, 1000);
+          });
+        }, timeout);
       }
 
       function switchRegister() {
