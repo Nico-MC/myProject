@@ -604,15 +604,22 @@
 
       function auctionExpiredAlert(expiredAuctions, callback) {
         if(expiredAuctions.length != 0) {
-          if(expiredAuctions.length == 1) $(".expired_auction_div").text(expiredAuctions.length + " Auktion ist abgelaufen und wurde deiner Itemliste wieder hinzugefügt.");
-          else $(".expired_auction_div").text(expiredAuctions.length + " Auktionen sind abgelaufen und wurden deiner Itemliste wieder hinzugefügt.");
-          $(".expired_auction_div").slideDown("slow", function() {
+          if(expiredAuctions.length == 1) $(".expired_auction_div_two").text(expiredAuctions.length + " Auktion ist abgelaufen.");
+          else $(".expired_auction_div_two").text(expiredAuctions.length + " Auktionen ist abgelaufen.");
+          var width = $(".expired_auction_div_two").width();
+
+          $('.expired_auction_div_two').show().animate({"left": "-=220"}, "slow", function() {
             setTimeout(function() {
-              $(".expired_auction_div").slideUp("slow", function() {
-                return callback();
-              });
+              $('.expired_auction_div_two').animate({"left": "100%"}, "slow", function() { $(this).hide(); });
             }, 1000);
           });
+          // $(".expired_auction_div_two").slideDown("slow", function() {
+          //   setTimeout(function() {
+          //     $(".expired_auction_div_two").slideUp("slow", function() {
+          //       return callback();
+          //     });
+          //   }, 1000);
+          // });
         } else return callback();
       }
 

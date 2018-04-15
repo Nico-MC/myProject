@@ -113,7 +113,16 @@
   margin: 0 auto;
 }
 
-.expired_auction_div ,
+.expired_auction_div_two {
+  position: absolute;
+  left: 100%;
+  width: 201px;
+  top: 60px;
+  display: none;
+  position: fixed;
+}
+
+.expired_auction_div,
 .profile_option_div,
 .database_option_div {
   position: absolute;
@@ -129,6 +138,7 @@
   padding: 15px;
 }
 
+.expired_auction_div_two,
 .expired_auction_div,
 .profile_option_div {
   padding: 4px 15px 8px 10px;

@@ -468,7 +468,7 @@ function lookAfterExpiredAuctions(auctionsTodo, callback) {
   }
 }
 
-function lookAfterExpiredBids(callback) {
+async function lookAfterExpiredBids(callback) {
   DB.Bids.load(bidsID, {depth:true}).then(function(bidsTodo) {
     var bidlist = bidsTodo.bidlist;
     var expiredBids = [];
