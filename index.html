@@ -297,9 +297,6 @@
                   resizeAuto();
                   auctionTimeDurations.push([$(".search_content_row#"+auctionKey), diff]);
                 });
-                // console.log(DB.User.me.username == auctionUser);
-                // if(auctionUser == DB.User.me.username) $("#" + auctionKey).find(".auction_buttons button").css("color", "#444444");
-
                 // This is for searching after available auctions in search bar (look function: searchRealtime())
                 if(auctionClassNames.indexOf(auctionName)) { auctionClassNames.push(auctionName); }
               }
@@ -602,26 +599,34 @@
         }
       }
 
+      function buyThisAuctionMessage(auctionTodo, callback) {
+        $("#"+auctionTodo.key).find(".auction_buttons").fadeOut("slow").promise().done(function() {
+          $(this).html("<div class=your_bid>gekauft</div>").fadeIn("slow").promise().done(function() {
+            return callback();
+          });
+        });
+      }
+
       function auctionExpiredAlert(expiredAuctions, callback) {
         if(expiredAuctions.length != 0) {
           if(expiredAuctions.length == 1) $(".expired_auction_div_two").text(expiredAuctions.length + " Auktion ist abgelaufen.");
           else $(".expired_auction_div_two").text(expiredAuctions.length + " Auktionen ist abgelaufen.");
-          var width = $(".expired_auction_div_two").width();
+          slide();
+        } else return callback();
 
-          $('.expired_auction_div_two').show().animate({"left": "-=220"}, "slow", function() {
+        function slide() {
+          if($('.expired_auction_div_two').css("display") != "none") $('.expired_auction_div_two').stop(false, false);
+
+          var left = $(window).width() - 220;
+          $('.expired_auction_div_two').show().animate({"left": left}, "slow", function() {
             setTimeout(function() {
-              $('.expired_auction_div_two').animate({"left": "100%"}, "slow", function() { $(this).hide(); });
+              $('.expired_auction_div_two').animate({"left": "100%"}, "slow", function() {
+                $(this).hide();
+              });
             }, 1000);
           });
-          // $(".expired_auction_div_two").slideDown("slow", function() {
-          //   setTimeout(function() {
-          //     $(".expired_auction_div_two").slideUp("slow", function() {
-          //       return callback();
-          //     });
-          //   }, 1000);
-          // });
-        } else return callback();
-      }
+        }
+    }
 
       function bidExpiredAlert(bids, callback) {
         if(bids.length != 0) {

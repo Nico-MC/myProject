@@ -120,6 +120,7 @@
   top: 60px;
   display: none;
   position: fixed;
+  box-shadow: 0 0 0 2px;
 }
 
 .expired_auction_div,
