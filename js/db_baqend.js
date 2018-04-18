@@ -92,14 +92,13 @@ String.prototype.hashCode = function() {
 // }
 
 function initUser(username, callback) {
-  console.log("Initialize User ...");
   // user object
   var user = new DB.User({
     'username': username,
     'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64),
-    'bankbalance': 0.0
+    'bankbalance': 0.0,
+    'bids': 0
   });
-  console.log(user);
 
   return callback(user, user.securitykey);
 }
@@ -120,9 +119,10 @@ function init(callback) {
 
 function getDataForInitload() {
   DB.Auctions.load(auctionsID, {depth: true}).then(function(auctionsTodo) {
-    lookAfterExpiredBids(function() {
+    lookAfterExpiredBids(function(bidlist) {
       lookAfterExpiredAuctions(auctionsTodo, function(auctionlist) {
         loadAuctionItems(auctionlist);
+        loadBidItems(bidlist);
 
         DB.Items.load(itemsID, {depth: true}).then(function(loadedItems) {
           loadItems(loadedItems.itemlist);
@@ -406,6 +406,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
             'time': new DB.Activity({ 'start': startDate, 'end': endDate, 'timezoneOffset': timezoneOffset }),
             'amount': amount,
             'startingprice': startingPrice.toFixed(2),
+            'price': startingPrice.toFixed(2),
             'buyoutprice': buyoutPrice.toFixed(2),
             'factor': { 'startingprice': startingPrice, 'increase': increaseFactor}
           }).insert().then(function(insertedAuction) {
@@ -451,7 +452,7 @@ function lookAfterExpiredAuctions(auctionsTodo, callback) {
 
       if(diff.asSeconds() < 1) {
         if(auction.bidder == null) expiredAuctions.push(auction);
-        else newBidAlert("Folgender Gegenstand wurde für " + auction.startingprice + " € verkauft: " + auction.name);
+        else newBidAlert("Folgender Gegenstand wurde für " + (auction.price).toFixed(2) + " € verkauft: " + auction.name);
         auction.delete();
       }
       else {
@@ -470,37 +471,45 @@ function lookAfterExpiredAuctions(auctionsTodo, callback) {
 }
 
 async function lookAfterExpiredBids(callback) {
-  DB.Bids.load(bidsID, {depth:true}).then(function(bidsTodo) {
+  DB.Bids.load(bidsID).then(function(bidsTodo) {
     var bidlist = bidsTodo.bidlist;
     var expiredBids = [];
     var noneExpiredBids = new Map();
     if(bidlist.size != 0) {
       bidlist.forEach(function(bidVal, bidKey) {
-        if(getRemainingTime(bidVal).asSeconds() < 1) expiredBids.push(bidVal);
-        else noneExpiredBids.set(bidKey, bidVal);
+        if(getRemainingTime(bidVal).asSeconds() < 1) {
+          expiredBids.push(bidVal);
+          DB.User.me.bids--;
+          // DB.User.me.save();
+        } else noneExpiredBids.set(bidKey, bidVal);
       });
       bidsTodo.bidlist = noneExpiredBids;
       bidsTodo.save().then(function() {
         updateItemlist(expiredBids, function() {
           bidExpiredAlert(expiredBids, function() {
           });
-          return callback();
+          return callback(bidlist);
         });
       });
-    } else return callback();
+    } else return callback(bidlist);
   });
 }
 
 function bidThisAuction(auctionID) {
-  DB.Auction.load("/db/Auction/" + auctionID, {depth:true}).then(function(auctionTodo) {
+  DB.Auction.load("/db/Auction/" + auctionID).then(function(auctionTodo) {
     if(auctionTodo.user.username != DB.User.me.username) {
       if(auctionTodo.bidder != null) {
         deleteBidder(auctionTodo.bidder, auctionTodo.key);
+        if(auctionTodo.bidder.username == DB.User.me.username) {
+          return -1;
+        }
       }
       auctionTodo.bidder = { "username": DB.User.me.username };
+      var price = auctionTodo.startingprice;
+      auctionTodo.price = price;
       var newStartingPrice = auctionTodo.startingprice + auctionTodo.factor.startingprice/100 * auctionTodo.factor.increase;
-      if(newStartingPrice >= auctionTodo.buyoutprice && auctionTodo.buyoutprice != 0) buyThisAuction(auctionTodo);
-      else auctionTodo.startingprice = newStartingPrice;
+      if(newStartingPrice >= auctionTodo.buyoutprice && auctionTodo.buyoutprice != 0) buyThisAuction(auctionTodo.key);
+      else auctionTodo.startingprice = newStartingPrice.toFixed(2);
       DB.User.me.bids++;
       DB.User.me.save();
       auctionTodo.save().then(function(savedAuctionTodo) {
@@ -508,12 +517,11 @@ function bidThisAuction(auctionID) {
           var obj = {
             "name": auctionTodo.name,
             "itemlist": auctionTodo.itemlist,
-            "time": auctionTodo.time
+            "time": auctionTodo.time,
+            "price": price
           };
           bidsTodo.bidlist.set(auctionTodo.key, obj);
-          bidsTodo.save().then(function() {
-
-          });
+          bidsTodo.save();
         });
       });
     }
@@ -521,13 +529,15 @@ function bidThisAuction(auctionID) {
 }
 
 function deleteBidder(bidder, auctionKey) {
-  console.log("delete");
   DB.Bids.find()
           .equal("user.username", bidder.username)
           .singleResult(function(bidsTodo) {
             var bidlist = bidsTodo.bidlist;
             bidlist.delete(auctionKey);
-            bidsTodo.save();
+            bidsTodo.save().then(function() {
+              DB.User.me.bids--;
+              DB.User.me.save();
+            });
           });
 }
 
@@ -535,16 +545,18 @@ function browseAfterAuctions() {}
 
 function buyThisAuction(auctionID) {
   DB.Auction.load("/db/Auction/" + auctionID).then(function(auctionTodo) {
-    updateItemlist([auctionTodo], function() {
-      if(auctionTodo.bidder != null) {
-        deleteBidder(auctionTodo.bidder, auctionTodo.key);
-        auctionTodo.bidder = null;
-        auctionTodo.save().then(function() {
+    if(auctionTodo.buyoutprice > 0) {
+      updateItemlist([auctionTodo], function() {
+        if(auctionTodo.bidder != null) {
+          deleteBidder(auctionTodo.bidder, auctionTodo.key);
+          auctionTodo.bidder = null;
+          auctionTodo.save().then(function() {
 
-        });
-      }
-      removeAuctionFromUserAuctionlist(auctionTodo.user.username, auctionTodo);
-    });
+          });
+        }
+        removeAuctionFromUserAuctionlist(auctionTodo.user.username, auctionTodo);
+      });
+    }
   });
 }
 
@@ -574,7 +586,7 @@ function simulate() {
   var thirdPause = 3000;
 
   var item1 = new DB.Item({
-    'name': 'iron',
+    'name': 'gold',
     'type': 'ore',
     'weight': 10
   });

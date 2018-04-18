@@ -53,6 +53,7 @@
             // load user profile_option_div
             $('.profile_option_div .username').text(DB.User.me.username);
             $('.profile_option_div .bankbalance').text(DB.User.me.bankbalance);
+            $('.profile_option_div .bids').text(DB.User.me.bids);
 
             // query-ui slider
             var slider_hours = $("#auction_duration_slider_hours").slider();
@@ -135,6 +136,7 @@
             });
 
             // startGame();
+            $('#check_realtime').trigger( "click" );
           }
         }
       }
@@ -243,6 +245,26 @@
         resizeAuto();
       }
 
+      function loadBidItems(bidsTodo) {
+        bidsTodo.forEach(function(bid, auctionKey) {
+          console.log(bid);
+          console.log(auctionKey);
+          var name = bid.name;
+          var itemlist = bid.itemlist;
+          var price = bid.price;
+          var time = bid.time;
+
+          $('.bids_div .no_items').fadeOut('fast').promise().done(function() {
+            $(this).remove();
+            if($('.bids_div').find('.bid_item#' + auctionKey).length === 0) {
+              $('<div id="'+ auctionKey +'" class="bid_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.bids_div').show('slow');
+            } else {
+              $('.bid_item.'+name+' .bid_number').html(itemlist.length);
+            }
+          });
+        });
+      }
+
       function loadSearchContent(auctions, callback) {
         auctionClassNames = [];
         var callbackCount = 0;
@@ -266,9 +288,13 @@
                   return '';
                 else if(auction.bidder != null && auction.bidder.username == DB.User.me.username)
                   return "<div class=your_bid>dein gebot</div>";
-                else
-                  return '<button class="bid_auction_button" type="button" name="button" onclick="clickBidAuctionButton(this)">Bieten</button> \
-                          <button class="buy_auction_button" type="button" name="button" onclick="clickBuyAuctionButton(this)">Kaufen</button>';
+                else {
+                  if(auction.buyoutprice > 0)
+                    return html = '<button class="bid_auction_button" type="button" name="button" onclick="clickBidAuctionButton(this)">Bieten</button> \
+                                   <button class="buy_auction_button" type="button" name="button" onclick="clickBuyAuctionButton(this)">Kaufen</button>';
+                  else
+                    return html = '<button class="bid_auction_button" type="button" name="button" onclick="clickBidAuctionButton(this)">Bieten</button>';
+                }
               };
 
               if($('.search_content_row#' + auctionKey).length == 0) {
@@ -322,6 +348,10 @@
         loadAuctionItems(userAuctions);
       }
 
+      function updateBidItems(bidsTodo) {
+
+      }
+
       function updateSearchContent(auctionTodo) {
         if(auctionTodo.data != null) {
           var matchType = auctionTodo.matchType;
@@ -352,12 +382,12 @@
             });
           });
           setTimeout(function() {
-            lookAfterExpiredBids(function() {
+            lookAfterExpiredBids(function(bidlist) {
               lookAfterExpiredAuctions(null, function() {
+                resizeAuto();
               });
             });
-          }, 4000);
-          // lookAfterExpiredBids(function() { resizeAuto(); });
+          }, 2000);
       }
 
       function searchRealtime() {
@@ -487,7 +517,7 @@
           if(endTime.asSeconds() < 1) {
             $(insertTo).hide("slow", function() {
               auctionTimeDurations.splice(index, 1)
-              lookAfterExpiredBids(function() {
+              lookAfterExpiredBids(function(bidlist) {
                 lookAfterExpiredAuctions(null, function() {
                   resizeAuto();
                 });
@@ -586,8 +616,12 @@
               $(this).html("<div class=your_bid>dein gebot</div>").fadeIn("slow");
             });
           } else {
-            var html = '<button class="bid_auction_button" type="button" name="button" onclick="clickBidAuctionButton(this)">Bieten</button> \
-                        <button class="buy_auction_button" type="button" name="button" onclick="clickBuyAuctionButton(this)">Kaufen</button>';
+            if(auctionTodo.buyoutprice > 0)
+              var html = '<button class="bid_auction_button" type="button" name="button" onclick="clickBidAuctionButton(this)">Bieten</button> \
+                          <button class="buy_auction_button" type="button" name="button" onclick="clickBuyAuctionButton(this)">Kaufen</button>';
+            else
+              var html = '<button class="bid_auction_button" type="button" name="button" onclick="clickBidAuctionButton(this)">Bieten</button>';
+
             $("#"+auctionTodo.key).find(".your_bid").fadeOut("slow").promise().done(function() {
               $("#"+auctionTodo.key).find(".auction_buttons").html(html);
               $(".bid_auction_button").css("display", "none");
@@ -642,16 +676,14 @@
 
       function newBidAlert(message, callback) {
         var timeout = 0;
-        if($(".expired_auction_div").css("display") != "none") timeout = 1000;
+        if($('.expired_auction_div').css("display") != "none") $('.expired_auction_div').stop(false, false);
 
-        setTimeout(function() {
-          $(".expired_auction_div").text(message);
-          $(".expired_auction_div").slideDown("slow", function() {
-            setTimeout(function() {
-              $(".expired_auction_div").slideUp("slow");
-            }, 1000);
-          });
-        }, timeout);
+        $(".expired_auction_div").text(message);
+        $(".expired_auction_div").slideDown("slow", function() {
+          setTimeout(function() {
+            $(".expired_auction_div").slideUp("slow");
+          }, 1000);
+        });
       }
 
       function switchRegister() {
