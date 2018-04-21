@@ -48,7 +48,9 @@
           });
 
           function loadLogin() {
-            getDataForInitload();
+            setTimeout(function() {
+              getDataForInitload();
+            }, 300);
 
             // load user profile_option_div
             $('.profile_option_div .username').text(DB.User.me.username);
@@ -120,6 +122,7 @@
             $('#check_realtime').change(function() {
               if(checkRealtime() && (streamlist == null)) {
                 subscribeRealtime(sk, function(streams) {
+                  initialize = true;
                   streamlist = streams;
                   console.log("Realtime is on.");
                 });
@@ -136,7 +139,7 @@
             });
 
             // startGame();
-            $('#check_realtime').trigger( "click" );
+            $('#check_realtime').trigger("click");
           }
         }
       }
@@ -199,35 +202,60 @@
               $('.inventar_div .no_items').fadeIn("fast");
             }
           }, 1000);
-          resizeAuto();
+          // resizeAuto();
         });
 
       }
 
       function loadAuctionItems(auctions) {
         var auctions = auctions.auctionlist;
-        function render() {
+        function render(callback) {
           // if auctionlist is not empty:
           if(auctions.length != 0) {
             var auctionElements = [];
             auctions.forEach(function(auction) {
-              var name = auction.name;
+              var auctionName = auction.name;
               var itemlist = auction.itemlist;
               var auctionKey = auction.key;
+              var auctionStartingPrice = parseFloat(auction.startingprice).toFixed(2);
+              var auctionBuyoutPrice = parseFloat(auction.buyoutprice).toFixed(2);
+              var diff = getRemainingTime(auction);
+
+              var checkAuctionBuyoutPrice = function() {
+                if(auctionBuyoutPrice == 0) return '';
+                else return '<div class="buyout_price">'+auctionBuyoutPrice+' €</div>'
+              };
 
               $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
                 $(this).remove();
-                if($('.auction_div').find('.auction_item#' + auctionKey).length === 0) {
-                  $('<div id="'+ auctionKey +'" class="auction_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.auction_div').show('slow');
+                if($('.auction_div').find('.auction_div_row#' + auctionKey).length === 0) {
+                  var html = '<div id="'+ auctionKey +'" style="display: none" class="auction_div_row flex"> \
+                                <div class="auction_item_div category_content flex-child"> \
+                                  <div class="auction_item '+auctionName+'"><span class="item_number strokeme">'+itemlist.length+'</span></div> \
+                                </div> \
+                                <div class="auction_end_div category_content flex-child"> \
+                                  <div class="endtime">'+formatTime(diff, "seconds")+'</div> \
+                                </div> \
+                                <div class="auction_buyout_price_div category_content flex-child"> \
+                                  '+checkAuctionBuyoutPrice()+' \
+                                </div> \
+                                <div class="auction_starting_price_div category_content flex-child"> \
+                                  <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
+                                </div> \
+                              </div>';
+
+                  $(html).appendTo('.auction_div').show('slow', function() {
+                    if(auction.bidder != null) $("#" + auctionKey + ".auction_div_row .starting_price").css("color", "green");
+                  });
                 } else {
-                  $('.auction_item.'+name+' .auction_number').html(itemlist.length);
+                  $('.auction_item.'+auctionName+' .auction_number').html(itemlist.length);
                 }
               });
               auctionElements.push(auction.key);
             });
 
             // This is to filter the old elements and remove them immediately
-            if($('.auction_div > .auction_item').length != 0) {
+            if($('.auction_div > .auction_div_row').length != 0) {
               var loadedElements = $('.auction_div').children().toArray();
 
               $(loadedElements).each(function(key, val) {
@@ -240,15 +268,19 @@
               $('.auction_div .no_items').fadeIn("fast");
             });
           }
+          return callback();
         }
-        render();
-        resizeAuto();
+        setTimeout(function() {
+          render(function() {
+            setTimeout(function() {
+              resizeAuto();
+            }, 500);
+          });
+        }, 300);
       }
 
       function loadBidItems(bidsTodo) {
         bidsTodo.forEach(function(bid, auctionKey) {
-          console.log(bid);
-          console.log(auctionKey);
           var name = bid.name;
           var itemlist = bid.itemlist;
           var price = bid.price;
@@ -306,7 +338,7 @@
                                 <div>'+auctionUser+'</div> \
                               </div> \
                               <div class="auction_end_div category_content flex-child"> \
-                                <div class="endtime">'+formatTime(diff)+'</div> \
+                                <div class="endtime">'+formatTime(diff, "minutes")+'</div> \
                               </div> \
                               <div class="auction_price_div category_content flex-child"> \
                                 <div class="auction_price"> \
@@ -320,7 +352,7 @@
                             </div>';
 
                 $(html).appendTo('.search_content_div').show("slow", function() {
-                  resizeAuto();
+                  // resizeAuto();
                   auctionTimeDurations.push([$(".search_content_row#"+auctionKey), diff]);
                 });
                 // This is for searching after available auctions in search bar (look function: searchRealtime())
@@ -360,10 +392,12 @@
           } else if(matchType == "remove") {
             $('#'+auctionTodo.data.key).hide("slow", function() {
               $(this).remove();
-              resizeAuto();
             });
           } else if(matchType == "change") {
-            $('#'+auctionTodo.data.key).find(".starting_price").text(parseFloat(auctionTodo.data.startingprice).toFixed(2) + " €");
+            console.log($('#'+auctionTodo.data.key + " .starting_price"));
+            $('#'+auctionTodo.data.key + " .starting_price").each(function(i, val) {
+              $(this).text(parseFloat(auctionTodo.data.startingprice).toFixed(2) + " €");
+            });
             if(auctionTodo.data.user.username == DB.User.me.username) {
               var message = "Neues Gebot für folgenden Gegenstand: " + "'" + capitalizeFirstLetter(auctionTodo.data.name) + "'";
               newBidAlert(message, function() {});
@@ -374,20 +408,19 @@
       }
 
       function realtimeInitSearchContent(auctions) {
-          auctionTimeDurations = [];
-          $('.search_content_div').children('.search_content_row').hide("slow").promise().done(function() {
-            $('.search_content_div').html('');
-            loadSearchContent(auctions, function() {
-                resizeAuto();
+        initialize = false;
+        auctionTimeDurations = [];
+        $('.search_content_div').children('.search_content_row').hide("slow").promise().done(function() {
+          $('.search_content_div').html('');
+          loadSearchContent(auctions, function() {});
+        });
+        setTimeout(function() {
+          lookAfterExpiredBids(function(bidlist) {
+            lookAfterExpiredAuctions(function() {
+              // resizeAuto();
             });
           });
-          setTimeout(function() {
-            lookAfterExpiredBids(function(bidlist) {
-              lookAfterExpiredAuctions(null, function() {
-                resizeAuto();
-              });
-            });
-          }, 2000);
+        }, 2000);
       }
 
       function searchRealtime() {
@@ -487,14 +520,23 @@
         return moment.duration(auctionEnd.diff(now));
       }
 
-      function formatTime(time) {
-        var newTime = "";
-        if(time.hours() != 0) newTime += time.hours() + ":";
-          else newTime += "0:";
-        if(time.minutes() != 0) newTime += time.minutes() + ":";
-        if(time.seconds() != 0) newTime += time.seconds();
-         else newTime += "0";
-         return newTime;
+      function formatTime(time, option) {
+        if(option == "seconds") {
+          var newTime = "";
+          if(time.hours() != 0) newTime += time.hours() + ":";
+            else newTime += "0:";
+          if(time.minutes() != 0) newTime += time.minutes() + ":";
+          if(time.seconds() != 0) newTime += time.seconds();
+           else newTime += "0";
+           return newTime;
+         } else if(option == "minutes") {
+           if(time.asSeconds() < 60) return "0:1"
+           var newTime = "";
+           if(time.hours() != 0) newTime += time.hours() + ":";
+             else newTime += "0:";
+           if(time.minutes() != 0) newTime += time.minutes();
+            return newTime;
+         }
       };
 
       function setTimeInterval() {
@@ -507,24 +549,27 @@
         clearInterval(id);
       }
 
+      var runningTime = 0;
       function updateAuctionsTime() {
-
+        runningTime++;
         auctionTimeDurations.forEach(function(val, index) {
-          var insertTo = val[0];
+          var insertTo = $(val[0]).attr("id");
           var endTime = val[1].subtract(1, "seconds");
-          if(endTime.asSeconds() > 0 && endTime.asSeconds() < 11)
-            $(insertTo.find(".endtime").css("color", "#980000"));
-          if(endTime.asSeconds() < 1) {
-            $(insertTo).hide("slow", function() {
-              auctionTimeDurations.splice(index, 1)
+          if(endTime.seconds()%60 == 0) {
+            if(endTime.asSeconds() < 1) {
+              auctionTimeDurations.splice(index, 1);
               lookAfterExpiredBids(function(bidlist) {
-                lookAfterExpiredAuctions(null, function() {
-                  resizeAuto();
-                });
+                lookAfterExpiredAuctions(function() {});
               });
-            });
+              $("div#"+insertTo).hide("slow", function() {
+                $(this).css("display", "none");
+              });
+            } else $(".search_content_div #"+insertTo + " .endtime").text(formatTime(endTime, "minutes"));
           }
-          $(insertTo.find(".endtime").text(formatTime(endTime)));
+
+
+
+          $(".auction_div_row#"+insertTo + " .endtime").text(formatTime(endTime, "seconds"));
         });
       }
       /* ----- TIME END ----- */
@@ -535,23 +580,29 @@
       });
 
       function resizeAuto(obj) {
-        if(obj != null) {
-          var target = $(obj).attr("href");
-          var oldHeight = $('.tab-pane.active').height();
-          $(target).height(oldHeight);
-          setTimeout(function() {
-            var newHeight = $(target).children('.overflow_div').outerHeight();
-            $(".tab-pane.active").height(newHeight);
-          }, 300);
-        } else {
-          if($('#tab3.tab-pane.active').length !== 0 || $('#tab1.tab-pane.active').length !== 0) {
-            var overflowHeight = $('.tab-pane.active .overflow_div').outerHeight();
-            var tabHeight = $('.tab-pane.active').height();
-            if(overflowHeight > tabHeight) {
-              $(".tab-pane.active").height($('.tab-pane.active .overflow_div').outerHeight());
-            } else if(overflowHeight < tabHeight) {
-              $(".tab-pane.active").height($('.tab-pane.active .overflow_div').outerHeight());
+        console.log("asdsadsads");
+        if(!isResizing) {
+          isResizing = true;
+          if(obj != null) {
+            var target = $(obj).attr("href");
+            var oldHeight = $('.tab-pane.active').height();
+            $(target).height(oldHeight);
+            setTimeout(function() {
+              var newHeight = $(target).children('.overflow_div').outerHeight();
+              $(".tab-pane.active").height(newHeight);
+              isResizing = false;
+            }, 300);
+          } else {
+            if($('#tab3.tab-pane.active').length !== 0 || $('#tab1.tab-pane.active').length !== 0) {
+              var overflowHeight = $('.tab-pane.active .overflow_div').outerHeight();
+              var tabHeight = $('.tab-pane.active').height();
+              if(overflowHeight > tabHeight) {
+                $(".tab-pane.active").height($('.tab-pane.active .overflow_div').outerHeight());
+              } else if(overflowHeight < tabHeight) {
+                $(".tab-pane.active").height($('.tab-pane.active .overflow_div').outerHeight());
+              }
             }
+            isResizing = false;
           }
         }
       }
@@ -644,7 +695,7 @@
       function auctionExpiredAlert(expiredAuctions, callback) {
         if(expiredAuctions.length != 0) {
           if(expiredAuctions.length == 1) $(".expired_auction_div_two").text(expiredAuctions.length + " Auktion ist abgelaufen.");
-          else $(".expired_auction_div_two").text(expiredAuctions.length + " Auktionen ist abgelaufen.");
+          else $(".expired_auction_div_two").text(expiredAuctions.length + " Auktionen sind abgelaufen.");
           slide();
         } else return callback();
 
