@@ -252,11 +252,9 @@
                                 </div> \
                               </div>';
 
-                  $(html).appendTo('.auction_div').show('slow', function() {
-                    if(auction.bidder != null) $("#" + auctionKey + ".auction_div_row .starting_price").css("color", "green");
-                  });
+                  $(html).appendTo('.auction_div').show('slow');
                 } else {
-                  $('.auction_item.'+auctionName+' .auction_number').html(itemlist.length);
+                  $('.auction_item.'+auctionName+' .item_number').html(itemlist.length);
                 }
               });
               auctionElements.push(auction.key);
@@ -287,22 +285,64 @@
         }, 300);
       }
 
-      function loadBidItems(bidsTodo) {
-        bidsTodo.forEach(function(bid, auctionKey) {
-          var name = bid.name;
-          var itemlist = bid.itemlist;
-          var price = bid.price;
-          var time = bid.time;
+      function loadBidItems(bidlist, callback) {
+        function render(callback) {
+          // if bidlist is not empty:
+          if(bidlist.size != 0) {
+            var bidElements = [];
+            bidlist.forEach(function(bid, key) {
+              var name = bid.name;
+              var price = parseFloat(bid.price).toFixed(2);
+              var diff = getRemainingTime(bid);
+              var itemlist = bid.itemlist;
 
-          $('.bids_div .no_items').fadeOut('fast').promise().done(function() {
-            $(this).remove();
-            if($('.bids_div').find('.bid_item#' + auctionKey).length === 0) {
-              $('<div id="'+ auctionKey +'" class="bid_item '+name+'" draggable="false" ondragstart="drag(event)"><span class="item_number strokeme">'+itemlist.length+'</span></div>').appendTo('.bids_div').show('slow');
-            } else {
-              $('.bid_item.'+name+' .bid_number').html(itemlist.length);
+              $('.bids_div .no_items').fadeOut('fast').promise().done(function() {
+                $(this).remove();
+                if($('.bids_div').find('.bid_div_row#' + key).length === 0) {
+                  var html = '<div id="'+ key +'" class="bid_div_row flex"> \
+                                <div class="bid_item_div category_content flex-child"> \
+                                  <div class="bid_item '+name+'"><span class="item_number strokeme">'+itemlist.length+'</span></div> \
+                                </div> \
+                                <div class="bid_end_div category_content flex-child"> \
+                                  <div class="endtime">'+formatTime(diff, "minutes", true)+'</div> \
+                                </div> \
+                                <div style="color: #007700;" class="bid_status_div category_content flex-child"> \
+                                   Höchstbietender \
+                                </div> \
+                                <div class="bid_price_div category_content flex-child"> \
+                                  '+price+' € \
+                                </div> \
+                              </div>';
+
+                  $(html).appendTo('.bids_div');
+                } else {
+                  $('.bid_item.'+name+' .item_number').html(itemlist.length);
+                }
+              });
+              bidElements.push(key);
+            });
+
+            // This is to filter the old elements and remove them immediately
+            if($('.bids_div > .bid_div_row').length != 0) {
+              var loadedElements = $('.bids_div').children().toArray();
+
+              $(loadedElements).each(function(key, val) {
+                if($.inArray(val.id, bidElements) == -1) $(val).hide('slow', function() { $(this).remove(); });
+              });
             }
+          } else if(bidlist.size === 0 && $('.bids_div .no_items').length === 0) {
+            $('.bids_div').children().hide("slow").promise().done(function() {
+              $('.bids_div').html('<span class="no_items">Keine aktuellen Gebote.</span>');
+              $('.bids_div .no_items').fadeIn("fast");
+            });
+          }
+          return callback();
+        }
+        setTimeout(function() {
+          render(function() {
+            if(callback != null) return callback();
           });
-        });
+        }, 300);
       }
 
       function loadSearchContent(auctions, callback) {
@@ -346,7 +386,7 @@
                                 <div>'+auctionUser+'</div> \
                               </div> \
                               <div class="auction_end_div category_content flex-child"> \
-                                <div class="endtime">'+formatTime(diff, "minutes")+'</div> \
+                                <div class="endtime">'+formatTime(diff, "minutes", true)+'</div> \
                               </div> \
                               <div class="auction_price_div category_content flex-child"> \
                                 <div class="auction_price"> \
@@ -389,7 +429,11 @@
       }
 
       function updateBidItems(bidsTodo) {
-
+        loadBidItems(bidsTodo.data.bidlist, function() {
+          setTimeout(function() {
+            resizeAuto();
+          }, 500);
+        });
       }
 
       function updateSearchContent(auctionTodo) {
@@ -407,30 +451,38 @@
               }, 1000);
             });
           } else if(matchType == "remove") {
+            var key = auctionTodo.data.key;
             $('#'+key).hide("slow", function() {
               $(this).remove();
                 setTimeout(function() {
                   resizeAuto();
-                }, 1000);
+                }, 300);
             });
           } else if(matchType == "change") {
+            if(auctionTodo.data.buyed) {
+              auctionBuyedAlert(auctionTodo.data);
+              return -1;
+            }
+
             var buyoutprice = auctionTodo.data.buyoutprice;
             var startingprice = auctionTodo.data.startingprice;
             var key = auctionTodo.data.key;
             var bidder = auctionTodo.data.bidder;
-            $('*[id^="'+key+'"] .starting_price').each(function(i, val) {
-              $(this).text(parseFloat(startingprice).toFixed(2) + " €");
-            });
-            if(buyoutprice != 0) $(".auction_div .buyout_price").hide("slow", function() { $(this).remove() })
             if(bidder != null) {
-              $("#"+key+".high_bidder").text(bidder.username);
-              $("#"+key+".high_bidder").css("color", "#007700");
+              $('*[id^="'+key+'"] .starting_price').each(function(i, val) {
+                $(this).text(parseFloat(startingprice).toFixed(2) + " €");
+              });
+              if(buyoutprice != 0) $(".auction_div .buyout_price").hide("slow", function() { $(this).remove() })
+
+              $(".auction_div_row#"+key+" .high_bidder").text(bidder.username);
+              $(".auction_div_row#"+key+" .high_bidder").css("color", "#007700");
+
+              if(auctionTodo.data.user.username == DB.User.me.username) {
+                var message = "Neues Gebot für folgenden Gegenstand: " + "'" + capitalizeFirstLetter(auctionTodo.data.name) + "'";
+                newBidAlert(message, function() {});
+              }
+              bidThisAuctionMessage(auctionTodo.data);
             }
-            if(auctionTodo.data.user.username == DB.User.me.username) {
-              var message = "Neues Gebot für folgenden Gegenstand: " + "'" + capitalizeFirstLetter(auctionTodo.data.name) + "'";
-              newBidAlert(message, function() {});
-            }
-            bidThisAuctionMessage(auctionTodo.data);
           }
         } else console.log("ERROR: Couldn't read coming event");
       }
@@ -459,10 +511,6 @@
           if(className.indexOf(searchInput) > -1) $('.search_content_row#' + loadedElement.id).show("slow", function() { resizeAuto(); });
           else $('.search_content_row#' + loadedElement.id).hide("slow", function() { resizeAuto(); });
         });
-      }
-
-      function updateBids(bidsTodo) {
-        console.log(bidsTodo);
       }
 
       function escapeID(id) {
@@ -548,7 +596,7 @@
         return moment.duration(auctionEnd.diff(now));
       }
 
-      function formatTime(time, option) {
+      function formatTime(time, option, init) {
         if(option == "seconds") {
           var newTime = "";
           if(time.hours() != 0) newTime += time.hours() + ":";
@@ -562,10 +610,13 @@
            var newTime = "";
            if(time.hours() != 0) newTime += time.hours() + ":";
              else newTime += "0:";
-           if(time.minutes() != 0) newTime += time.minutes();
-            return newTime;
+           if(time.minutes() != 0) {
+             if(init) newTime += time.minutes()+1;
+             else newTime += time.minutes();
+           }
+          return newTime;
          }
-      };
+      }
 
       function setTimeInterval() {
         return setInterval(function() {
@@ -594,9 +645,9 @@
             });
             return -1;
           }
-
           if(endTime.seconds()%60 == 0) {
-            $(".search_content_div #"+insertTo + " .endtime").text(formatTime(endTime, "minutes"));
+            $(".search_content_row#"+insertTo + " .endtime").text(formatTime(endTime, "minutes"));
+            $(".bid_div_row#"+insertTo + " .endtime").text(formatTime(endTime, "minutes"));
           }
 
           $(".auction_div_row#"+insertTo + " .endtime").text(formatTime(endTime, "seconds"));
@@ -623,7 +674,7 @@
               isResizing = false;
             }, 300);
           } else {
-            if($('#tab3.tab-pane.active').length !== 0 || $('#tab1.tab-pane.active').length !== 0) {
+            if($('#tab3.tab-pane.active').length !== 0 || $('#tab2.tab-pane.active') || $('#tab1.tab-pane.active').length !== 0) {
               var overflowHeight = $('.tab-pane.active .overflow_div').outerHeight();
               var tabHeight = $('.tab-pane.active').height();
               if(overflowHeight > tabHeight) {
@@ -765,6 +816,12 @@
             $(".expired_auction_div").slideUp("slow");
           }, 1000);
         });
+      }
+
+      function auctionBuyedAlert(auctionTodo) {
+        if(auctionTodo.user.username == DB.User.me.username) {
+          newBidAlert("Auktion "+capitalizeFirstLetter(auctionTodo.name)+" für "+auctionTodo.buyoutprice+" verkauft." ,function() {});
+        }
       }
 
       function switchRegister() {

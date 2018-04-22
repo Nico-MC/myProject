@@ -256,10 +256,10 @@ function subscribeRealtime(sk, callback) {
 
     function subscribeToBids() {
       var query = DB.Bids.find()
-                         .equal('user', DB.User.me);
+                         .equal('user.username', DB.User.me.username);
       var stream = query.eventStream({initial:true});
       var subscriptionBids = stream.subscribe(function(bidsTodo) {
-        updateBids(bidsTodo);
+        updateBidItems(bidsTodo);
       }, function(err) {
         console.log(err);
       });
@@ -401,7 +401,6 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
 }
 
 function lookAfterExpiredAuctions(callback) {
-  console.log("look after expired auction");
   var auctionlist = myAuctionsTodo.auctionlist;
   if(auctionlist.length != 0) {
     var nonExpiredAuctions = [];
@@ -410,7 +409,6 @@ function lookAfterExpiredAuctions(callback) {
       var diff = getRemainingTime(auction);
 
       if(diff.asSeconds() <= 1) {
-        console.log("delete expired auction");
         if(auction.bidder == null) expiredAuctions.push(auction);
         else newBidAlert("Folgender Gegenstand wurde für " + (auction.price).toFixed(2) + " € verkauft: " + auction.name);
         auction.delete();
@@ -435,18 +433,20 @@ async function lookAfterExpiredBids(callback) {
     var expiredBids = [];
     var noneExpiredBids = new Map();
     bidlist.forEach(function(bidVal, bidKey) {
-      if(getRemainingTime(bidVal).asSeconds() < 1) {
+      if(getRemainingTime(bidVal).asSeconds() <= 1) {
         expiredBids.push(bidVal);
       } else noneExpiredBids.set(bidKey, bidVal);
     });
-    myBidsTodo.bidlist = noneExpiredBids;
-    myBidsTodo.save().then(function() {
-      updateItemlist(expiredBids, function() {
-        bidExpiredAlert(expiredBids, function() {
+    if(expiredBids.length != 0) {
+      myBidsTodo.bidlist = noneExpiredBids;
+      myBidsTodo.save().then(function() {
+        updateItemlist(expiredBids, function() {
+          bidExpiredAlert(expiredBids, function() {
+          });
+          return callback(bidlist);
         });
-        return callback(bidlist);
       });
-    });
+    } else return callback(bidlist);
   } else return callback(bidlist);
 }
 
@@ -495,14 +495,14 @@ function buyThisAuction(auctionID) {
   DB.Auction.load("/db/Auction/" + auctionID).then(function(auctionTodo) {
     if(auctionTodo.buyoutprice > 0) {
       updateItemlist([auctionTodo], function() {
+        auctionTodo.buyed = true;
         if(auctionTodo.bidder != null) {
           deleteBidder(auctionTodo.bidder, auctionTodo.key);
           auctionTodo.bidder = null;
-          auctionTodo.save().then(function() {
-
-          });
         }
-        removeAuctionFromUserAuctionlist(auctionTodo.user.username, auctionTodo);
+        auctionTodo.save().then(function() {
+          removeAuctionFromUserAuctionlist(auctionTodo.user.username, auctionTodo);
+        });
       });
     }
   });
