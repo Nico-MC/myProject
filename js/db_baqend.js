@@ -391,8 +391,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
         });
       } else createAuctionMessage("Kauf ist nicht größer als Gebot.", false);
     } else {
-      if(startingPrice == "") console.log(startingPrice);
-      else if(startingPrice < 1) createAuctionMessage("Startpreis muss größer 0 sein.", false);
+      createAuctionMessage("Startpreis muss größer 0 sein.", false);
       return -1;
     }
   } else {
@@ -402,6 +401,7 @@ function createAuction(startingPrice, buyoutPrice, auctionTime) {
 }
 
 function lookAfterExpiredAuctions(callback) {
+  console.log("look after expired auction");
   var auctionlist = myAuctionsTodo.auctionlist;
   if(auctionlist.length != 0) {
     var nonExpiredAuctions = [];
@@ -409,7 +409,8 @@ function lookAfterExpiredAuctions(callback) {
     auctionlist.forEach(function(auction) {
       var diff = getRemainingTime(auction);
 
-      if(diff.asSeconds() < 1) {
+      if(diff.asSeconds() <= 1) {
+        console.log("delete expired auction");
         if(auction.bidder == null) expiredAuctions.push(auction);
         else newBidAlert("Folgender Gegenstand wurde für " + (auction.price).toFixed(2) + " € verkauft: " + auction.name);
         auction.delete();

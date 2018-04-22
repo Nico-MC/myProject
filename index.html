@@ -223,8 +223,16 @@
 
               var checkAuctionBuyoutPrice = function() {
                 if(auctionBuyoutPrice == 0) return '';
-                else return '<div class="buyout_price">'+auctionBuyoutPrice+' €</div>'
+                else return '<div class="buyout_price">'+auctionBuyoutPrice+' € (Sofortkauf)</div>'
               };
+              var chechAuctionBidder = function() {
+                if(auction.bidder != null) return '<div style="color: #007700; font-weight: 600;" class="high_bidder">'+auction.bidder.username+'</div>';
+                else return '<div style="color: #7d0000" class="high_bidder">Keine Gebote</div>';
+              };
+              var checkAuctionPrice = function() {
+                if(auction.bidder != null) return '<div class="starting_price">'+auctionStartingPrice+' €</div>';
+                else return '<div class="starting_price">'+auctionStartingPrice+' €</div>'+checkAuctionBuyoutPrice();
+              }
 
               $('.auction_div .no_items').fadeOut('fast').promise().done(function() {
                 $(this).remove();
@@ -236,11 +244,11 @@
                                 <div class="auction_end_div category_content flex-child"> \
                                   <div class="endtime">'+formatTime(diff, "seconds")+'</div> \
                                 </div> \
-                                <div class="auction_buyout_price_div category_content flex-child"> \
-                                  '+checkAuctionBuyoutPrice()+' \
+                                <div class="high_bidder_div category_content flex-child"> \
+                                  '+chechAuctionBidder()+' \
                                 </div> \
                                 <div class="auction_starting_price_div category_content flex-child"> \
-                                  <div class="starting_price">'+auctionStartingPrice+' &euro;</div> \
+                                  '+checkAuctionPrice()+' \
                                 </div> \
                               </div>';
 
@@ -272,9 +280,9 @@
         }
         setTimeout(function() {
           render(function() {
-            setTimeout(function() {
-              resizeAuto();
-            }, 500);
+            // setTimeout(function() {
+            //   resizeAuto();
+            // }, 500);
           });
         }, 300);
       }
@@ -385,19 +393,39 @@
       }
 
       function updateSearchContent(auctionTodo) {
+        var matchType = auctionTodo.matchType;
+
         if(auctionTodo.data != null) {
-          var matchType = auctionTodo.matchType;
           if(matchType == "add") {
-            loadSearchContent([auctionTodo.data], null);
+            var buyoutprice = auctionTodo.data.buyoutprice;
+            var startingprice = auctionTodo.data.startingprice;
+            var key = auctionTodo.data.key;
+            var bidder = auctionTodo.data.bidder;
+            loadSearchContent([auctionTodo.data], function() {
+              setTimeout(function() {
+                resizeAuto();
+              }, 1000);
+            });
           } else if(matchType == "remove") {
-            $('#'+auctionTodo.data.key).hide("slow", function() {
+            $('#'+key).hide("slow", function() {
               $(this).remove();
+                setTimeout(function() {
+                  resizeAuto();
+                }, 1000);
             });
           } else if(matchType == "change") {
-            console.log($('#'+auctionTodo.data.key + " .starting_price"));
-            $('#'+auctionTodo.data.key + " .starting_price").each(function(i, val) {
-              $(this).text(parseFloat(auctionTodo.data.startingprice).toFixed(2) + " €");
+            var buyoutprice = auctionTodo.data.buyoutprice;
+            var startingprice = auctionTodo.data.startingprice;
+            var key = auctionTodo.data.key;
+            var bidder = auctionTodo.data.bidder;
+            $('*[id^="'+key+'"] .starting_price').each(function(i, val) {
+              $(this).text(parseFloat(startingprice).toFixed(2) + " €");
             });
+            if(buyoutprice != 0) $(".auction_div .buyout_price").hide("slow", function() { $(this).remove() })
+            if(bidder != null) {
+              $("#"+key+".high_bidder").text(bidder.username);
+              $("#"+key+".high_bidder").css("color", "#007700");
+            }
             if(auctionTodo.data.user.username == DB.User.me.username) {
               var message = "Neues Gebot für folgenden Gegenstand: " + "'" + capitalizeFirstLetter(auctionTodo.data.name) + "'";
               newBidAlert(message, function() {});
@@ -434,7 +462,7 @@
       }
 
       function updateBids(bidsTodo) {
-        // console.log(bidsTodo);
+        console.log(bidsTodo);
       }
 
       function escapeID(id) {
@@ -555,19 +583,21 @@
         auctionTimeDurations.forEach(function(val, index) {
           var insertTo = $(val[0]).attr("id");
           var endTime = val[1].subtract(1, "seconds");
-          if(endTime.seconds()%60 == 0) {
-            if(endTime.asSeconds() < 1) {
-              auctionTimeDurations.splice(index, 1);
-              lookAfterExpiredBids(function(bidlist) {
-                lookAfterExpiredAuctions(function() {});
-              });
-              $("div#"+insertTo).hide("slow", function() {
-                $(this).css("display", "none");
-              });
-            } else $(".search_content_div #"+insertTo + " .endtime").text(formatTime(endTime, "minutes"));
+
+          if(endTime.asSeconds() < 1) {
+            auctionTimeDurations.splice(index, 1);
+            lookAfterExpiredBids(function(bidlist) {
+              lookAfterExpiredAuctions(function() {});
+            });
+            $("div#"+insertTo).hide("slow", function() {
+              $(this).css("display", "none");
+            });
+            return -1;
           }
 
-
+          if(endTime.seconds()%60 == 0) {
+            $(".search_content_div #"+insertTo + " .endtime").text(formatTime(endTime, "minutes"));
+          }
 
           $(".auction_div_row#"+insertTo + " .endtime").text(formatTime(endTime, "seconds"));
         });
@@ -580,7 +610,7 @@
       });
 
       function resizeAuto(obj) {
-        console.log("asdsadsads");
+        // console.log("Resize!");
         if(!isResizing) {
           isResizing = true;
           if(obj != null) {
