@@ -10,14 +10,15 @@ var eventArrived = 0;
 var initialize = true;
 var isResizing = false;
 
-$(document).ready(function() {
+function connect() {
   DB.connect('misty-shape-74', false).then(function() {
     console.log("Connected");
+    transfer();
   });
-})
+}
 
 //Wait for connection
-DB.ready().then(function() {
+function transfer() {
   if (DB.User.me) {
     //do additional things if user is logged in
     console.log('Willkommen ' + DB.User.me.username + '!'); //the username of the user
@@ -26,7 +27,7 @@ DB.ready().then(function() {
     //do additional things if user is not logged in
     transferToRegister();
   }
-});
+}
 
 function register(data, callback) {
   var username = data[0].value;
