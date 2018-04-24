@@ -1,0 +1,301 @@
+<template id="" name="login_content">
+  <div class="login_content">
+    <!-- ##### HEADER ##### -->
+    <div class="header noselect">
+      <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+        <button id="navbar_toggler" class="my_navbar-toggler navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="my_collapse collapse navbar-collapse" id="navbarText">
+          <a class="navbar-brand" href="javascript:toggleProfileOptions()">Profil</a>
+          <a class="navbar-brand" href="javascript:toggleDatabaseOptions()">Realtime</a>
+          <a class="navbar-brand" href="#">Log</a>
+          <!-- <a class="navbar-brand" href="javascript:logout()">Logout</a> -->
+        </div>
+
+        <button class="simulate_button_gradient" type="button" name="button" onclick="simulate()">Simulieren</button>
+
+      </nav>
+    </div>
+
+    <!-- ##### GAME ##### -->
+    <div class="game_container">
+      <div id="my-game" class="canvas_container"></div>
+      <div class="gui_container">
+
+        <div class="window_1 bg-dark shadow_out">
+          <div class="window_1_header flex">
+            <button id="stats_button" type="button" class="btn btn-primary btn-lg flex-child">Stats</button>
+            <button id="shop_button" type="button" class="btn btn-primary btn-lg flex-child">Inventar</button>
+          </div>
+        </div>
+
+        <div class="shop bg-dark">
+          <div class="stats_content">
+            <p>Spieler Position:</p>
+          </div>
+          <div class="shop_content">
+            asd
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ##### AUCTIONHOUSE ##### -->
+    <div class="auctionhouse_container">
+      <div class="auctionhouse">
+        <div class="auctionhouse_content">
+
+          <!-- Tab panes -->
+          <div class="tab-content">
+            <!-- container-Klasse entfernt -->
+            <div class="tab-pane fade show active" id="tab1">
+              <div class="overflow_div">
+                <form id="search" class="" action="" method="post">
+                  <div class="search_bar">
+                    <input id="search_field" class="form-control" name="search" placeholder="Suchen.." type="text">
+                  </div>
+                </form>
+                <div class="search_content_slide_div">
+                  <div class="search_content_category_div flex">
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Gegenstand
+                      </div>
+                    </div>
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Verkäufer
+                      </div>
+                    </div>
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Endet in
+                      </div>
+                    </div>
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Kaufpreis/Gebotspreis
+                      </div>
+                    </div>
+                    <div class="category_empty">
+
+                    </div>
+                  </div>
+                  <div class="search_content_div bg-secondary flex">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="tab2">
+              <div class="overflow_div flex">
+                <div class="show_bids_div bg-secondary">
+                  <span class="headline">Gebote</span>
+                  <div class="bids_category_div flex">
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Gegenstand
+                      </div>
+                    </div>
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Endet in
+                      </div>
+                    </div>
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Status
+                      </div>
+                    </div>
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Akt. Gebot
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bids_div flex flex_wrap">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="tab3">
+              <div class="overflow_div flex">
+                <!-- left upper box -->
+                <div class="create_auction_container">
+                  <div class="create_auction_div bg-secondary">
+                    <div class="part">
+                      <span class="headline">Auktionsgegenstand</span>
+                      <div class="flex auction_item_container">
+                        <div class="auction_item" ondrop="drop(event)" ondragover="allowDrop(event)">
+                          <div class="background_overflow_div">
+
+                          </div>
+                        </div>
+                        <div class="auction_item_name_div strokeme">
+                          <div class="auction_item_name"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                    <!-- left bottom box -->
+                  <div class="create_auction_div bg-secondary">
+                    <div class="part1">
+                      <!-- form here is useless, but I leave it for better reading -->
+                     <form>
+                       <span class="headline">Anfangsgebot</span>
+                       <div class="starting_price_div">
+                         <input id="startingPrice" name="startingPrice" placeholder="0" type="text">
+                         <div class="fa fa-eur euroicon" aria-hidden="true"></div>
+                       </div>
+                       <span class="headline">Kaufpreis (optional)</span>
+                       <div class="buy_out_div">
+                         <input id="buyOut" name="buyOut" placeholder="0" type="text">
+                         <div class="fa fa-eur euroicon" aria-hidden="true"></div>
+                       </div>
+                       <span style="margin-bottom: 10px" class="headline">Dauer</span>
+                       <div id="auction_duration_slider_hours" class="auction_duration_slider flex-child"></div>
+                       <div id="auction_duration_slider_minutes" class="auction_duration_slider flex-child"></div>
+                       <div class="show_auction_duration">
+                         <input id="auctionDuration" name="auctionDuration" placeholder="0:1" type="text" disabled>
+                       </div>
+                     </form>
+                     <div class="create_auction_button_error strokeme"><div></div></div>
+                     <button class="create_auction_button flex-child" type="button" name="button" onclick="clickAuctionButton()">Auktion erstellen</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- right two boxes -->
+                <div class="show_inventar_div bg-secondary">
+                  <span class="headline">Inventar</span>
+                  <div class="inventar_div flex flex_wrap">
+
+                  </div>
+                </div>
+                <div class="show_auction_div bg-secondary">
+                  <span class="headline">Auktionen</span>
+                  <div class="auctions_category_div flex">
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Gegenstand
+                      </div>
+                    </div>
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Endet in
+                      </div>
+                    </div>
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Höchstbietender
+                      </div>
+                    </div>
+                    <div class="category_header flex-child">
+                      <div class="">
+                        Akt. Gebot
+                      </div>
+                    </div>
+                  </div>
+                  <div class="auction_div flex flex_wrap">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+        <div class="auctionhouse_nav">
+
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs">
+            <li class="nav-item">
+              <a class="nav-link active" data-toggle="tab" href="#tab1" onclick="resizeAuto(this)">Durchsuchen</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#tab2" onclick="resizeAuto(this)">Gebote</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#tab3" onclick="resizeAuto(this)">Auktionen</a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="database_option_div bg-secondary">
+      <div class="checkbox">
+        <input id="check_realtime" type="checkbox" name="realtime">
+        <span>Enable Realtime</span>
+      </div>
+    </div>
+
+    <div class="profile_option_div bg-secondary">
+      <div class="profile">
+        Benutzername: <span class="username"></span>
+        <br>
+        Kontostand: <span class="bankbalance"></span>&#8364;
+        <br>
+        Gebote: <span class="bids"></span>
+        <center><a href="javascript:logout()">Logout</a></center>
+      </div>
+    </div>
+
+    <div class="expired_auction_div bg-secondary">
+
+    </div>
+    <div class="expired_auction_div_two bg-secondary">
+
+    </div>
+  </div>
+</template>
+
+
+
+
+
+
+
+
+<!-- ##### REGISTER ##### -->
+<template id="" name="register_content">
+  <div class="register_container container">
+    <div id="register_div" class="register_div col-md-6 mx-auto">
+      <div class="card card-body">
+          <h3 style="font-weight: 100" class="text-center mb-4">Zugang zu Auktionen</h3>
+          <div style="display: none" class="alert alert-danger">
+              <a class="close font-weight-light" data-dismiss="alert" href="#">×</a>Password is too short.
+          </div>
+          <div class="switch">
+          <form id="register">
+              <div class="form-group has-error">
+                  <input class="form-control input-lg" placeholder="Benutzername" name="username" type="text">
+              </div>
+              <div class="form-group has-success">
+                  <input class="form-control input-lg" placeholder="Passwort" name="password" value="" type="password">
+              </div>
+              <div class="form-group has-success">
+                  <input class="form-control input-lg" placeholder="Passwort bestätigen" name="password" value="" type="password">
+              </div>
+              <input class="btn btn-lg btn-primary btn-block" value="Registrieren" type="submit">
+          </form>
+          <!-- ##### LOGIN ##### -->
+          <form id="login">
+            <div class="form-group has-error">
+                <input class="form-control input-lg" placeholder="Benutzername" name="username" type="text">
+            </div>
+            <div class="form-group has-success">
+                <input class="form-control input-lg" placeholder="Passwort" name="password" value="" type="password">
+            </div>
+            <input class="btn btn-lg btn-primary btn-block" value="Login" type="submit">
+          </form>
+          </div>
+          <a href="javascript:switchRegister()"><i class="material-icons" style="font-size:36px">expand_more</i></a>
+      </div>
+    </div>
+  </div>
+</template>

@@ -12,6 +12,10 @@ Projektwiederherstellung:
 >git reflog
 >git checkout <commit>
 
+### Multible Realtime Databases
+- Baqend: Start webserver like XAMPP and put the root directory to htdocs, done.
+- Meteor: Join directory meteorApp and start server over console with command: meteor.
+
 ### Upcoming changes:
 - [ ] Daily lootbox filled with random item
 - [ ] Bank balance (backend)

@@ -1,0 +1,186 @@
+.header {
+  background-color: white;
+  width: 100%;
+  height: 50px;
+  border-bottom: 2px solid #000000 !important; }
+
+.navbar {
+  height: 100% !important;
+  padding: 0 !important;
+  margin-left: 30px; }
+
+.my_navbar-toggler {
+  outline: 0 !important;
+  border: 0 !important;
+  padding: 0 !important;
+  line-height: 1.3 !important; }
+
+.my_collapse {
+  flex-basis: auto !important;
+  flex-grow: auto !important;
+  margin-left: 25px !important; }
+
+.my_navbar-text {
+  float: right !important;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+.register_container {
+  /* Screen center */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -75%);
+}
+
+.register_div {
+  margin: 0 auto;
+  display: none;
+  position: fixed;
+}
+
+.register_div .card-body {
+  background-color: #ced4da !important;
+  border: 1px solid #cecece !important;
+  box-shadow: 0 2px 100px #818181;
+  padding-bottom: 0;
+}
+
+.register_div input {
+  -webkit-transition: all .4s ease-in-out;
+  transition: all .4s ease-in-out;
+}
+
+.register_div input:focus {
+  border-color: #80bdff;
+  outline: none !important;
+  border-color: #9ecaed;
+  box-shadow: 0 0 10px #9ecaed;
+}
+
+.register_div a {
+  margin-top: 5px;
+  text-align: center;
+  outline: 0;
+}
+
+.register_div i {
+  vertical-align: bottom;
+}
+
+.register_div #login {
+  display: none;
+}
+
+.simulate_button_gradient {
+  margin-right: 15px;
+  outline: 0 !important;
+  cursor: pointer;
+  outline: none;
+  color: #fff;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px #999;
+  width: 110px;
+  height: 30px;
+  margin-bottom: 2px;
+
+  background-image: -moz-linear-gradient(top, #AF4CE8, #611BBD);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#AF4CE8), to(#611BBD));
+  background-image: -webkit-linear-gradient(top, #AF4CE8, #611BBD);
+  background-image: -o-linear-gradient(top, #AF4CE8, #611BBD);
+  background-image: linear-gradient(to bottom, #AF4CE8, #611BBD);
+}
+
+.simulate_button_gradient:active {
+  background-color: #3e8e41;
+  box-shadow: 0 3px #666;
+  transform: translateY(2px);
+}
+
+.database_option_container {
+  position: relative;
+  margin: 0 auto;
+}
+
+.expired_auction_div_two {
+  position: absolute;
+  left: 100%;
+  width: 201px;
+  top: 60px;
+  display: none;
+  position: fixed;
+  box-shadow: 0 0 0 2px;
+}
+
+.expired_auction_div,
+.profile_option_div,
+.database_option_div {
+  position: absolute;
+  transform: translate(-50%, 0);
+  left: 50%;
+  top: 50px;
+  display: none;
+  box-shadow: 0 0 0 2px;
+}
+
+.database_option_div {
+  line-height: 0;
+  padding: 15px;
+}
+
+.expired_auction_div_two,
+.expired_auction_div,
+.profile_option_div {
+  padding: 4px 15px 8px 10px;
+}
+
+.database_option_div span {
+  margin-left: 5px;
+}
+
+.database_option_div input[type=checkbox] {
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(1.5); /* IE */
+  -moz-transform: scale(1.5); /* FF */
+  -webkit-transform: scale(1.5); /* Safari and Chrome */
+  -o-transform: scale(1.5); /* Opera */
+}
+
+.strokeme
+{
+  text-shadow:
+  -1px -1px 0 #000,
+  1px -1px 0 #000,
+  -1px 1px 0 #000,
+  1px 1px 0 #000;
+}
+
+.flex {
+display: -webkit-box;
+display: -moz-box;
+display: -ms-flexbox;
+display: -webkit-flex;
+display: flex; }
+
+.flex-child {
+-webkit-box-flex: 1 1 auto;
+-moz-box-flex: 1 1 auto;
+-webkit-flex: 1 1 auto;
+-ms-flex: 1 1 auto;
+flex: 1 1 auto; }
+
+.flex_wrap {
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
