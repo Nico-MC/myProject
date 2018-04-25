@@ -63,15 +63,14 @@ function login(data, callback) {
   var username = data[0].value;
   var password = data[1].value;
 
-  DB.User.login(username, password).then(function() {
-    return callback();
-  }, function() {
-    errormessage("Name oder Passwort ist nicht korrekt.");
+  Meteor.loginWithPassword(username, password, function(err) {
+    if(err) errormessage("Name oder Passwort ist nicht korrekt.");
+    else return callback();
   });
 }
 
 function logout() {
-  DB.User.logout().then(function() {
+  Meteor.logout(function() {
     location.reload();
   });
 }
