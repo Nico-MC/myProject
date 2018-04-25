@@ -9,13 +9,14 @@ var auctionTimeDurations = [];
 var eventArrived = 0;
 var initialize = true;
 var isResizing = false;
+var me;
 
 //Wait for connection
 function transfer() {
-  if (Meteor.userId() != null) {
-    //do additional things if user is logged in
-    console.log('Willkommen ' + DB.User.me.username + '!'); //the username of the user
-    transferToLogin(DB.User.me.securitykey);
+  if (Meteor.userId() != null && Meteor.loggingIn()) {
+    Accounts.onLogin(function() {
+      transferToLogin();
+    });
   } else {
     //do additional things if user is not logged in
     transferToRegister();
@@ -32,18 +33,25 @@ function register(data, callback) {
       if(password.length != 0) {
         if(password.length > 4) {
           if(password === password_2) {
-            initUser(username, function(user, sk) {
-              DB.User.register(user, password).then(function() {
-                  registermessage(function() {
-                    createItemlist();
-                    createAuctionList();
-                    createBidList();
-                    setTimeout(function() {
-                      return callback(sk);
-                    }, 0);
-                  });
+            // initUser(username, function(user, sk) {
+            //   DB.User.register(user, password).then(function() {
+            //       registermessage(function() {
+            //         createItemlist();
+            //         createAuctionList();
+            //         createBidList();
+            //         setTimeout(function() {
+            //           return callback(sk);
+            //         }, 0);
+            //       });
+            //     });
+            //   });
+            initUser(username, function(options) {
+              Accounts.createUser(options, function() {
+                registermessage(function() {
+
                 });
               });
+            });
           } else errormessage("Passwörter stimmen nicht überein.");
         } else errormessage("Passwort ist zu kurz.");
       } else errormessage("Bitte gebe ein Passwort ein.");
@@ -56,7 +64,7 @@ function login(data, callback) {
   var password = data[1].value;
 
   DB.User.login(username, password).then(function() {
-    return callback(DB.User.me.securitykey);
+    return callback();
   }, function() {
     errormessage("Name oder Passwort ist nicht korrekt.");
   });
@@ -79,24 +87,21 @@ String.prototype.hashCode = function() {
   return hash;
 };
 
-// function testWebsocketConnection() {
-//   // var ws = new WebSocket('ws://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
-//   var ws = new WebSocket('ws://misty-shape-74.events.baqend.com/v1/events');
-//   ws.onopen = function() { console.log('Websocket opened') };
-//   ws.onclose = function() { console.log('Websocket closed') };
-//   //expect opened to be logged but closed is called immediately
-// }
-
 function initUser(username, callback) {
   // user object
   var user = new DB.User({
     'username': username,
-    'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64),
     'bankbalance': 0.0,
     'bids': 0
   });
 
-  return callback(user, user.securitykey);
+  var options = {
+    "username": username,
+    "email": "test@gmail.com",
+    "password": "admin"
+  }
+
+  return callback(options);
 }
 
 // Initialize all important VARIABLES

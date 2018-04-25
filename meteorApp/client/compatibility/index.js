@@ -1,119 +1,115 @@
 // Load mit Vorsicht genießen, da asynchron.
 // Für synchrones Laden: Ajax
-function transferToLogin(sk) {
-  if(DB.User.me.securitykey == sk) {
-    $.ajax({
-      url: "../assets/content/content.html",
-      success: function(data) {
-        var data = $(data).filter('.login_content');
-        $('section').html("data");
-        init(function() {
-          loadLogin(); //race conditions? https://stackoverflow.com/questions/8611145/race-conditions-with-javascript-event-handling
+function transferToLogin() {
+  var login_template = Template.login_content;
+  var insert_div = document.getElementById('insert_div');
+  login_template.onRendered(function() {
+    // init(function() {
+      loadLogin(); //race conditions? https://stackoverflow.com/questions/8611145/race-conditions-with-javascript-event-handling
+    // });
+  });
+  Blaze.render(login_template, insert_div);
+
+  function loadLogin() {
+    setTimeout(function() {
+      getDataForInitload();
+    }, 300);
+
+    // load user profile_option_div
+    $('.profile_option_div .username').text(Meteor.user().username);
+    // $('.profile_option_div .bankbalance').text(DB.User.me.bankbalance);
+    // $('.profile_option_div .bids').text(DB.User.me.bids);
+
+    // query-ui slider
+    var slider_hours = $("#auction_duration_slider_hours").slider();
+    console.log(slider_hours);
+    var slider_minutes = $("#auction_duration_slider_minutes").slider();
+    var initSlider = function() {
+      var options_hours = {
+        min: 0,
+        max: 48,
+        value: 0,
+        slide: function(e, ui) {
+          if(ui.value == 0) {
+            slider_minutes.slider("option", "min", 1);
+          }
+          else {
+            slider_minutes.slider("option", "min", 0);
+          }
+          if(ui.value == 48) {
+            slider_minutes.slider("disable");
+            slider_minutes.slider("option", "max", 0);
+          } else {
+            slider_minutes.slider("enable");
+            slider_minutes.slider("option", "max", 59);
+          }
+
+          var hours = ui.value;
+          var minutes = slider_minutes.slider("value");
+          $('#auctionDuration').val(hours + ":" + minutes);
+        }
+      }
+      slider_hours.slider('option', options_hours);
+      var options_minutes = {
+        min: 1,
+        max: 59,
+        value: 0,
+        slide: function(e, ui) {
+          var hours = slider_hours.slider("value");
+          var minutes = ui.value;
+          $('#auctionDuration').val(hours + ":" + minutes);
+        }
+      }
+      slider_minutes.slider('option', options_minutes);
+
+      $('#auctionDuration').val("0:1");
+    }
+    initSlider();
+
+    $('.inventar_item').click(function(e) {
+      var target = e.target;
+      console.log(target);
+    });
+
+    $('#search').submit(function(e) {
+      e.preventDefault();
+    });
+
+    $('#search_field').keyup(function() {
+        searchRealtime();
+    });
+
+    // Clear text search_field
+    $("#search_field").val("");
+
+    var streamlist;
+    $('#check_realtime').change(function() {
+      if(checkRealtime() && (streamlist == null)) {
+        // subscribeRealtime(sk, function(streams) {
+          initialize = true;
+          streamlist = streams;
+          console.log("Realtime is on.");
+        // });
+      } else {
+        streamlist.forEach(function(stream) {
+          stream.unsubscribe();
         });
+        streamlist = null;
+        console.log("All streams unsubscribed.");
+        console.log("Realtime is off.");
+        clearTimeInterval(timeIntervalID)
+        timeIntervalID = null;
       }
     });
 
-    function loadLogin() {
-      setTimeout(function() {
-        getDataForInitload();
-      }, 300);
-
-      // load user profile_option_div
-      $('.profile_option_div .username').text(DB.User.me.username);
-      $('.profile_option_div .bankbalance').text(DB.User.me.bankbalance);
-      $('.profile_option_div .bids').text(DB.User.me.bids);
-
-      // query-ui slider
-      var slider_hours = $("#auction_duration_slider_hours").slider();
-      var slider_minutes = $("#auction_duration_slider_minutes").slider();
-      var initSlider = function() {
-        var options_hours = {
-          min: 0,
-          max: 48,
-          value: 0,
-          slide: function(e, ui) {
-            if(ui.value == 0) {
-              slider_minutes.slider("option", "min", 1);
-            }
-            else {
-              slider_minutes.slider("option", "min", 0);
-            }
-            if(ui.value == 48) {
-              slider_minutes.slider("disable");
-              slider_minutes.slider("option", "max", 0);
-            } else {
-              slider_minutes.slider("enable");
-              slider_minutes.slider("option", "max", 59);
-            }
-
-            var hours = ui.value;
-            var minutes = slider_minutes.slider("value");
-            $('#auctionDuration').val(hours + ":" + minutes);
-          }
-        }
-        slider_hours.slider('option', options_hours);
-        var options_minutes = {
-          min: 1,
-          max: 59,
-          value: 0,
-          slide: function(e, ui) {
-            var hours = slider_hours.slider("value");
-            var minutes = ui.value;
-            $('#auctionDuration').val(hours + ":" + minutes);
-          }
-        }
-        slider_minutes.slider('option', options_minutes);
-
-        $('#auctionDuration').val("0:1");
-      }
-      initSlider();
-
-      $('.inventar_item').click(function(e) {
-        var target = e.target;
-        console.log(target);
-      });
-
-      $('#search').submit(function(e) {
-        e.preventDefault();
-      });
-
-      $('#search_field').keyup(function() {
-          searchRealtime();
-      });
-
-      // Clear text search_field
-      $("#search_field").val("");
-
-      var streamlist;
-      $('#check_realtime').change(function() {
-        if(checkRealtime() && (streamlist == null)) {
-          subscribeRealtime(sk, function(streams) {
-            initialize = true;
-            streamlist = streams;
-            console.log("Realtime is on.");
-          });
-        } else {
-          streamlist.forEach(function(stream) {
-            stream.unsubscribe();
-          });
-          streamlist = null;
-          console.log("All streams unsubscribed.");
-          console.log("Realtime is off.");
-          clearTimeInterval(timeIntervalID)
-          timeIntervalID = null;
-        }
-      });
-
-      // startGame();
-      $('#check_realtime').trigger("click");
-    }
+    // startGame();
+    $('#check_realtime').trigger("click");
   }
 }
 
 function transferToRegister() {
   var register_template = Template.register_content;
   var insert_div = document.getElementById('insert_div');
-  console.log("insert_div");
   register_template.onRendered(function() {
     loadRegister();
   });
