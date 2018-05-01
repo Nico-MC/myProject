@@ -203,6 +203,19 @@ function subscribeRealtime(sk, callback) {
     subscribeToAuctions();
     subscribeToAuctionsInit();
     subscribeToBids();
+    test();
+
+    function test() {
+      var query = DB.Auction.find()
+                            .ascending('user.username');
+      var stream = query.eventStream();
+      var testt = stream.subscribe(function(auctionTodos) {
+        console.log(auctionTodos);
+      }, function(err) {
+        console.log(err);
+      });
+      subList.push(testt);
+    }
 
     function subscribeToItems() {
       var query = DB.Items.find()
@@ -428,7 +441,7 @@ function lookAfterExpiredAuctions(callback) {
   } else return callback(myAuctionsTodo);
 }
 
-async function lookAfterExpiredBids(callback) {
+function lookAfterExpiredBids(callback) {
     var bidlist = myBidsTodo.bidlist;
     if(bidlist.size != 0) {
     var expiredBids = [];

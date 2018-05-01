@@ -31,19 +31,30 @@
     <section></section>
 
     <script type="text/javascript">
-      var selectedDatabase = "baqend";
-
-      $.when(
-        $.getScript("//www.baqend.com/js-sdk/latest/baqend-realtime.js"),
-        $.getScript("js/"+selectedDatabase+"/db.js"),
-        $.getScript("js/"+selectedDatabase+"/index.js"),
-        $.Deferred(function(deferred) {
-          $(deferred.resolve);
-        })
-      ).done(function() {
-        console.log("Selected Realtime database: " + selectedDatabase);
-        connect();
-      });
+      var selectedDatabase = "firebase";
+      if(selectedDatabase == "baqend") {
+        $.when(
+          $.getScript("//www.baqend.com/js-sdk/latest/baqend-realtime.js"),
+          $.getScript("js/baqend/db.js"),
+          $.getScript("js/baqend/index.js"),
+          $.Deferred(function(deferred) {
+            $(deferred.resolve);
+          })
+        ).done(function() {
+          connect();
+        });
+      } else if(selectedDatabase == "firebase") {
+        $.when(
+          $.getScript("https://www.gstatic.com/firebasejs/4.13.0/firebase.js"),
+          $.getScript("js/firebase/db.js"),
+          $.getScript("js/firebase/index.js"),
+          $.Deferred(function(deferred) {
+            $(deferred.resolve);
+          })
+        ).done(function() {
+          connect();
+        });
+      }
     </script>
 
     <!-- LOADING GAME -->

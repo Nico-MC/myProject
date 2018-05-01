@@ -13,6 +13,9 @@ var me;
 
 //Wait for connection
 function transfer() {
+  console.log(Meteor.status());
+  const Col = new Mongo.Collection("items");
+  Col.insert({ name: "lol" });
   if (Meteor.userId() != null && Meteor.loggingIn()) {
     Accounts.onLogin(function() {
       transferToLogin();
@@ -33,22 +36,17 @@ function register(data, callback) {
       if(password.length != 0) {
         if(password.length > 4) {
           if(password === password_2) {
-            // initUser(username, function(user, sk) {
-            //   DB.User.register(user, password).then(function() {
-            //       registermessage(function() {
-            //         createItemlist();
-            //         createAuctionList();
-            //         createBidList();
-            //         setTimeout(function() {
-            //           return callback(sk);
-            //         }, 0);
-            //       });
-            //     });
-            //   });
             initUser(username, function(options) {
-              Accounts.createUser(options, function() {
+              Accounts.createUser(options, function(err) {
+                if(err) {
+                  errormessage("Name existiert bereits.");
+                  return -1;
+                }
                 registermessage(function() {
-
+                  createItemlist();
+                  createAuctionList();
+                  createBidList();
+                  return callback();
                 });
               });
             });
@@ -64,7 +62,10 @@ function login(data, callback) {
   var password = data[1].value;
 
   Meteor.loginWithPassword(username, password, function(err) {
-    if(err) errormessage("Name oder Passwort ist nicht korrekt.");
+    if(err) {
+      errormessage("Name oder Passwort ist nicht korrekt.");
+      console.log(err);
+    }
     else return callback();
   });
 }
@@ -75,28 +76,10 @@ function logout() {
   });
 }
 
-String.prototype.hashCode = function() {
-  var hash = 0, i, chr;
-  if (this.length === 0) return hash;
-  for (i = 0; i < this.length; i++) {
-    chr   = this.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};
-
 function initUser(username, callback) {
-  // user object
-  var user = new DB.User({
-    'username': username,
-    'bankbalance': 0.0,
-    'bids': 0
-  });
-
   var options = {
     "username": username,
-    "email": "test@gmail.com",
+    "email": username+"@gmail.com",
     "password": "admin"
   }
 
@@ -164,31 +147,34 @@ function getBidsTodo(callback) {
 }
 
 function createItemlist() {
-  // items object for each individual user
-  new DB.Items(
-    {
-      'itemlist': new DB.Map(),
-      'user': { 'username': DB.User.me.username },
-    }
-  ).save();
+  // // items object for each individual user
+  // new DB.Items(
+  //   {
+  //     'itemlist': new DB.Map(),
+  //     'user': { 'username': DB.User.me.username },
+  //   }
+  // ).save();
+
 }
 
 function createAuctionList() {
-  new DB.Auctions(
-    {
-      'user': { "username": DB.User.me.username },
-      'auctionlist': new DB.List()
-    }
-  ).save();
+  // new DB.Auctions(
+  //   {
+  //     'user': { "username": DB.User.me.username },
+  //     'auctionlist': new DB.List()
+  //   }
+  // ).save();
+  new Mongo.Collection('auctions');
 }
 
 function createBidList() {
-  new DB.Bids(
-    {
-      'user': { "username": DB.User.me.username },
-      'bidlist': new DB.Map()
-    }
-  ).save();
+  // new DB.Bids(
+  //   {
+  //     'user': { "username": DB.User.me.username },
+  //     'bidlist': new DB.Map()
+  //   }
+  // ).save();
+  new Mongo.Collection('bids');
 }
 
 function subscribeRealtime(sk, callback) {
