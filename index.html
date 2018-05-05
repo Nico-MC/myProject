@@ -32,29 +32,41 @@
     <section></section>
 
     <script type="text/javascript">
-      Parse.initialize("ohlongjohnsonID"); //PASTE HERE YOUR Back4App APPLICATION ID AND YOUR JavaScript KEY
-      // Parse.serverURL = 'http://ohlongjohnson.herokuapp.com/parse';
-      Parse.serverURL = 'https://ohlongjohnson.herokuapp.com/parse';
-
-
-      var GameScore = Parse.Object.extend("GameScore");
-      var gameScore = new GameScore();
-
-      gameScore.set("score", 1337);
-      gameScore.set("playerName", "Sean Plott");
-      gameScore.set("cheatMode", false);
-
-      gameScore.save(null, {
-        success: function(gameScore) {
-          // Execute any logic that should take place after the object is saved.
-          alert('New object created with objectId: ' + gameScore.id);
-        },
-        error: function(gameScore, error) {
-          // Execute any logic that should take place if the save fails.
-          // error is a Parse.Error with an error code and message.
-          alert('Failed to create new object, with error code: ' + error.message);
-        }
-      });
+      var selectedDatabase = "rapid";
+      if(selectedDatabase == "baqend") {
+        $.when(
+          $.getScript("//www.baqend.com/js-sdk/latest/baqend-realtime.js"),
+          $.getScript("js/baqend/db.js"),
+          $.getScript("js/baqend/index.js"),
+          $.Deferred(function(deferred) {
+            $(deferred.resolve);
+          })
+        ).done(function() {
+          connect();
+        });
+      } else if(selectedDatabase == "firebase") {
+        $.when(
+          $.getScript("https://www.gstatic.com/firebasejs/4.13.0/firebase.js"),
+          $.getScript("js/firebase/db.js"),
+          $.getScript("js/firebase/index.js"),
+          $.Deferred(function(deferred) {
+            $(deferred.resolve);
+          })
+        ).done(function() {
+          connect();
+        });
+      } else if(selectedDatabase == "rapid") {
+        $.when(
+          $.getScript("https://www.gstatic.com/firebasejs/4.13.0/firebase.js"),
+          $.getScript("js/rapid/db.js"),
+          $.getScript("js/rapid/index.js"),
+          $.Deferred(function(deferred) {
+            $(deferred.resolve);
+          })
+        ).done(function() {
+          connect();
+        });
+      }
     </script>
 
     <!-- LOADING GAME -->

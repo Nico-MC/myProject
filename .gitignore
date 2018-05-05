@@ -39,4 +39,7 @@ Thumbs.db
 # My Files #
 #assets/content#
 parseApp
+js/states
+js/main.js
+js/debug.js
 #modules#
