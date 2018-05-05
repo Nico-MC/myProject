@@ -192,14 +192,13 @@ function createBidList() {
 }
 
 function subscribeRealtime(callback) {
-  var ref = db.ref("item/itemlist");
+  var ref_items = db.ref("item/itemlist");
 
-  ref.on("value", function(snapshot) {
-    console.log(snapshot.val());
+  ref_items.on("value", function(snapshot) {
+    // console.log(snapshot.val());
   }, function (errorObject) {
     console.log("The read failed: " + errorObject.code);
   });
-
 
   /*var subList = [];
   if(DB.User.me.securitykey == sk) {

@@ -19,42 +19,42 @@
     <!-- <script type="text/javascript" src="//www.baqend.com/js-sdk/latest/baqend-realtime.js"></script> -->
     <!-- MODULES -->
     <!-- <script type="text/javascript" src="modules/phaser.min.js"></script> -->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
+    <script type="application/json" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
     <script src="modules/moment-timezone-with-data.js"></script>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+    <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
   </head>
   <body>
     <section></section>
 
     <script type="text/javascript">
-      var selectedDatabase = "firebase";
-      if(selectedDatabase == "baqend") {
-        $.when(
-          $.getScript("//www.baqend.com/js-sdk/latest/baqend-realtime.js"),
-          $.getScript("js/baqend/db.js"),
-          $.getScript("js/baqend/index.js"),
-          $.Deferred(function(deferred) {
-            $(deferred.resolve);
-          })
-        ).done(function() {
-          connect();
-        });
-      } else if(selectedDatabase == "firebase") {
-        $.when(
-          $.getScript("https://www.gstatic.com/firebasejs/4.13.0/firebase.js"),
-          $.getScript("js/firebase/db.js"),
-          $.getScript("js/firebase/index.js"),
-          $.Deferred(function(deferred) {
-            $(deferred.resolve);
-          })
-        ).done(function() {
-          connect();
-        });
-      }
+      Parse.initialize("ohlongjohnsonID"); //PASTE HERE YOUR Back4App APPLICATION ID AND YOUR JavaScript KEY
+      // Parse.serverURL = 'http://ohlongjohnson.herokuapp.com/parse';
+      Parse.serverURL = 'https://ohlongjohnson.herokuapp.com/parse';
+
+
+      var GameScore = Parse.Object.extend("GameScore");
+      var gameScore = new GameScore();
+
+      gameScore.set("score", 1337);
+      gameScore.set("playerName", "Sean Plott");
+      gameScore.set("cheatMode", false);
+
+      gameScore.save(null, {
+        success: function(gameScore) {
+          // Execute any logic that should take place after the object is saved.
+          alert('New object created with objectId: ' + gameScore.id);
+        },
+        error: function(gameScore, error) {
+          // Execute any logic that should take place if the save fails.
+          // error is a Parse.Error with an error code and message.
+          alert('Failed to create new object, with error code: ' + error.message);
+        }
+      });
     </script>
 
     <!-- LOADING GAME -->
