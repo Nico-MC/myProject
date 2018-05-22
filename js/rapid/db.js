@@ -9,42 +9,26 @@ var auctionTimeDurations = [];
 var eventArrived = 0;
 var initialize = true;
 var isResizing = false;
-var config = null;
-var username;
-var me;
-var db;
+const client;
 
 function connect() {
-  // Initialize Firebase
-  config = {
-    apiKey: "AIzaSyDQH4IHsFgArvuGZEJBwQabOLvQT_PIQRM",
-    authDomain: "myproject-11518.firebaseapp.com",
-    databaseURL: "https://myproject-11518.firebaseio.com",
-    projectId: "myproject-11518",
-    storageBucket: "myproject-11518.appspot.com",
-    messagingSenderId: "337001808230"
-  };
-  firebase.initializeApp(config);
-  db = firebase.database();
-  console.log("Connected");
-  transfer();
+  const client = Rapid.createClient(API_KEY)
+  // DB.connect('misty-shape-74', false).then(function() {
+  //   console.log("Connected");
+  //   transfer();
+  // });
 }
 
 //Wait for connection
 function transfer() {
-  firebase.auth().onAuthStateChanged(function(user) {
-    if(user) {
-      me = user;
-      username = user.email.substr(0, user.email.indexOf('@'));
-      //do additional things if user is logged in
-      console.log('Willkommen ' + me.username); //the username of the user
-      transferToLogin();
-    } else {
-      me = null;
-      //do additional things if user is not logged in
-      transferToRegister();
-    }
-  });
+  if (DB.User.me) {
+    //do additional things if user is logged in
+    console.log('Willkommen ' + DB.User.me.username + '!'); //the username of the user
+    transferToLogin(DB.User.me.securitykey);
+  } else {
+    //do additional things if user is not logged in
+    transferToRegister();
+  }
 }
 
 function register(data, callback) {
@@ -55,21 +39,20 @@ function register(data, callback) {
   if(username.length != 0) {
     if(username.length > 3) {
       if(password.length != 0) {
-        if(password.length > 5) {
+        if(password.length > 4) {
           if(password === password_2) {
-            firebase.auth().createUserWithEmailAndPassword(username, password).then(function(user) {
-              me = user;
-              username = user.email.substr(0, user.email.indexOf('@'));
-              createItemlist();
-              createAuctionList();
-              createBidList();
-              // registermessage(function() {
-              //   return callback();
-              // });
-            }).catch(function(error) {
-              errormessage(error.message);
-              console.log(error.message);
-            });
+            initUser(username, function(user, sk) {
+              DB.User.register(user, password).then(function() {
+                  registermessage(function() {
+                    createItemlist();
+                    createAuctionList();
+                    createBidList();
+                    setTimeout(function() {
+                      return callback(sk);
+                    }, 0);
+                  });
+                });
+              });
           } else errormessage("Passwörter stimmen nicht überein.");
         } else errormessage("Passwort ist zu kurz.");
       } else errormessage("Bitte gebe ein Passwort ein.");
@@ -80,20 +63,49 @@ function register(data, callback) {
 function login(data, callback) {
   var username = data[0].value;
   var password = data[1].value;
-  firebase.auth().signInWithEmailAndPassword(username, password).then(function() {
-    return callback();
-  }).catch(function(error) {
+
+  DB.User.login(username, password).then(function() {
+    return callback(DB.User.me.securitykey);
+  }, function() {
     errormessage("Name oder Passwort ist nicht korrekt.");
   });
 }
 
 function logout() {
-  firebase.auth().signOut().then(function() {
+  DB.User.logout().then(function() {
     location.reload();
-  }).catch(function(error) {
-    console.log("ERROR if trying to logout current user ...");
-    console.log(error);
   });
+}
+
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+// function testWebsocketConnection() {
+//   // var ws = new WebSocket('ws://app-starter.events.baqend.com/v1/events'); // also ws:// can be used
+//   var ws = new WebSocket('ws://misty-shape-74.events.baqend.com/v1/events');
+//   ws.onopen = function() { console.log('Websocket opened') };
+//   ws.onclose = function() { console.log('Websocket closed') };
+//   //expect opened to be logged but closed is called immediately
+// }
+
+function initUser(username, callback) {
+  // user object
+  var user = new DB.User({
+    'username': username,
+    'securitykey': (CryptoJS.SHA256(username)).toString(CryptoJS.enc.Base64),
+    'bankbalance': 0.0,
+    'bids': 0
+  });
+
+  return callback(user, user.securitykey);
 }
 
 // Initialize all important VARIABLES
@@ -116,7 +128,7 @@ function getDataForInitload() {
         loadAuctionItems(auctionlist);
         loadBidItems(bidlist);
         loadItems(myItemsTodo.itemlist);
-console.log("asdsadas");
+
         DB.Auction.find()
         .ascending('name')
         .resultList(function(auctionItems) {
@@ -128,78 +140,64 @@ console.log("asdsadas");
 
 // Get ID of user items todo
 function getItemsTodo(callback) {
-  // DB.Items.find()
-  // .equal('user.username', DB.User.me.username)
-  // .singleResult(function(itemsTodo) {
-  //   myItemsTodo = itemsTodo;
-  //   console.log(1);
-  //   return callback();
-  // });
-  myItemsTodo = db.ref("items/");
-  return callback();
+  DB.Items.find()
+  .equal('user.username', DB.User.me.username)
+  .singleResult(function(itemsTodo) {
+    myItemsTodo = itemsTodo;
+    console.log(1);
+    return callback();
+  });
 }
 
 function getAuctionsTodo(callback) {
-  // DB.Auctions.find()
-  // .equal('user.username', DB.User.me.username)
-  // .singleResult(function(auctionsTodo) {
-  //   myAuctionsTodo = auctionsTodo;
-  //   console.log(3);
-  //   return callback();
-  // });
-  myAuctionsTodo = db.ref("auctions/");
-  return callback();
+  DB.Auctions.find()
+  .equal('user.username', DB.User.me.username)
+  .singleResult(function(auctionsTodo) {
+    myAuctionsTodo = auctionsTodo;
+    console.log(3);
+    return callback();
+  });
 }
 
 function getBidsTodo(callback) {
-  // firebase.db().ref('bids').set({
-  //   username: name,
-  //   email: email,
-  //   profile_picture : imageUrl
-  // });
-
-
-
-
-  // DB.Bids.find()
-  //        .equal('user.username', DB.User.me.username)
-  //        .singleResult(function(bidsTodo) {
-  //          myBidsTodo = bidsTodo;
-  //          return callback();
-  //        });
-  myBidsTodo = db.ref("bids/");
-  return callback();
+  DB.Bids.find()
+         .equal('user.username', DB.User.me.username)
+         .singleResult(function(bidsTodo) {
+           myBidsTodo = bidsTodo;
+           return callback();
+         });
 }
 
 function createItemlist() {
   // items object for each individual user
-  db.ref("items/useritemlist/").child(me.uid).set({
-    itemlist: "{}"
-  });
+  new DB.Items(
+    {
+      'itemlist': new DB.Map(),
+      'user': { 'username': DB.User.me.username },
+    }
+  ).save();
 }
 
 function createAuctionList() {
-  db.ref("auctions/userauctionlist/").child(me.uid).set({
-    auctionlist: "{}"
-  });
+  new DB.Auctions(
+    {
+      'user': { "username": DB.User.me.username },
+      'auctionlist': new DB.List()
+    }
+  ).save();
 }
 
 function createBidList() {
-  db.ref("bids/userbidlist/").child(me.uid).set({
-    bidlist: "{}"
-  });
+  new DB.Bids(
+    {
+      'user': { "username": DB.User.me.username },
+      'bidlist': new DB.Map()
+    }
+  ).save();
 }
 
-function subscribeRealtime(callback) {
-  var ref_items = db.ref("item/itemlist");
-
-  ref_items.on("value", function(snapshot) {
-    // console.log(snapshot.val());
-  }, function (errorObject) {
-    console.log("The read failed: " + errorObject.code);
-  });
-
-  /*var subList = [];
+function subscribeRealtime(sk, callback) {
+  var subList = [];
   if(DB.User.me.securitykey == sk) {
     // testWebsocketConnection();
     subscribeToItems();
@@ -207,6 +205,19 @@ function subscribeRealtime(callback) {
     subscribeToAuctions();
     subscribeToAuctionsInit();
     subscribeToBids();
+    test();
+
+    function test() {
+      var query = DB.Auction.find()
+                            .ascending('user.username');
+      var stream = query.eventStream();
+      var testt = stream.subscribe(function(auctionTodos) {
+        console.log(auctionTodos);
+      }, function(err) {
+        console.log(err);
+      });
+      subList.push(testt);
+    }
 
     function subscribeToItems() {
       var query = DB.Items.find()
@@ -272,33 +283,28 @@ function subscribeRealtime(callback) {
     }
 
     return callback(subList);
-  }*/
-
+  }
 }
 
 // Create and Push the given item
 function addItem(item, callback) {
-  // item.insert().then(function(savedItem) {
-  //   if(myItemsTodo.itemlist.has(savedItem.name)) {
-  //     var newArr = myItemsTodo.itemlist.get(savedItem.name);
-  //     newArr.push(savedItem.id);
-  //     myItemsTodo.partialUpdate()
-  //          .put("itemlist", savedItem.name, newArr)
-  //          .execute().then(function() {
-  //            return callback();
-  //          });
-  //   } else {
-  //     var arr = [savedItem.id];
-  //     myItemsTodo.partialUpdate()
-  //          .put("itemlist", savedItem.name, arr)
-  //          .execute().then(function() {
-  //            return callback();
-  //          });
-  //   }
-  // });
-  db.ref("item/itemlist/").push({
-    usermail: me.email,
-    item: item
+  item.insert().then(function(savedItem) {
+    if(myItemsTodo.itemlist.has(savedItem.name)) {
+      var newArr = myItemsTodo.itemlist.get(savedItem.name);
+      newArr.push(savedItem.id);
+      myItemsTodo.partialUpdate()
+           .put("itemlist", savedItem.name, newArr)
+           .execute().then(function() {
+             return callback();
+           });
+    } else {
+      var arr = [savedItem.id];
+      myItemsTodo.partialUpdate()
+           .put("itemlist", savedItem.name, arr)
+           .execute().then(function() {
+             return callback();
+           });
+    }
   });
 }
 
@@ -320,16 +326,16 @@ function deleteItem(id, callback) {
 }
 
 function popItem(itemName, callback) {
-  // // Pop and item
-  //   newArr = myItemsTodo.itemlist.get(itemName);
-  //   if(typeof newArr != 'undefined') {
-  //     newArr.pop();
-  //     myItemsTodo.partialUpdate()
-  //     .put("itemlist", itemName, newArr)
-  //     .execute().then(function() {
-  //       return callback();
-  //     });
-  //   } else console.log("No item named '" + itemName + "' in itemlist - Itemlist not poppable.");
+  // Pop and item
+    newArr = myItemsTodo.itemlist.get(itemName);
+    if(typeof newArr != 'undefined') {
+      newArr.pop();
+      myItemsTodo.partialUpdate()
+      .put("itemlist", itemName, newArr)
+      .execute().then(function() {
+        return callback();
+      });
+    } else console.log("No item named '" + itemName + "' in itemlist - Itemlist not poppable.");
 }
 
 function updateItemlist(expiredAuctions, callback) {
@@ -543,11 +549,11 @@ function simulate() {
   var secondPause = 7000;
   var thirdPause = 3000;
 
-  var item1 = {
+  var item1 = new DB.Item({
     'name': 'gold',
     'type': 'ore',
     'weight': 10
-  };
+  });
 
   console.log("Start simulating!");
   // setInterval(loop,1000);
